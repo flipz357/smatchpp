@@ -95,13 +95,13 @@ python smatchpp/main.py -a <amrs1> \
 
 Efficiency: + 
 Optimality: +++
-Graph standardization: + 
+Graph standardization: ++ 
 
 ```
 python smatchpp/main.py -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
-			-edges reify \
+			-edges dereify \
 			-score_dimension all-multialign \
 			-score_type micromacro \
 			-log_level 20 \
