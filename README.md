@@ -93,9 +93,9 @@ python smatchpp/main.py -a <amrs1> \
 
 ### ILP alignment, corpus sub-aspect metrics and confidence intervals
 
-Efficiency: + 
-Optimality: +++
-Graph standardization: ++ 
+- Efficiency: + 
+- Optimality: +++
+- Graph standardization: ++ 
 
 ```
 python smatchpp/main.py -a <amrs1> \
