@@ -2,6 +2,18 @@
 
 Contains standardized and optimal Smatch solving.
 
+## Requirements
+
+For the most basic version, there shouldn't be a need to install additional modules. However, when using ilp optimal solving and bootstrapping, we require
+
+```
+mip (tested: 1.13.0)
+scipy (tested: 1.7.3)
+numpy (tested: 1.20.1)
+```
+
+The packages can all be installed with `pip ...`
+
 ## Example configurations
 
 ### Recommended for average case: ILP alignment, dereification, corpus metrics and confidence intervals
