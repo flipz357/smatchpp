@@ -131,17 +131,6 @@ class HillClimber(interfaces.Solver):
                 if amaxs[key[0]] == key[1]:
                     malus -= binarymatch_dict[(k, l)][key] * 2
                
-        """ 
-        if (i, l) in binarymatch_dict:
-            bonus += sum([binarymatch_dict[(i, l)][key] for key in binarymatch_dict[(i, l)] if key[1] == amaxs_new[key[0]]]) * 2
-        if (k, j) in binarymatch_dict:
-            bonus += sum([binarymatch_dict[(k, j)][key] for key in binarymatch_dict[(k, j)] if key[1] == amaxs_new[key[0]]]) * 2
-        if (i, j) in binarymatch_dict:
-            malus -= sum([binarymatch_dict[(i, j)][key] for key in binarymatch_dict[(i, j)] if key[1] == amaxs[key[0]]]) * 2
-        if (k, l) in binarymatch_dict:
-            malus -= sum([binarymatch_dict[(k, l)][key] for key in binarymatch_dict[(k, l)] if key[1] == amaxs[key[0]]]) * 2
-        """
-        #print(bonus, malus)
         
         # cumulative gain 
         gain = bonus + malus
@@ -204,24 +193,18 @@ class HillClimber(interfaces.Solver):
                     best_candidate = (i, k)
 
         found_better = bool(best_candidate)
-        #print(pos_gains)
+        
         # we're at a peak
         if not found_better:
             return alignmat, best_gain, False, nogains
-        #print(len(nogains))
         # a better alignment was found
-
         pos_gains = sorted(pos_gains, key=lambda x:x[2], reverse=True)
-        #print([(i, j) for i, j, _ in pos_gains])
         switches = []
         for idx, (i, k, _) in enumerate(pos_gains):
             if idx == 0:
                 i, k = best_candidate 
                 switches.append((i, k))
-                #alignmat[[i, k]] = alignmat[[k, i]]
             else:
-                #break
-                #i, k = next_best
                 j, l = alignmat[i], alignmat[k]
                 conflict = False
                 for tup in switches:
@@ -251,15 +234,9 @@ class HillClimber(interfaces.Solver):
                 
                 if not conflict:
                     switches.append((i, k))
-                #print(conflict)
-        #print(switches)#, pos_gains)
         for i, k in switches:
             alignmat[[i, k]] = alignmat[[k, i]]
 
-        """
-        i, k = best_candidate 
-        alignmat[[i, k]] = alignmat[[k, i]]
-        """
         return alignmat, best_gain, found_better, nogains
 
     
@@ -288,8 +265,6 @@ class HillClimber(interfaces.Solver):
         
         binarymatch_dict = wd
         
-        #alignment_collects = []
-        #alignment_scores = []
         
         # iterate over random inits
         for init in range(self.rand_inits):
@@ -316,15 +291,11 @@ class HillClimber(interfaces.Solver):
  
             alignmat, score, _ = self._climb(unarymatch_dict, binarymatch_dict, V, alignmat)
             
-            #alignment_collects.append(str(alignmat))
-            #alignment_scores.append(str(score))
-            
             # if solution from this init better than last inits, save
             if score > max_score:
                 logger.debug("new high score over candidates and inits: {}...".format(score))
                 max_score = score
                 alignmat_best = alignmat
-        #print(str(len(set(alignment_collects))/len(alignment_collects)) + "\t" + str(len(set(alignment_scores))/len(alignment_scores)) + "\t" + str(len(alignmat_best)))
         
         # lower bound
         max_score = self._score(alignmat_best, unarymatch_dict, binarymatch_dict)
