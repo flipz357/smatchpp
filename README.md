@@ -31,23 +31,23 @@ The packages can all be installed with `pip ...`
 where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
 ```
-\# first graph
+# first graph
 (x / y
    :rel (w / z))
 
-\# second graph
+# second graph
 (...
 ```
 
 Or can set to tsv with `-input_format tsv`, where the file looks like:
 
 ```
-\# first graph
+# first graph
 x y nodelabel
 w z nodelabel
 x y rel
 
-\# second graph
+# second graph
 ...
 ```
 
