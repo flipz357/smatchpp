@@ -4,7 +4,7 @@ Contains standardized and optimal Smatch solving.
 
 ## Requirements
 
-For the most basic version, there shouldn't be a need to install additional modules. However, when using ilp optimal solving and bootstrapping, we require
+Code written for python (3). For the most basic version, there shouldn't be a need to install additional modules. However, when using ilp optimal solving and bootstrapping, we require
 
 ```
 mip (tested: 1.13.0)
@@ -22,6 +22,8 @@ The packages can all be installed with `pip ...`
 - Optimality: +++
 - Graph standardization: ++ 
 
+Simply call: `./score.sh <amrs1> <amrs2>` or with python:
+
 ```
 python smatchpp/main.py -a <amrs1> \
 			-b <amrs2> \
@@ -32,6 +34,29 @@ python smatchpp/main.py -a <amrs1> \
 			-log_level 20 \
 			--bootstrap \
 			--remove_duplicates
+```
+
+where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in penman:
+
+```
+# first graph
+(x / y
+   :rel (w / z))
+
+# second graph
+(...
+```
+
+Or can set to tsv with `-input_format tsv`, where the file looks like:
+
+```
+# first graph
+x y nodelabel
+w z nodelabel
+x y rel
+
+# second graph
+...
 ```
 
 ### Hill-climber alignment, dereification, corpus metrics and confidence intervals

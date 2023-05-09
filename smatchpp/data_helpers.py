@@ -139,5 +139,24 @@ class PenmanReader(interfaces.GraphReader):
                 return attr, newi
         
         return tokens[start], start
+
+
+class TSVReader(interfaces.GraphReader):
+
+    def _string2graph(self, string):
+
+        triples = string.split("\n")
+        triples = [tuple(triple.split()) for triple in triples]
+        triples = [(triple[0], triple[2], triple[1]) for triple in triples]
+
+        return triples
     
+
+def get_reader(reader_name):
+
+    if reader_name == "penman":
+        return PenmanReader()
+    
+    if reader_name == "tsv":
+        return TSVReader()
 

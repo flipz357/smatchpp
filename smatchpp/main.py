@@ -25,13 +25,19 @@ def build_arg_parser():
             , choices=list(range(0, 60, 10))
             , help='logging level (int), see\
                     https://docs.python.org/3/library/logging.html#logging-levels')
-     
-    
+      
     parser.add_argument('-score_type'
             , type=str
             , default="pairwise"
             , nargs='?'
             , choices=["micro", "macro", "pairwise", "micromacro"]
+            , help='score type')
+    
+    parser.add_argument('-input_format'
+            , type=str
+            , default="pemman"
+            , nargs='?'
+            , choices=["tsv, penman"]
             , help='score type')
     
     parser.add_argument('-score_dimension'
@@ -241,7 +247,7 @@ if __name__ == "__main__":
     assert len(amrs) == len(amrs2)
 
     logger.info("loading processing modules ...")
-    graph_reader = data_helpers.PenmanReader()
+    graph_reader = data_helpers.get_reader(args.input_format)
     logger.info("1. Penman reader loaded")
     graph_standardizer = preprocess.AMRGraphStandardizer(edges=args.edges, remove_duplicates=args.remove_duplicates)
     logger.info("2. triple standardizer loaded")
