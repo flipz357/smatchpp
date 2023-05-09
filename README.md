@@ -22,9 +22,14 @@ The packages can all be installed with `pip ...`
 - Optimality: +++
 - Graph standardization: ++ 
 
-Simply call: `./score.sh <amrs1> <amrs2>` or where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in penman:
+**Simply call**: 
 
 ```
+./score.sh <amrs1> <amrs2>
+``` 
+
+where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in "penman":
+
 # first graph
 (x / y
    :rel (w / z))
