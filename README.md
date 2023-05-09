@@ -45,7 +45,7 @@ Or can set to tsv with `-input_format tsv`, where the file looks like:
 # first graph
 x y nodelabel
 w z nodelabel
-x y rel
+x w rel
 
 # second graph
 ...
