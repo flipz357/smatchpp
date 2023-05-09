@@ -22,21 +22,7 @@ The packages can all be installed with `pip ...`
 - Optimality: +++
 - Graph standardization: ++ 
 
-Simply call: `./score.sh <amrs1> <amrs2>` or with python:
-
-```
-python smatchpp/main.py -a <amrs1> \
-			-b <amrs2> \
-			-solver ilp \
-			-edges dereify \
-			-score_dimension main \
-			-score_type micromacro \
-			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates
-```
-
-where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in penman:
+Simply call: `./score.sh <amrs1> <amrs2>` or where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in penman:
 
 ```
 # first graph
