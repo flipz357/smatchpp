@@ -30,6 +30,7 @@ The packages can all be installed with `pip ...`
 
 where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
+```
 \# first graph
 (x / y
    :rel (w / z))
