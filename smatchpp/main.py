@@ -208,16 +208,16 @@ class Smatchpp():
             final_result = []
             for i in range(len(amrs)):
                 match_dict_tmp = {k:[match_dict[k][i]] for k in match_dict.keys()}
-                result = printer.get_result(match_dict_tmp, print_result=print_result)
+                result = printer.get_final_result(match_dict_tmp)
                 final_result.append(result)
         
         if self.printer.score_type == "macro":
-            if self.score_type != "main":
+            if self.printer.score_type != "main":
                 logger.warning("Cannot comply with current score type argument. Currently only main Smatch score available for macro statistics.")
-            final_result = printer.get_final_result(match_dict, print_result=print_result)
+            final_result = printer.get_final_result(match_dict)
         
         if self.printer.score_type == "micro":
-            final_result = printer.get_final_result(match_dict, print_result=print_result)
+            final_result = printer.get_final_result(match_dict)
         
         return final_result, status
 
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     logger.info("5. scorer loaded")
     logger.info("starting score calculations")
     
-    printer = eval_statistics.ResultPrinter()
+    printer = eval_statistics.ResultPrinter(score_type=args.score_type, do_bootstrap=args.bootstrap, output_format=args.output_format)
     seconds = time.time()
 
     SMATCHPP = Smatchpp(graph_reader=graph_reader, graph_standardizer=graph_standardizer, 
@@ -285,7 +285,8 @@ if __name__ == "__main__":
         print("-------------------------------")
         print("-------------------------------")
         printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=args.bootstrap, output_format=args.output_format)
-        printer.print_all(match_dict)
+        final_result_dict = printer.get_final_result(match_dict)
+        printer.print_all(final_result_dict)
         print("-------------------------------")
         print("-------------------------------")
         print("---------Macro scores----------")
@@ -293,10 +294,14 @@ if __name__ == "__main__":
         print("-------------------------------")
         if args.score_type != "main":
             logger.warning("Cannot comply with current score type argument. Currently only main Smatch score available for macro statistics.")
-        match_dict = {"main": match_dict["main"]}
         printer = eval_statistics.ResultPrinter(score_type="macro", do_bootstrap=args.bootstrap, output_format=args.output_format)
-        printer.print_all(match_dict)
+        final_result_dict = printer.get_final_result(match_dict)
+        printer.print_all(final_result_dict)
 
+    elif args.score_type == "pairwise":
+        final_result_list, status = SMATCHPP.score_corpus(amrs, amrs2)
+        for singlepair in final_result_list:
+            SMATCHPP.printer.print_all(singlepair)
     else:
         final_result_dic, status = SMATCHPP.score_corpus(amrs, amrs2)
         SMATCHPP.printer.print_all(final_result_dic)

@@ -61,8 +61,8 @@ class ResultPrinter:
             result = np.mean(match_data, axis=axis)
         return result
               
-    def print_all(self, result_dic):
-        final_result_dic = self.get_final_result(result_dic)
+    def print_all(self, final_result_dic):
+        #final_result_dic = self.get_final_result(result_dic)
         if self.output_format == "json":
             string = self._nice_format(final_result_dic)
         if self.output_format == "text":
@@ -70,12 +70,12 @@ class ResultPrinter:
         print(string)
     
     def get_final_result(self, result_dic):
-        final_result_dic = {k:np.array(v) for k, v in result_dic.items()}# if k == "main"}
-        for score_type in result_dic:
-            match_data = result_dic[score_type]
+        final_result_dic = {k:np.array(v) for k, v in result_dic.items()}
+        for score_dim in result_dic:
+            match_data = result_dic[score_dim]
             low = None
             high = None
-            if self.score_type == "micro":
+            if self.score_type in ["micro", "pairwise"]:
                 match_data_reduced = np.sum(match_data, axis=0)
                 res = self.get_fpr(match_data_reduced)
             if self.score_type == "macro":
@@ -91,10 +91,12 @@ class ResultPrinter:
                             setting confidence interval to [0,100]")
                     low = [0.0, 0.0]
                     high = [100.0, 100.0]
-            final_result_dic[score_type] = self._get_partial_result_dict(res, low, high)
+            final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high)
         return final_result_dic
 
     def _nice_format(self, dic):
+        if self.score_type == "pairwise":
+            return json.dumps(dic)
         return json.dumps(dic, indent=4)
 
     def _get_partial_result_dict(self, fpr, low, high, multiplier=100, rounder=2):
@@ -119,9 +121,9 @@ class ResultPrinter:
     def _nice_format2(self, dic):
         strings = []
         dic["===> MAIN (\"Smatch\") <==="] = dic.pop("main")
-        for score_type in dic:
-            fpr = np.array([dic[score_type]["F1"]["result"], dic[score_type]["Precision"]["result"], dic[score_type]["Recall"]["result"]])
-            fpr = [score_type + " " * (max(len(st) for st in dic) - len(score_type))] + list(fpr)
+        for score_dim in dic:
+            fpr = np.array([dic[score_dim]["F1"]["result"], dic[score_dim]["Precision"]["result"], dic[score_dim]["Recall"]["result"]])
+            fpr = [score_dim + " " * (max(len(st) for st in dic) - len(score_dim))] + list(fpr)
             string = "{} ---->   F1: {}    Precision: {}    Recall: {}".format(*fpr)
             strings.append(string)
         strings.append("----------------------------")
