@@ -129,11 +129,11 @@ class ResultPrinter:
         strings.append("----------------------------")
         strings.append("--95-confidence intervals:--")
         strings.append("----------------------------")
-        for score_type in dic:
-            fpr = np.array([dic[score_type]["F1"]["ci"][0], dic[score_type]["F1"]["ci"][1], 
-                dic[score_type]["Precision"]["ci"][0], dic[score_type]["Precision"]["ci"][1],
-                dic[score_type]["Recall"]["ci"][0], dic[score_type]["Recall"]["ci"][1]])
-            fpr = [score_type + " " * (max(len(st) for st in dic) - len(score_type))] + list(fpr)
+        for score_dim in dic:
+            fpr = np.array([dic[score_dim]["F1"]["ci"][0], dic[score_dim]["F1"]["ci"][1], 
+                dic[score_dim]["Precision"]["ci"][0], dic[score_dim]["Precision"]["ci"][1],
+                dic[score_dim]["Recall"]["ci"][0], dic[score_dim]["Recall"]["ci"][1]])
+            fpr = [score_dim + " " * (max(len(st) for st in dic) - len(score_dim))] + list(fpr)
             string = "{} ---->   F1: [{},{}]    Precision: [{},{}]    Recall: [{},{}]".format(*fpr)
             strings.append(string)
         return "\n".join(strings)

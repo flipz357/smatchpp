@@ -135,9 +135,8 @@ class AMRScorer(interfaces.Scorer):
             scores += [self.triplematcher.triplematch(triple, triples1_aligned[i]) for i in range(len(triples1_aligned))]
             matchsum_y += max(scores)
         
+        #note: for IDTripleMatch matchsum_x = matchsum_y = len(set(triples1_aligned).intersection(triples2))
         match = np.array([matchsum_x, matchsum_y, xlen, ylen])
-        sxtmp = len(set(triples1_aligned).intersection(triples2))
-        match = [sxtmp, sxtmp, match[2], match[3]]
         return match
     
     def main_scores(self, triples1, triples2, alignmat, varindex):
