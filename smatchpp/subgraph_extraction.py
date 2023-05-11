@@ -1,7 +1,6 @@
 import re
 from collections import defaultdict
 import util
-import pprint
 
 class SubGraphExtractor():
 
@@ -79,8 +78,6 @@ class SubGraphExtractor():
             for (s, r, t) in triples:
                 if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
                     out.append((s, r, t))
-        #if rel == ":cause":
-        #    print(out)
         out = self._maybe_add_subtree(out, triples)
         out = self._maybe_add_instance(out, triples)
         return out

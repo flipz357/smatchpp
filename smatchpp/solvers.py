@@ -339,7 +339,6 @@ class HillClimber(interfaces.Solver):
             alignmat = new_mat
             score += new_gain 
             iters += 1
-            #print(iters, score)
             if iters > 1000:
                 logger.warning("hillclimber stopped after 1000 iterations. \
                                 This may be due to a bug or very large graph")

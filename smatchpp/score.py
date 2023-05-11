@@ -107,8 +107,6 @@ class AMRScorer(interfaces.Scorer):
             
             var_newvar[s] = news
             var_newvar[t] = newt
-        #print(var_newvar)
-        #print("\n\n\n")
         for k, tr in enumerate(triples_aligned):
             s, r, t = tr
             s = var_newvar[s]
@@ -124,8 +122,7 @@ class AMRScorer(interfaces.Scorer):
         triples1_aligned = self._map_triples(triples1, alignmat, varindex)
         xlen = len(triples1_aligned)
         ylen = len(triples2)
-        #print(sorted(triples1_aligned, key=lambda x:x[0]))
-        #print(sorted(triples2, key=lambda x:x[0]))
+        
         matchsum_x = 0.0
         for triple in triples1_aligned:
             scores = [0.0] 
@@ -137,14 +134,10 @@ class AMRScorer(interfaces.Scorer):
             scores = [0.0] 
             scores += [self.triplematcher.triplematch(triple, triples1_aligned[i]) for i in range(len(triples1_aligned))]
             matchsum_y += max(scores)
-        #print(matchsum_x, matchsum_y, xlen, ylen)        
+        
         match = np.array([matchsum_x, matchsum_y, xlen, ylen])
         sxtmp = len(set(triples1_aligned).intersection(triples2))
         match = [sxtmp, sxtmp, match[2], match[3]]
-        #print(varindex)
-        #for xtr in sxtmp:
-        #    if triples1_aligned.count(xtr) != 1:
-        #        print(xtr, triples1_aligned.count(xtr))
         return match
     
     def main_scores(self, triples1, triples2, alignmat, varindex):
@@ -153,78 +146,7 @@ class AMRScorer(interfaces.Scorer):
         return {"main": match}
 
     def subtask_scores(self, triples1, triples2, alignmat, varindex):
-        
-        """
-        def get_sub_structure(triples, rel):
-            
-            # if not reified this is what we want
-            out = [t for t in triples if rel == t[1]] 
-            vars_of_reified_concept = []
-
-            # check for reified rel nodes, collect related variables
-            if rel in self.reify_rules[0]:
-                for (s, r, t) in triples:
-                    if r == ":instance" and t == self.reify_rules[0][rel][0]: 
-                        vars_of_reified_concept.append(s)
-                for (s, r, t) in triples:
-                    if t in vars_of_reified_concept or s in vars_of_reified_concept and r != ":instance":
-                        out.append((s, r, t))
-            return out
-        
-        def get_sub_structure_reent(triples):
-            out = []
-            inc_rels = defaultdict(int)
-            var_concept_dict = util.get_var_concept_dict(triples)
-            for (s, r, t) in triples:
-                if t in var_concept_dict:
-                    inc_rels[t] += 1
-            
-            for (s, r, t) in triples:
-                if s in var_concept_dict and inc_rels[s] > 1:
-                    out.append((s, r, t))
-                elif t in var_concept_dict and inc_rels[t] > 1:
-                    out.append((s, r, t))
-            return out
-        
-        def get_additional_instances(triples, triples_all):
-            additional_instance = []
-            var_concept_dict = util.get_var_concept_dict(triples_all)
-            tvars = set()
-            for (s, _, t) in triples:
-                if s in var_concept_dict:
-                    tvars.add(s)
-                if t in var_concept_dict:
-                    tvars.add(t)
-            for var in tvars:
-                additional_instance.append((var, ":instance", var_concept_dict[var]))
-            
-            return additional_instance
-
-        score_dict = {}
-        
-        x_triples1 = [t for t in triples1 if ":instance" == t[1].lower()]
-        x_triples2 = [t for t in triples2 if ":instance" == t[1].lower()]
-        score_dict["instance (Concept)"] = self._score(x_triples1, x_triples2, alignmat, varindex)
-
-        x_triples1 = [t for t in triples1 if re.match(r".*-[0-9]+",t[2].lower())]
-        x_triples2 = [t for t in triples2 if re.match(r".*-[0-9]+",t[2].lower())]
-        score_dict["wsd"] = self._score(x_triples1, x_triples2, alignmat, varindex)
-
-        for rel in list(self.reify_rules[0].keys()) + [":cause"] + [":arg"]:
-            x_triples1 = get_sub_structure(triples1, rel)
-            x_triples1 += get_additional_instances(x_triples1, triples1)
-            x_triples2 = get_sub_structure(triples2, rel)
-            x_triples2 += get_additional_instances(x_triples2, triples2)
-            score_dict[rel.replace(":", "")] = self._score(x_triples1, x_triples2, alignmat, varindex)
-        
-        x_triples1 = get_sub_structure_reent(triples1)
-        x_triples1 += get_additional_instances(x_triples1, triples1)
-        x_triples2 = get_sub_structure_reent(triples2)
-        x_triples2 += get_additional_instances(x_triples2, triples2)
-        score_dict["reent"] = self._score(x_triples1, x_triples2, alignmat, varindex)
-        score_dict["main"] = self._score(triples1, triples2, alignmat, varindex)
-        """
-        
+         
         sub_graphs_1 = self.sg_extractor.all_subgraphs_by_name(triples1)
         sub_graphs_2 = self.sg_extractor.all_subgraphs_by_name(triples2)
 

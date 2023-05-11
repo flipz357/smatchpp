@@ -199,9 +199,7 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
                     foundyv = tr[2] 
                     foundyi = i
                 else:
-                    #print(tr)
                     foundother += 1
-        #print(foundx, foundy, foundother)
         if foundx == foundy == 1 and foundother == 0:
             return (foundxv, foundyv, foundxi, foundyi, ci, self.reify_rules_inverse[concept][0])
         return False
@@ -385,7 +383,6 @@ class AMRGraphPairPreparer(interfaces.GraphPairPreparer):
             elif co1 == co2 == 1:
                 single_ref.add(c)
         
-        #print(triples1, single_ref, var_concept1)
         self._transform_with_dict(triples1, single_ref, var_concept1)
         self._transform_with_dict(triples2, single_ref, var_concept2)
 
