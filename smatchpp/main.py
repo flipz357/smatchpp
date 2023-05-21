@@ -287,12 +287,12 @@ if __name__ == "__main__":
         printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=args.bootstrap, output_format=args.output_format)
         final_result_dict = printer.get_final_result(match_dict)
         printer.print_all(final_result_dict)
-        print("-------------------------------")
+        print("\n\n-------------------------------")
         print("-------------------------------")
         print("---------Macro scores----------")
         print("-------------------------------")
         print("-------------------------------")
-        if args.score_type != "main":
+        if args.score_dimension != "main":
             logger.warning("Cannot comply with current score type argument. Currently only main Smatch score available for macro statistics.")
         printer = eval_statistics.ResultPrinter(score_type="macro", do_bootstrap=args.bootstrap, output_format=args.output_format)
         final_result_dict = printer.get_final_result(match_dict)

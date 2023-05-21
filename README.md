@@ -105,7 +105,6 @@ python smatchpp/main.py -a <amrs1> \
 			-log_level 20 \
 			--bootstrap \
 			--remove_duplicates \
-			--lossless_graph_compression
 ```
 
 ### ILP alignment, corpus sub-aspect metrics and confidence intervals
@@ -124,7 +123,6 @@ python smatchpp/main.py -a <amrs1> \
 			-log_level 20 \
 			--bootstrap \
 			--remove_duplicates \
-			--lossless_graph_compression
 ```
 
 ### Other configurations
