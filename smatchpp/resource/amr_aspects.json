@@ -1,0 +1,79 @@
+{"LOCATION (spatial)":
+	{
+	 "associated_rel": [":location"],
+	 "associated_concept": ["location"],
+	 "search_in_frame_descr": ["location", "path", "destination"],
+	 "subgraph_extraction_range": 2
+	 },
+	 
+"TIME (temporal)": 
+ 	{
+	 "associated_rel": [":time"],
+	 "associated_concept": ["dates"],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 },  
+
+"AGENT": 
+ 	{
+	 "associated_rel": [":arg0"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+
+"PATIENT": 
+ 	{
+	 "associated_rel": [":arg1", ":arg2", ":arg3", ":arg4", ":arg5", ":arg6", ":arg7", ":arg8", ":arg9"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+
+"SRL-core": 
+ 	{
+	 "associated_rel": [":arg0", ":arg1", ":arg2", ":arg3", ":arg4", ":arg5", ":arg6", ":arg7", ":arg8", ":arg9"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+
+"NER": 
+ 	{
+	 "associated_rel": [":name"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+
+"CAUSE": 
+ 	{
+	 "associated_rel": [":cause"],
+	 "associated_concept": ["cause"],
+	 "search_in_frame_descr": ["cause ", "cause of"],
+	 "subgraph_extraction_range": 2
+ 	 },
+
+"QUANTIFIER": 
+ 	{
+	 "associated_rel": [":quant"],
+	 "associated_concept": ["quantities"],
+	 "search_in_frame_descr": ["quantity", "amount"],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+"MATHS": 
+ 	{
+	 "associated_rel": [],
+	 "associated_concept": ["math"],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 2
+ 	 }, 
+
+"INSTRUMENT": 
+ 	{
+	 "associated_rel": [":instrument"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": ["instrument"],
+	 "subgraph_extraction_range": 2
+ 	 } 
+}

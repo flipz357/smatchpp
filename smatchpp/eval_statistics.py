@@ -73,6 +73,8 @@ class ResultPrinter:
         final_result_dic = {k:np.array(v) for k, v in result_dic.items()}
         for score_dim in result_dic:
             match_data = result_dic[score_dim]
+            if score_dim != "main" and self.score_type != "pairwise":
+                match_data = [m for m in match_data if sum(m) > 0.0]
             low = None
             high = None
             if self.score_type in ["micro", "pairwise"]:

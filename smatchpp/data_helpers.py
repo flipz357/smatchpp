@@ -1,5 +1,5 @@
 import logging
-import interfaces
+from smatchpp import interfaces
 
 logger = logging.getLogger("__main__")
 

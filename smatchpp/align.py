@@ -1,7 +1,7 @@
 from collections import Counter
 import numpy as np
 import logging
-from util import xor, get_var_concept_dict
+from smatchpp.util import xor, get_var_concept_dict
 
 logger = logging.getLogger("__main__")
 
@@ -71,17 +71,14 @@ class GraphAligner:
         return unary, binary
 
     def _get_var_map(self, alignment, var_index):
-        
-        index_var_1 = {i:v for v, i in var_index.items() if "other" not in v} 
-        index_var_2 = {i:v for v, i in var_index.items() if "other" in v} 
+        index_var_1 = {i:v for v, i in var_index.items() if "first" in v} 
+        index_var_2 = {i:v for v, i in var_index.items() if "second" in v} 
         mapping = []
         
-        for i in range(len(alignment)):
-            for j in range(len(alignment)):
-                if alignment[i] == j:
-                    var1 = index_var_1.get(i)
-                    var2 = index_var_2.get(j)
-                    mapping.append((var1, var2))
+        for i, j in enumerate(alignment):
+            var1 = index_var_1.get(i)
+            var2 = index_var_2.get(j)
+            mapping.append((var1, var2))
         
         return mapping
     
@@ -127,6 +124,5 @@ class GraphAligner:
         var_map = self._get_var_map(alignmat, var_index)
         logging.debug("5. output mapping {}".format(var_map))
         logging.debug("5. output mapping interpreted {}".format(self._interpretable_mapping(var_map, triples1, triples2)))
-        
         return alignmat, var_index, (objective_value, objective_bound)
 

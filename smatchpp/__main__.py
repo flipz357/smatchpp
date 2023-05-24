@@ -1,7 +1,5 @@
 import argparse
-import numpy as np
 import time
-from scipy.stats import pearsonr
 
 def build_arg_parser():
 
@@ -114,45 +112,45 @@ class Smatchpp():
 
         self.graph_reader = graph_reader
         if not self.graph_reader:
-            import data_helpers
+            from smatchpp import data_helpers
             self.graph_reader = data_helpers.PenmanReader()
         
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:
-            import preprocess
+            from smatchpp import preprocess
             self.graph_standardizer = preprocess.AMRGraphStandardizer()
 
         self.graph_pair_preparer = graph_pair_preparer
         if not self.graph_pair_preparer:
-            import preprocess
-            self.graph_pair_preparer = preprocess.AMRGraphPreparer()
+            from smatchpp import preprocess
+            self.graph_pair_preparer = preprocess.AMRGraphPairPreparer()
         
         self.triplematcher = triplematcher
         if not self.triplematcher:
-            import score
+            from smatchpp import score
             self.triplematcher = score.IDTripleMatcher()
         
         self.alignmentsolver = alignmentsolver
         if not self.alignmentsolver:
-            import solvers
+            from smatchpp import solvers
             self.alignmentsolver = solvers.get_solver("hillclimber")
         
         self.graph_aligner = graph_aligner
         if not self.graph_aligner:
-            import align
-            self.graph_aligner = align.Graphaligner(self.triplematcher, self.alignmentsolver)
+            from smatchpp import align
+            self.graph_aligner = align.GraphAligner(self.triplematcher, self.alignmentsolver)
         
         self.graph_scorer = graph_scorer
         if not self.graph_scorer:
-            import score
+            from smatchpp import score
             self.graph_scorer = score.AMRScorer(triplematcher=self.triplematcher)
         
         self.subgraph_extractor = subgraph_extractor
         
         self.printer = printer
         if not self.printer:
-            import eval_statistics
-            self.printer = eval_statistics.ResultPrinter(score_type="micro", do_boostrap=False, output_format="json")
+            from smatchpp import eval_statistics
+            self.printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=False, output_format="json")
         
         self.score_dimension = score_dimension
         if not self.score_dimension:
@@ -185,6 +183,7 @@ class Smatchpp():
             name_subgraph1 = subgraph_extractor.all_subgraphs_by_name(g1)
             name_subgraph2 = subgraph_extractor.all_subgraphs_by_name(g2)
             match = {}
+            alignments = {}
             for name in name_subgraph1:
                 g1 = name_subgraph1[name]
                 g2 = name_subgraph2[name]
@@ -212,8 +211,6 @@ class Smatchpp():
                 final_result.append(result)
         
         if self.printer.score_type == "macro":
-            if self.printer.score_type != "main":
-                logger.warning("Cannot comply with current score type argument. Currently only main Smatch score available for macro statistics.")
             final_result = printer.get_final_result(match_dict)
         
         if self.printer.score_type == "micro":
@@ -225,21 +222,21 @@ class Smatchpp():
 
 if __name__ == "__main__":
 
-    import log_helper
+    from smatchpp import log_helper
 
     args = build_arg_parser().parse_args()
     logger = log_helper.set_get_logger("smatchpp-logger", args.log_level)
     logger.info("loading amrs from files {} and {}".format(
         args.a, args.b))
     
-    import data_helpers
-    import solvers
-    import preprocess
-    import align
-    import subgraph_extraction
-    import score
-    import eval_statistics
-    import util
+    from smatchpp import data_helpers
+    from smatchpp import solvers
+    from smatchpp import preprocess
+    from smatchpp import align
+    from smatchpp import subgraph_extraction
+    from smatchpp import score
+    from smatchpp import eval_statistics
+    from smatchpp import util
   
     amrs = data_helpers.read_amr_strings_from_file(args.a)
     amrs2 = data_helpers.read_amr_strings_from_file(args.b)
@@ -292,8 +289,6 @@ if __name__ == "__main__":
         print("---------Macro scores----------")
         print("-------------------------------")
         print("-------------------------------")
-        if args.score_dimension != "main":
-            logger.warning("Cannot comply with current score type argument. Currently only main Smatch score available for macro statistics.")
         printer = eval_statistics.ResultPrinter(score_type="macro", do_bootstrap=args.bootstrap, output_format=args.output_format)
         final_result_dict = printer.get_final_result(match_dict)
         printer.print_all(final_result_dict)

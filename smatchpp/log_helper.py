@@ -6,5 +6,5 @@ def set_get_logger(name, level=50):
     return logger
 
 
-def get_logger(name):
+def get_logger():
     return logging.getLogger("root")
