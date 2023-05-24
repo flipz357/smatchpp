@@ -58,7 +58,7 @@ x w rel
 - Graph standardization: ++
 
 ```
-python smatchpp/main.py -a <amrs1> \
+python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver hillclimber \
 			-edges dereify \
@@ -77,7 +77,7 @@ python smatchpp/main.py -a <amrs1> \
 - Graph standardization: + 
 
 ```
-python smatchpp/main.py -a <amrs1> \
+python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
 			-edges dereify \
@@ -96,7 +96,7 @@ python smatchpp/main.py -a <amrs1> \
 - Graph standardization: +++
 
 ```
-python smatchpp/main.py -a <amrs1> \
+python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
 			-edges reify \
@@ -114,7 +114,7 @@ python smatchpp/main.py -a <amrs1> \
 - Graph standardization: ++ 
 
 ```
-python smatchpp/main.py -a <amrs1> \
+python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
 			-edges dereify \
@@ -130,7 +130,7 @@ python smatchpp/main.py -a <amrs1> \
 See
 
 ```
-python smatchpp/main.py --help
+python -m smatchpp --help
 ```
 
 ## Additional functionality
