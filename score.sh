@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-python smatchpp/main.py -a $1 \
+python -m smatchpp      -a $1 \
 			-b $2 \
 			-solver ilp \
 			-edges dereify \
