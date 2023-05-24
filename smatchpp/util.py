@@ -1,7 +1,7 @@
-import numpy as np
 import logging
-import time
 import os
+import json
+from collections import defaultdict
 
 logger = logging.getLogger("__main__")
 
@@ -27,6 +27,57 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
         rel_rule_inverse[spl[1]] = [spl[0], spl[2], spl[3]]
 
     return rel_rule, rel_rule_inverse
+
+def read_amr_aspects(p="/resource/amr_aspects.json"):
+    """load reification rules"""
+    
+    path = os.path.dirname(__file__)
+    
+    with open(path + p, "r") as f:
+        data = json.load(f)
+
+    return data
+
+def read_concept_groups(p="/resource/concept_groups.json"):
+    """load reification rules"""
+    
+    path = os.path.dirname(__file__)
+    
+    with open(path + p, "r") as f:
+        data = json.load(f)
+
+    return data
+
+def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
+    """load frame-argument rules"""
+    
+    path = os.path.dirname(__file__)
+
+    with open(path + p, "r") as f:
+        lines = [l for l in f.read().split("\n") if l]
+
+    frame_table = {}
+
+    for line in lines:
+        if lower:
+            line = line.lower()
+        spl = line.split("  arg")
+        pred = spl[0]
+        frame_table[pred] = {}
+        for elm in spl[1:]:
+            role_descr = elm.split(": ")
+            frame_table[pred][":arg" + role_descr[0]] = role_descr[1] 
+    return frame_table
+
+def invert_frame_table(frame_table, aspects):
+    aspects_pred_role = defaultdict(list)    
+    for aspect in aspects:
+        strings = aspects[aspect]["search_in_frame_descr"]
+        for pred in frame_table:
+            for role in frame_table[pred]:
+                if any(string in frame_table[pred][role] for string in strings):
+                    aspects_pred_role[aspect].append((pred, role))
+    return aspects_pred_role
 
 def xor(a, b):
     if a and b:
@@ -108,9 +159,3 @@ def alignmat_compressed(alignmat):
     alignmatargmax[alignmat.sum(axis=1) == 0] = -1
     alignmat = alignmatargmax
     return alignmat
-
-def alignmat_decompressed(alignmat):
-    a = np.zeros((len(alignmat), len(alignmat)))
-    for i, j in enumerate(alignmat):
-        a[i, j] = 1    
-    return a

@@ -1,149 +1,184 @@
 import re
 from collections import defaultdict
-import util
+from smatchpp import util
+
+def subgraph_instance(triples):
+    triples = [t for t in triples if t[1] == ":instance"]
+    return triples
+
+def subgraph_predicate(triples):
+    triples = subgraph_instance(triples)
+    triples = [t for t in triples if re.match(r".*-[0-9]+", t[2].lower())]
+    return triples
+
+def unlabel_edges(triples):
+    out = []
+    for t in triples:
+        if t[1] != ":instance":
+            out.append((t[0], ":rel", t[2]))
+        else:
+            out.append(t)
+    return out
+    
+def unlabel_nodes(triples):
+    out = []
+    for t in triples:
+        if t[1] == ":instance":
+            out.append((t[0], ":instance", "concept"))
+        else:
+            out.append(t)
+    return out
+
+def maybe_complete_triple(frame, rel, triples):
+    candidates = [t[0] for t in triples if t[2] == frame]
+    out = [t for t in triples if t[0] in candidates and t[1] == rel]
+    return out
+    
+def subgraph_reentrancies(triples):
+    out = []
+    inc_rels = defaultdict(int)
+    var_concept_dict = util.get_var_concept_dict(triples)
+    for (s, r, t) in triples:
+        if t in var_concept_dict:
+            inc_rels[t] += 1
+    for (s, r, t) in [ t for t in triples if t[1] != ":instance"]:
+        if t in var_concept_dict and inc_rels[t] > 1:
+            out.append((s, r, t))
+    return out
+
+def get_additional_instances(triples, triples_all):
+    additional_instance = []
+    var_concept_dict = util.get_var_concept_dict(triples_all)
+    tvars = set()
+    for (s, _, t) in triples:
+        if s in var_concept_dict:
+            tvars.add(s)
+        if t in var_concept_dict:
+            tvars.add(t)
+    for var in tvars:
+        itriple = (var, ":instance", var_concept_dict[var])
+        if itriple not in additional_instance:
+            additional_instance.append(itriple)
+
+    return additional_instance
 
 class SubGraphExtractor():
 
-    def __init__(self, reify_rules=None, add_instance=True, subtree_context_depth=2, wiki_option=1):
+    def __init__(self, reify_rules=None, add_instance=True, 
+            subtree_context_depth=2, amr_aspects=None, inverted_frame_table=None, concept_groups=None):
         
         if not reify_rules:
             reify_rules = util.read_reify_table()
         
+        if not amr_aspects:
+            amr_aspects = util.read_amr_aspects()
+            frame_table = util.read_frame_table()
+        
+        if not inverted_frame_table:
+            inverted_frame_table = util.invert_frame_table(frame_table, amr_aspects)
+        
+        if not concept_groups:
+            concept_groups = util.read_concept_groups()
+        
         self.reify_rules = reify_rules
         self.add_instance = add_instance
         self.subtree_context_depth = subtree_context_depth
-        self.wiki_option = wiki_option
-        
+        self.amr_aspects = amr_aspects
+        self.inverted_frame_table = inverted_frame_table
+        self.concept_groups = concept_groups
+
+
     def all_subgraphs_by_name(self, triples):
-        
         name_subgraph = {}
         
         # full graph
         name_subgraph["main"] = triples 
-        if self.wiki_option == 0:
-            name_subgraph["main"] = [t for t in triples if t[1] != ":wiki"]
+        name_subgraph["main without wiki"] = [t for t in triples if t[1] != ":wiki"]
         name_subgraph["wiki"] = self._maybe_add_instance([t for t in triples if t[1] == ":wiki"], triples)
-
-        if self.wiki_option == 1:
-            triples = [t for t in triples if t[1] != ":wiki"]
         
-        for rel in list(self.reify_rules[0].keys()) + [":arg0", ":arg1", ":arg2", ":arg3", ":arg4"]:
-            x_triples = self.subgraph_rel(triples, rel)
-            name_subgraph[rel.replace(":", "")] = x_triples
-        name_subgraph["coreference"] = self.subgraph_reentrancies(triples)
-        name_subgraph["predicate sense disambiguation (wsd)"] = self.subgraph_predicate(triples)
-        name_subgraph["semantic role labeling (srl)"] = self.subgraph_srl(triples)
-        name_subgraph["concepts"] = self.subgraph_instance(triples)
-         
-        # maybe also interesting
-        #name_subgraph["edges_unlabeled"] = self.unlabel_edges(triples)
-        #name_subgraph["nodes_unlabeled"] = self.unlabel_nodes(triples)
+        # remove wiki from all subgraphs that will be extracted
+        tmptriples = name_subgraph["main without wiki"]
+        for name, subgraph in self._iter_name_subgraph(tmptriples):
+            name_subgraph[name] = subgraph
         
-        name_subgraph["quantification"] = name_subgraph["quant"]
-        name_subgraph["modification"] = name_subgraph["mod"]
-        name_subgraph["possession"] = name_subgraph["poss"]
+        # more complex aspects
+        name_subgraph["REENTRANCIES"] = subgraph_reentrancies(tmptriples)
+ 
+        for name in name_subgraph:
+ 
+            sg = name_subgraph[name]
+            sg = self.clean_extend_subgraph(sg, tmptriples, name)
+            name_subgraph[name] = sg
         
-        # keep a selection
-        selection = ["main", "manner", "coreference", "predicate sense disambiguation (wsd)", "semantic role labeling (srl)", 
-                        "concepts", "time", "location", "cause", "modification", "wiki",
-                        "quantification", "possession", "polarity"]
-        
-        name_subgraph = {k:name_subgraph[k] for k in selection}
+        assert len(triples) == len(name_subgraph["main"])  
         
         return name_subgraph
 
-    def subgraph_srl(self, triples):
-        out = []
-        for triple in triples:
-            if re.match(r":arg[0-9]+", triple[1]):
-                out.append(triple)
-        out = self._maybe_add_subtree(out, triples)
-        out = self._maybe_add_instance(out, triples)
-        return out
-    
-    def subgraph_rel(self, triples, rel=None):
+    def _iter_name_subgraph(self, triples):
         
-        if not rel:
-            raise ValuerError("relation needs to be defined for subgrah extraction")
+        for name in self.amr_aspects:
+            yield self._get_subgraph_by_name(name, triples)
 
-	# if not reified this is what we want
-        out = [t for t in triples if rel == t[1]]
-        vars_of_reified_concept = []
+    def _get_subgraph_by_name(self, name, triples):
 
-	# check for reified rel nodes, collect related variabl      
-        if rel in self.reify_rules[0]:
-            for (s, r, t) in triples:
-                if r == ":instance" and t == self.reify_rules[0][rel][0]:
-                    vars_of_reified_concept.append(s)
-            for (s, r, t) in triples:
-                if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
-                    out.append((s, r, t))
-        out = self._maybe_add_subtree(out, triples)
-        out = self._maybe_add_instance(out, triples)
-        return out
+        rules = self.amr_aspects[name]
+        associated_rels = rules["associated_rel"]
+        sgtriples = [t for t in triples if t[1] in associated_rels]
+        
+        if rules["associated_concept"] and rules["associated_concept"][0] in self.concept_groups:
+            concept_group = self.concept_groups[rules["associated_concept"][0]]["aliases"]
+            vs = [t[0] for t in triples if t[2] in concept_group] 
+            sgtriples += [t for t in triples if t[0] in vs or t[2] in vs] 
+        
+	# check for reified rel nodes, collect related variabl    
+        for associated_rel in associated_rels:
+            vars_of_reified_concept = []
+            if associated_rel in self.reify_rules[0]:
+                for (s, r, t) in triples:
+                    if r == ":instance" and t == self.reify_rules[0][associated_rel][0]:
+                        vars_of_reified_concept.append(s)
+                for (s, r, t) in triples:
+                    if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
+                        sgtriples.append((s, r, t))
+        
+        associated_frame_rels = self.inverted_frame_table[name]
+        for (frame, rel) in associated_frame_rels:
+            found = maybe_complete_triple(frame, rel, triples)
+            sgtriples += found
+        return name, sgtriples 
     
-    def subgraph_instance(self, triples):
-        triples = [t for t in triples1 if t[1] == ":instance"]
-        return triples
+    def clean_extend_subgraph(self, sgtriples, triples_all, name):
+        
+        sgtriples = self._maybe_add_subtree(sgtriples, triples_all, name)
+        sgtriples = self._maybe_add_instance(sgtriples, triples_all)
+        sgtriples = list(set(sgtriples))
 
-    def subgraph_predicate(self, triples):
-        triples = self.subgraph_instance(triples)
-        triples = [t for t in triples if re.match(r".*-[0-9]+", t[2].lower())]
-        return triples
+        return sgtriples
 
-    def subgraph_instance(self, triples):
-        triples = [t for t in triples if t[1] == ":instance"]
-        return triples
-    
-    def unlabel_edges(self, triples):
-        out = []
-        for t in triples:
-            if t[1] != ":instance":
-                out.append((t[0], ":rel", t[2]))
-            else:
-                out.append(t)
-        return out
-    
-    def unlabel_nodes(self, triples):
-        out = []
-        for t in triples:
-            if t[1] == ":instance":
-                out.append((t[0], ":instance", "concept"))
-            else:
-                out.append(t)
-        return out
-
-    def subgraph_reentrancies(self, triples):
-        out = []
-        inc_rels = defaultdict(int)
-        var_concept_dict = util.get_var_concept_dict(triples)
-        for (s, r, t) in triples:
-            if t in var_concept_dict:
-                inc_rels[t] += 1
-        for (s, r, t) in [ t for t in triples if t[1] != ":instance"]:
-            if t in var_concept_dict and inc_rels[t] > 1:
-                out.append((s, r, t))
-        out = self._maybe_add_subtree(out, triples)
-        out = self._maybe_add_instance(out, triples)
-        return out
      
     def _maybe_add_instance(self, triples, triples_all):
         out = []
         if self.add_instance:
-            ai = self._get_additional_instances(triples, triples_all)
+            ai = get_additional_instances(triples, triples_all)
             out = triples + ai
         return out
     
-    def _maybe_add_subtree(self, triples, triples_all):
-        out = list(triples)
+    def _maybe_add_subtree(self, triples, triples_all, name):
         
-        if self.subtree_context_depth != 0:
-            
+        out = list(triples)
+
+        if name not in self.amr_aspects:
+            return out
+
+        subtree_context_depth = self.amr_aspects[name].get("subgraph_extraction_range")
+        subtree_context_depth = int(subtree_context_depth)
+        
+        if subtree_context_depth != 0:    
             finished = False
             depth = 0
             while not finished:
                 finished = True
-                if depth == self.subtree_context_depth:
+                if depth == subtree_context_depth:
                     break
                 tmp = []
                 for tri in out:
@@ -158,23 +193,8 @@ class SubGraphExtractor():
                             finished = False
                 out += tmp
                 depth += 1
+
         out = list(set(out))
         return out
-            
-    def _get_additional_instances(self, triples, triples_all):
-        additional_instance = []
-        var_concept_dict = util.get_var_concept_dict(triples_all)
-        tvars = set()
-        for (s, _, t) in triples:
-            if s in var_concept_dict:
-                tvars.add(s)
-            if t in var_concept_dict:
-                tvars.add(t)
-        for var in tvars:
-            itriple = (var, ":instance", var_concept_dict[var])
-            if itriple not in additional_instance:
-                additional_instance.append(itriple)
-
-        return additional_instance
 
 

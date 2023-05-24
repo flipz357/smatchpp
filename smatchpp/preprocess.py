@@ -1,8 +1,8 @@
 from copy import deepcopy
 from collections import defaultdict
 import logging
-import util
-import interfaces
+from smatchpp import util
+from smatchpp import interfaces
 
 logger = logging.getLogger("__main__")
 

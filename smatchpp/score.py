@@ -1,11 +1,9 @@
 from copy import deepcopy
-from collections import defaultdict
 import numpy as np
 import logging
-import util
-import re
-import interfaces
-from subgraph_extraction import SubGraphExtractor
+from smatchpp import util
+from smatchpp import interfaces
+from smatchpp.subgraph_extraction import SubGraphExtractor
 
 logger = logging.getLogger("__main__")
                  
@@ -43,7 +41,7 @@ class EmbeddingConceptMatcher(interfaces.TripleMatcher):
         except ModuleNotFoundError:
             raise ModuleNotFoundError("gensim not found")
 
-        self.vecs = self.gensim.downloader.api.load("glove-wiki-gigaword-100")
+        self.vectors = self.gensim.downloader.api.load("glove-wiki-gigaword-100")
 
 
     def _triplematch(self, t1, t2): 
@@ -55,8 +53,8 @@ class EmbeddingConceptMatcher(interfaces.TripleMatcher):
         if ":instance" == t1[1] == t2[1]:
             concept1 = t1[2]
             concept2 = t2[2]
-            vc1 = self.vectors.get(vc1)
-            vc2 = self.vectors.get(vc2)
+            vc1 = self.vectors.get(concept1)
+            vc2 = self.vectors.get(concept2)
             return 1 - self.scipy.spatial.distance.cosine(vc1, vc2)
         return sc
 
@@ -81,6 +79,7 @@ class AMRScorer(interfaces.Scorer):
         var_newvar = {}
         
         for k, tr in enumerate(triples_aligned):
+            
             s, r, t = tr
             news  = s
             newt = t
@@ -107,6 +106,7 @@ class AMRScorer(interfaces.Scorer):
             
             var_newvar[s] = news
             var_newvar[t] = newt
+        
         for k, tr in enumerate(triples_aligned):
             s, r, t = tr
             s = var_newvar[s]
@@ -135,8 +135,8 @@ class AMRScorer(interfaces.Scorer):
             scores += [self.triplematcher.triplematch(triple, triples1_aligned[i]) for i in range(len(triples1_aligned))]
             matchsum_y += max(scores)
         
-        #note: for IDTripleMatch matchsum_x = matchsum_y = len(set(triples1_aligned).intersection(triples2))
         match = np.array([matchsum_x, matchsum_y, xlen, ylen])
+        #note: in basic Smatch w/o duplicates we have IDTripleMatch matchsum_x = matchsum_y = len(set(triples1_aligned).intersection(triples2))
         return match
     
     def main_scores(self, triples1, triples2, alignmat, varindex):

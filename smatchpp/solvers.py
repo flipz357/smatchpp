@@ -5,8 +5,8 @@ logger = logging.getLogger("__main__")
 import numpy as np
 import sys
 from collections import Counter
-import interfaces
-import util
+from smatchpp import interfaces
+from smatchpp import util
 
 def get_solver(identifier_string):
 
@@ -682,7 +682,7 @@ class RILP(interfaces.Solver):
                 alignmat = util.alignmat_compressed(alignmat)
                 return alignmat, lower_bound, upper_bound
 
-        alignmat = util.alignmat_compress(alignmat)
+        alignmat = util.alignmat_compressed(alignmat)
         return alignmat, None, None
 
 
