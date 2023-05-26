@@ -28,7 +28,7 @@ The packages can all be installed with `pip ...`
 ./score.sh <amrs1> <amrs2>
 ``` 
 
-where `<amrs1>` and `<amrs>` are the paths to the files with graphs. Format is assumed to be in "penman":
+where `<amrs1>` and `<amrs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
 ```
 # first graph
