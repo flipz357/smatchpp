@@ -64,8 +64,8 @@ def get_additional_instances(triples, triples_all):
 
 class SubGraphExtractor():
 
-    def __init__(self, reify_rules=None, add_instance=True, 
-            subtree_context_depth=2, amr_aspects=None, inverted_frame_table=None, concept_groups=None):
+    def __init__(self, reify_rules=None, add_instance=True, amr_aspects=None, 
+                    inverted_frame_table=None, concept_groups=None):
         
         if not reify_rules:
             reify_rules = util.read_reify_table()
@@ -82,7 +82,6 @@ class SubGraphExtractor():
         
         self.reify_rules = reify_rules
         self.add_instance = add_instance
-        self.subtree_context_depth = subtree_context_depth
         self.amr_aspects = amr_aspects
         self.inverted_frame_table = inverted_frame_table
         self.concept_groups = concept_groups
