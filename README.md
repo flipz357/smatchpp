@@ -1,6 +1,6 @@
 # SMATCH++
 
-Contains standardized and optimal Smatch solving.
+Contains standardized and optimal Smatch scoring and subgraph extraction and scoring for spatial, temporal, causal, and more AMR aspects.
 
 ## Requirements
 
