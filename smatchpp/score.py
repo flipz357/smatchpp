@@ -73,7 +73,7 @@ class AMRScorer(interfaces.Scorer):
         target = alignmat[src]
         return target
 
-    def _map_triples(self, triples, alignmat, varindex, identifier="XsecondX"):
+    def _map_triples(self, triples, alignmat, varindex, identifier="bb_"):
         
         triples_aligned = deepcopy(triples)
         var_newvar = {}

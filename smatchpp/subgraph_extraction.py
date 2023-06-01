@@ -29,9 +29,12 @@ def unlabel_nodes(triples):
             out.append(t)
     return out
 
-def maybe_complete_triple(frame, rel, triples):
+def maybe_complete_triple(frame, rel, triples, mapto=None):
     candidates = [t[0] for t in triples if t[2] == frame]
-    out = [t for t in triples if t[0] in candidates and t[1] == rel]
+    if not mapto:
+        out = [t for t in triples if t[0] in candidates and t[1] == rel]
+    else:
+        out = [(t[0], mapto, t[2]) for t in triples if t[0] in candidates and t[1] == rel]
     return out
     
 def subgraph_reentrancies(triples):
@@ -65,7 +68,7 @@ def get_additional_instances(triples, triples_all):
 class SubGraphExtractor():
 
     def __init__(self, reify_rules=None, add_instance=True, amr_aspects=None, 
-                    inverted_frame_table=None, concept_groups=None):
+                    inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True):
         
         if not reify_rules:
             reify_rules = util.read_reify_table()
@@ -85,6 +88,7 @@ class SubGraphExtractor():
         self.amr_aspects = amr_aspects
         self.inverted_frame_table = inverted_frame_table
         self.concept_groups = concept_groups
+        self.map_core_to_explicit = map_core_to_explicit
 
 
     def all_subgraphs_by_name(self, triples):
@@ -110,7 +114,6 @@ class SubGraphExtractor():
             name_subgraph[name] = sg
         
         assert len(triples) == len(name_subgraph["main"])  
-        
         return name_subgraph
 
     def _iter_name_subgraph(self, triples):
@@ -140,10 +143,12 @@ class SubGraphExtractor():
                     if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
                         sgtriples.append((s, r, t))
         
+        map_to = self.amr_aspects[name]["map_to"]
         associated_frame_rels = self.inverted_frame_table[name]
-        for (frame, rel) in associated_frame_rels:
-            found = maybe_complete_triple(frame, rel, triples)
-            sgtriples += found
+        if self.map_core_to_explicit and map_to:
+            for (frame, rel) in associated_frame_rels:
+                found = maybe_complete_triple(frame, rel, triples, map_to)
+                sgtriples += found
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
@@ -162,6 +167,7 @@ class SubGraphExtractor():
             out = triples + ai
         return out
     
+
     def _maybe_add_subtree(self, triples, triples_all, name):
         
         out = list(triples)

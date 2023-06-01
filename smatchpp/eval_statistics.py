@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import bootstrap
 import logging
 import json
+import math
 
 logger = logging.getLogger("__main__")
 
@@ -48,21 +49,20 @@ class ResultPrinter:
 
     def _aggr_wrapper(self, match_data, axis=0):
         result = None
+
         if self.score_type == "micro":        
             dat = np.sum(match_data, axis=axis)
-             
             p = dat[0]/dat[2]
             r = dat[1]/dat[3]
             stat =  2 * (p * r) / (p + r)
-
             result = np.array([stat, p, r])
         
         if self.score_type == "macro":        
             result = np.mean(match_data, axis=axis)
+
         return result
               
     def print_all(self, final_result_dic):
-        #final_result_dic = self.get_final_result(result_dic)
         if self.output_format == "json":
             string = self._nice_format(final_result_dic)
         if self.output_format == "text":
@@ -93,6 +93,10 @@ class ResultPrinter:
                             setting confidence interval to [0,100]")
                     low = [0.0, 0.0]
                     high = [100.0, 100.0]
+                if any(math.isnan(x) for x in np.concatenate((low, high))):
+                    low = [0.0, 0.0]
+                    high = [100.0, 100.0]
+
             final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high)
         return final_result_dic
 

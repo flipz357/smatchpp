@@ -66,7 +66,7 @@ def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True
         frame_table[pred] = {}
         for elm in spl[1:]:
             role_descr = elm.split(": ")
-            frame_table[pred][":arg" + role_descr[0]] = role_descr[1] 
+            frame_table[pred][":arg" + role_descr[0]] = " " + " ".join(role_descr[1].split()) + " "
     return frame_table
 
 def invert_frame_table(frame_table, aspects):

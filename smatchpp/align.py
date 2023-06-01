@@ -13,13 +13,11 @@ class GraphAligner:
         self.solver = solver
      
     def _make_binary_match_dict(self, triples1, triples2, var1, var2, var_index):
-        
-        maxvarlen = max(len(var1), len(var2))
-        
+         
         data = Counter() 
-        
         triples1 = [tr for tr in triples1 if (tr[0] in var1 and tr[2] in var1)]
         triples2 = [tr for tr in triples2 if (tr[0] in var2 and tr[2] in var2)]
+
         for triple in triples1:
             s, r, t  = triple
             i = var_index[s]
@@ -32,11 +30,11 @@ class GraphAligner:
                 if match > 0.0:
                     data[(i, i_other, j, j_other)] += match / 2
                     data[(j, j_other, i, i_other)] += match / 2
+        
         return data
                 
     def _make_unary_match_dict(self, triples1, triples2, var1, var2, var_index):
         
-        maxvarlen = max(len(var1), len(var2))
         data = Counter()
         triples1 = [tr for tr in triples1 if xor(tr[0] in var1, tr[2] in var1)]
         triples2 = [tr for tr in triples2 if xor(tr[0] in var2, tr[2] in var2)]

@@ -8,4 +8,5 @@ setup(
     author='Juri Opitz',
     author_email='opitz.sci@gmail.com',
     license='GPLv3',
-    packages=['smatchpp'])
+    packages=['smatchpp'],
+    package_data={'smatchpp': ['resource/*']})

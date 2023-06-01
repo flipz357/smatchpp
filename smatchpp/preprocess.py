@@ -309,7 +309,7 @@ class AMRGraphPairPreparer(interfaces.GraphPairPreparer):
         
         if self.rename_vars:
             logger.debug("renaming vars in graph 1...")
-            var_newvar = {v: "XfirstX_" + v for v in var1}
+            var_newvar = {v: "aa_" + v for v in var1}
             for i in range(len(triples1)):
                 src = triples1[i][0]
                 tgt = triples1[i][2]
@@ -324,7 +324,7 @@ class AMRGraphPairPreparer(interfaces.GraphPairPreparer):
             logger.debug("new graph 1: {}".format(triples1))
             
             logger.debug("renaming vars in graph 2...")
-            var_newvar = {v: "XsecondX_" + v for v in var2}
+            var_newvar = {v: "bb_" + v for v in var2}
 
             for i in range(len(triples2)):
                 src = triples2[i][0]

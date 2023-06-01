@@ -156,7 +156,9 @@ def get_reader(reader_name):
 
     if reader_name == "penman":
         return PenmanReader()
-    
+
     if reader_name == "tsv":
         return TSVReader()
+    
+    raise NameError("reader name not known, available: penman, tsv")
 
