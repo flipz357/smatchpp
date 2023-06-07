@@ -69,8 +69,8 @@ class GraphAligner:
         return unary, binary
 
     def _get_var_map(self, alignment, var_index):
-        index_var_1 = {i:v for v, i in var_index.items() if "first" in v} 
-        index_var_2 = {i:v for v, i in var_index.items() if "second" in v} 
+        index_var_1 = {i:v for v, i in var_index.items() if "aa_" in v} 
+        index_var_2 = {i:v for v, i in var_index.items() if "bb_" in v} 
         mapping = []
         
         for i, j in enumerate(alignment):
@@ -122,5 +122,6 @@ class GraphAligner:
         var_map = self._get_var_map(alignmat, var_index)
         logging.debug("5. output mapping {}".format(var_map))
         logging.debug("5. output mapping interpreted {}".format(self._interpretable_mapping(var_map, triples1, triples2)))
+        #print(self._interpretable_mapping(var_map, triples1, triples2), var_map)
         return alignmat, var_index, (objective_value, objective_bound)
 

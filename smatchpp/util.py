@@ -93,9 +93,24 @@ def get_var_concept_dict(triples):
     for tr in triples:
         if tr[1] == ":instance":
             vc[tr[0]] = tr[2]
-    vc["root"] = "root"
     return vc
 
+def get_constant_set(triples):
+    # this includes all leaves that are leaves and the root node, 
+    # i.e., all tokens that are not variables
+    vc = get_var_concept_dict(triples)
+    constants = set()
+    for tr in triples:
+        src = tr[0]
+        rel = tr[1]
+        tgt = tr[2]
+        if rel == ":instance":
+            continue
+        if src not in vc:
+            constants.add(src)
+        if tgt not in vc:
+            constants.add(tgt)
+    return constants.union(vc.values())
 
 def isroot(var, triples):
     """ check if triple is root """

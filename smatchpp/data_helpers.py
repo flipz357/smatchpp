@@ -41,7 +41,7 @@ class PenmanReader(interfaces.GraphReader):
         # prepare
         nested_level = 0
         i = 0
-        tmpsrc = {0: "ROOT"}
+        tmpsrc = {0: "ROOT_OF_GRAPH"}
         tmprel = {0: ":root"}
         triples = []
         

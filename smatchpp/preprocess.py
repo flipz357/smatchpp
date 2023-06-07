@@ -35,16 +35,18 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
                                     (x, instance, and), (x, op1, y), (x, op2, z)
                                     -> (x, instance, and), (x, op, y), (x, op, z)
            use_concept_as_root (bool): do smatch style, where root is not attached to
-                                        a var, but to a concept (concept, :root, root)
-                                        if false, we use (xvar, :root, root)
+                                        a var, but concept to var via root relation 
+                                        (xvar, :root, concept) if false, we use (xvar, :root, root_of_graph)
     """
 
 
     def __init__(self, reify_nodes=False, edges=None, lower=True, 
-            remove_quote=True, deinvert_edges=True, norm_logical_ops=False, 
-            use_concept_as_root=True, remove_duplicates=True):
+                 relabel_vars=True, remove_quote=True, 
+                 deinvert_edges=True, norm_logical_ops=False, 
+                 use_concept_as_root=True, remove_duplicates=True):
 
         self.lower = lower
+        self.relabel_vars = relabel_vars
         self.reify_nodes = reify_nodes
         self.edges = edges
         self._maybe_set_reify_rules()
@@ -67,38 +69,84 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
         if self.lower:
             triples = [(s.lower(), r.lower(), t.lower()) for (s, r, t) in triples]
             logging.debug("2. lower cased: {}".format(triples)) 
+        if self.relabel_vars:
+            self._relabel_vars(triples)
+            logging.debug("3. ensure no varname qual concept: {}".format(triples)) 
         if self.reify_nodes:
             self._reify_n(triples)
-            logging.debug("3. reify nodes: {}".format(triples)) 
+            logging.debug("4. reify nodes: {}".format(triples)) 
         if self.deinvert_edges:
             self._deinvert_e(triples)
-            logging.debug("4. deinvert edges: {}".format(triples)) 
+            logging.debug("5. deinvert edges: {}".format(triples)) 
         if self.edges == "reify":
             self._reify_e(triples)
-            logging.debug("5. edge reififcation: {}".format(triples)) 
+            logging.debug("6. edge reififcation: {}".format(triples)) 
         if self.edges == "dereify":
             self._dereify_e(triples)
-            logging.debug("5. edge dereififcation: {}".format(triples)) 
+            logging.debug("7. edge dereififcation: {}".format(triples)) 
         if self.norm_logical_ops:
             self._norm_logical_ops(triples)
-            logging.debug("norm logical operators: {}".format(triples)) 
+            logging.debug("8. norm logical operators: {}".format(triples)) 
         if self.remove_quote:
             triples = [rmquote(t) for t in triples]
-            logging.debug("remove quotes: {}".format(triples)) 
+            logging.debug("9. remove quotes: {}".format(triples)) 
         if self.use_concept_as_root:
-            self.concept_as_root(triples)
-            logging.debug("make concept to root (smatch style): {}".format(triples)) 
+            self._concept_as_root(triples)
+            logging.debug("10. make concept to root (smatch style): {}".format(triples)) 
         if self.remove_duplicates:
             triples = list(set(triples))
-            logging.debug("removed duplicate triples: {}".format(triples)) 
+            logging.debug("11. removed duplicate triples: {}".format(triples)) 
         return triples
 
+    def _relabel_vars(self, triples):
+        """standardize variable names"""
+        
+        v2c = util.get_var_concept_dict(triples)
+        constants = util.get_constant_set(triples)
 
-    def concept_as_root(self, triples):
+        # standardize and make variable names simpler "(xyds / cat)" -> "(c / cat)"
+        # just for optics and better alignment interpretation
+        v2v = {}
+        vnew_idx = {}
+        for v in v2c:
+            concept = v2c[v]
+            vnew = concept[0]
+            if vnew not in vnew_idx:
+                v2v[v] = vnew
+                vnew_idx[vnew] = 1
+            else:
+                v2v[v] = vnew + str(vnew_idx[vnew])
+                vnew_idx[vnew] += 1
+        
+        # take care that there are no variable names that are same as concepts
+        # some parsers and the reference does this, can lead to bugs
+        # so we will change "(i / i)" -> "(ix / i)"
+        for v in v2v:
+            vnew = v2v[v]
+            while vnew in constants:
+                vnew += "x"
+            v2v[v] = vnew
+
+        # now we can map to new variables
+        for i in range(len(triples)):
+            src = triples[i][0]
+            rel = triples[i][1]
+            tgt = triples[i][2]
+            if src in v2v:
+                src = v2v[src]
+            if tgt in v2v:
+                if rel != ":instance":
+                    tgt = v2v[tgt]
+            triples[i] = (src, triples[i][1], tgt)
+        
+        return None
+
+    def _concept_as_root(self, triples):
         vc = util.get_var_concept_dict(triples)
         for i, tr in enumerate(triples):
             if tr[1] == ":root":
-                triples[i] = (tr[2], ":root", vc[tr[2]])
+                newtriple = (tr[2], ":root", vc[tr[2]])
+                triples[i] = newtriple
         return None
 
     def _maybe_set_reify_rules(self):
@@ -188,6 +236,7 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
         foundyv = None
         foundyi = None
         foundother = 0
+        
         for i, tr in enumerate(triples):
             if tr[0] == variable and tr[1] != ":instance":
                 if tr[1] == self.reify_rules_inverse[concept][1]:
@@ -200,8 +249,10 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
                     foundyi = i
                 else:
                     foundother += 1
+        
         if foundx == foundy == 1 and foundother == 0:
             return (foundxv, foundyv, foundxi, foundyi, ci, self.reify_rules_inverse[concept][0])
+        
         return False
 
     
@@ -301,8 +352,8 @@ class AMRGraphPairPreparer(interfaces.GraphPairPreparer):
          
         var1 = set(var1)
         var2 = set(var2)
-        var1.remove("root")
-        var2.remove("root")
+        #var1.remove("root_of_graph")
+        #var2.remove("root_of_graph")
             
         logger.debug("varset graph 1: {}".format(var1))
         logger.debug("varset graph 2: {}".format(var2))

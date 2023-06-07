@@ -33,7 +33,7 @@ def build_arg_parser():
     
     parser.add_argument('-input_format'
             , type=str
-            , default="pemman"
+            , default="penman"
             , nargs='?'
             , choices=["tsv, penman"]
             , help='score type')
@@ -126,6 +126,7 @@ if __name__ == "__main__":
     graph_aligner = align.GraphAligner(triplematcher, alignmentsolver) 
     logger.info("4c. graph aligner loaded")
 
+    subgraph_extractor = None
     if "all" in args.score_dimension:
         subgraph_extractor = subgraph_extraction.SubGraphExtractor(add_instance=True)
         logger.info("4c. sub graph extractor")
