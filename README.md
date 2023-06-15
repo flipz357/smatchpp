@@ -1,6 +1,6 @@
 # SMATCH++
 
-The package targets standardized evaluation of graph parsers with Smatch (a structural matching algorithm for network alignment). While it is oriented at standardized (A)MR evaluation it also allows processing of many other kinds of graph structures and operations on graphs such as sub-graph extraction or graph compression for faster metric computation. A short overview:
+The package targets standardized evaluation of graph parsers with Smatch (a structural matching algorithm for network alignment). While it is oriented at standardized (A)MR evaluation it also allows processing of other kinds of graph structures and operations such as sub-graph extraction or graph compression for faster metric computation. A short overview:
 
 - Standardized graph reading  
 - Different alignment solvers including optimal ILP alignment
