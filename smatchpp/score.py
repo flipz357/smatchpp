@@ -122,7 +122,6 @@ class AMRScorer(interfaces.Scorer):
         triples1_aligned = self._map_triples(triples1, alignmat, varindex)
         xlen = len(triples1_aligned)
         ylen = len(triples2)
-        
         matchsum_x = 0.0
         for triple in triples1_aligned:
             scores = [0.0] 

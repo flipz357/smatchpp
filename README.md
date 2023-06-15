@@ -1,10 +1,17 @@
 # SMATCH++
 
-Contains standardized and optimal Smatch scoring and subgraph extraction and scoring for spatial, temporal, causal, and more AMR aspects.
+The package targets standardized evaluation of graph parsers with Smatch (a structural matching algorithm for network alignment). While it is oriented at standardized (A)MR evaluation it also allows processing of many other kinds of graph structures and operations on graphs such as sub-graph extraction or graph compression for faster metric computation. A short overview:
+
+- Standardized graph reading  
+- Different alignment solvers including optimal ILP alignment
+- Evaluation scoring with bootstrap confidence intervals, micro and macro averages
+- AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
+
+Jump directly to [easy and standardized parser evaluation](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++.
 
 ## Requirements
 
-Code written for python (3). For the most basic version, there shouldn't be a need to install additional modules. However, when using ilp optimal solving and bootstrapping, we require
+For the most basic version, there shouldn't be a need to install additional modules. However, when using ilp optimal solving and bootstrapping, we require
 
 ```
 mip (tested: 1.13.0)
@@ -16,7 +23,7 @@ The packages can all be installed with `pip ...`
 
 ## Example configurations
 
-### Recommended for average case: ILP alignment, dereification, corpus metrics and confidence intervals
+### Recommended for average case: ILP alignment, dereification, corpus metrics and confidence intervals<a id="basic-eval"></a>
 
 - Efficiency: + 
 - Optimality: +++
@@ -143,9 +150,73 @@ Can be implemented in `score.py`
 
 See `subgraph_extraction.py` 
 
-## Pip install
+## Pip install<a id="pip-install"></a>
 
-coming.
+### Pip installation
+
+Simply run 
+
+`pip install smatchpp`
+
+The main interface is a smatchpp.Smatchpp object. With this, all kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
+
+### Example I: Smatch++ matching with some basic default
+
+```python
+import smatchpp
+measure = smatchpp.Smatchpp()
+match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
+print(match) # [2, 2, 2, 2], 2 left->right, 2 in right->left, 2 length of left, 2 length of right 
+```
+
+Note: Here it's two triples matching since there is an implicit root.
+
+### Example II: Standardize and extract subgraphs
+
+```python
+import smatchpp
+measure = smatchpp.Smatchpp()
+string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
+g = measure.graph_reader.string2graph(string_graph)
+g = measure.graph_standardizer.standardize(g)
+name_subgraph_dict = measure.subgraph_extractor.all_subgraphs_by_name(g)
+
+# get subgraph for "instrument"
+print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
+```
+
+Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`
+
+### Example III: Smatch++ matching same as default but with ILP
+
+```python
+import smatchpp, smatchpp.solvers
+ilp = smatchpp.solvers.ILP()
+measure = smatchpp.Smatchpp(alignmentsolver=ilp)
+match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
+print(match) # in this case same result as Example I
+```
+
+### Example IV: get an alignment
+
+```python
+import smatchpp
+measure = smatchpp.Smatchpp()
+measure.graph_standardizer.relabel_vars = False
+s1 = "(x / test)"
+s2 = "(y / test)"
+g1 = measure.graph_reader.string2graph(s1)
+g1 = measure.graph_standardizer.standardize(g1)
+g2 = measure.graph_reader.string2graph(s2)
+g2 = measure.graph_standardizer.standardize(g2)
+g1, g2, v1, v2 = measure.graph_pair_preparer.prepare_get_vars(g1, g2)
+alignment, var_index, _ = measure.graph_aligner.align(g1, g2, v1, v2)
+var_map = measure.graph_aligner._get_var_map(alignment, var_index)
+interpretable_mapping = measure.graph_aligner._interpretable_mapping(var_map, g1, g2)
+print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/bb indicates 1st/2nd graph
+```
+
+Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we show the process from scratch).
 
 ## Citation
 

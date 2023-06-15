@@ -83,7 +83,6 @@ class Smatchpp():
             match = self.graph_scorer.subtask_scores(g1, g2, alignment, varindex)
 
         elif self.score_dimension == "all-multialign":
-            g1, g2, v1, v2 = self.graph_pair_preparer.prepare_get_vars(g1, g2)
             name_subgraph1 = self.subgraph_extractor.all_subgraphs_by_name(g1)
             name_subgraph2 = self.subgraph_extractor.all_subgraphs_by_name(g2)
             match = {}
@@ -95,11 +94,12 @@ class Smatchpp():
                 logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1t, g2t, v1t, v2t))
                 alignment, varindex, status = self.graph_aligner.align(g1t, g2t, v1t, v2t)
                 logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-                match[name] = self.graph_scorer.main_scores(g1, g2, alignment, varindex)["main"]
-                alignments[name] = alignment 
+                match[name] = self.graph_scorer.main_scores(g1t, g2t, alignment, varindex)["main"]
+                alignments[name] = alignment
             alignment = alignments
         logger.debug("match computed: {}".format(match))
         status = (status[0], min(len(g1), len(g2), status[1]))
+        
         return match, status, alignment
     
     

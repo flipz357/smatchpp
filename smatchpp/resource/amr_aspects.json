@@ -29,7 +29,7 @@
  	{
 	 "associated_rel": [":instrument"],
 	 "associated_concept": [],
-	 "search_in_frame_descr": [" instrument "],
+	 "search_in_frame_descr": [" instrument ", " instrumental "],
 	 "subgraph_extraction_range": 2,
 	 "map_to": ":instrument"
  	 }, 

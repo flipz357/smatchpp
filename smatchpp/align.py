@@ -12,7 +12,7 @@ class GraphAligner:
         self.triplematcher = triplematcher
         self.solver = solver
      
-    def _make_binary_match_dict(self, triples1, triples2, var1, var2, var_index):
+    def _make_binary_match_dict(self, triples1, triples2, var1, var2, var_index): 
          
         data = Counter() 
         triples1 = [tr for tr in triples1 if (tr[0] in var1 and tr[2] in var1)]
@@ -107,6 +107,7 @@ class GraphAligner:
             var_index[v] = i
         if not var_index:
             return None, []
+        
         logging.debug("1. var index created: {}".format(var_index))
         unarymatch_dict, binarymatch_dict = self._compute_match_dicts(triples1, triples2, var1, var2, var_index)
 
@@ -122,6 +123,6 @@ class GraphAligner:
         var_map = self._get_var_map(alignmat, var_index)
         logging.debug("5. output mapping {}".format(var_map))
         logging.debug("5. output mapping interpreted {}".format(self._interpretable_mapping(var_map, triples1, triples2)))
-        #print(self._interpretable_mapping(var_map, triples1, triples2), var_map)
+        
         return alignmat, var_index, (objective_value, objective_bound)
 

@@ -29,13 +29,28 @@ def unlabel_nodes(triples):
             out.append(t)
     return out
 
-def maybe_complete_triple(frame, rel, triples, mapto=None):
-    candidates = [t[0] for t in triples if t[2] == frame]
-    if not mapto:
-        out = [t for t in triples if t[0] in candidates and t[1] == rel]
-    else:
-        out = [(t[0], mapto, t[2]) for t in triples if t[0] in candidates and t[1] == rel]
+def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
+    vc = util.get_var_concept_dict(triples)
+    news = {}
+    for name in amr_aspects:
+        mapto = None
+        map_to = amr_aspects[name].get("map_to")
+        if not map_to:
+            continue
+        associated_frame_rels = inverted_frame_table[name]
+        for (frame, rel) in associated_frame_rels:
+            for i in range(len(triples)):
+                s, r, t = triples[i]
+                if r == rel and (s == frame or vc.get(s) == frame):
+                    news[i] = (s, map_to, t)
+    out = []
+    for i in range(len(triples)):
+        if i in news:
+            out.append(news[i])
+        else:
+            out.append(triples[i])
     return out
+
     
 def subgraph_reentrancies(triples):
     out = []
@@ -101,6 +116,11 @@ class SubGraphExtractor():
         
         # remove wiki from all subgraphs that will be extracted
         tmptriples = name_subgraph["main without wiki"]
+        
+        if self.map_core_to_explicit:
+            tmptriples = semantically_standardize_graph(tmptriples, self.inverted_frame_table, self.amr_aspects)
+            #name_subgraph["semantically standardized graph"] = tmptriples
+        
         for name, subgraph in self._iter_name_subgraph(tmptriples):
             name_subgraph[name] = subgraph
         
@@ -112,7 +132,6 @@ class SubGraphExtractor():
             sg = name_subgraph[name]
             sg = self.clean_extend_subgraph(sg, tmptriples, name)
             name_subgraph[name] = sg
-        
         assert len(triples) == len(name_subgraph["main"])  
         return name_subgraph
 
@@ -132,7 +151,7 @@ class SubGraphExtractor():
             vs = [t[0] for t in triples if t[2] in concept_group] 
             sgtriples += [t for t in triples if t[0] in vs or t[2] in vs] 
         
-	# check for reified rel nodes, collect related variabl    
+	# check for reified rel nodes, collect related variable    
         for associated_rel in associated_rels:
             vars_of_reified_concept = []
             if associated_rel in self.reify_rules[0]:
@@ -143,12 +162,6 @@ class SubGraphExtractor():
                     if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
                         sgtriples.append((s, r, t))
         
-        map_to = self.amr_aspects[name]["map_to"]
-        associated_frame_rels = self.inverted_frame_table[name]
-        if self.map_core_to_explicit and map_to:
-            for (frame, rel) in associated_frame_rels:
-                found = maybe_complete_triple(frame, rel, triples, map_to)
-                sgtriples += found
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
