@@ -201,6 +201,8 @@ print(g) [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (
 
 ### Example III: Smatch++ matching same as default but with ILP
 
+In this example, we use ILP for optimal alignment.
+
 ```python
 import smatchpp, smatchpp.solvers
 ilp = smatchpp.solvers.ILP()
@@ -210,6 +212,8 @@ print(match) # in this case same result as Example I
 ```
 
 ### Example IV: get an alignment
+
+In this example, we retrieve an alignment between graph nodes.
 
 ```python
 import smatchpp
@@ -232,6 +236,7 @@ Note that the alignment is a by-product of the matching and can be also retrieve
 
 ### Example V: Read, standardize and write graph
 
+In this example, we read a basic graph from a string, apply reification standardization, and write the reified graph to a string.
 ```python
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
