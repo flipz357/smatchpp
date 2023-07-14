@@ -3,6 +3,7 @@ from collections import defaultdict
 import logging
 from smatchpp import util
 from smatchpp import interfaces
+from smatchpp import subgraph_extraction
 
 logger = logging.getLogger("__main__")
 
@@ -43,7 +44,8 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
     def __init__(self, reify_nodes=False, edges=None, lower=True, 
                  relabel_vars=True, remove_quote=True, 
                  deinvert_edges=True, norm_logical_ops=False, 
-                 use_concept_as_root=True, remove_duplicates=True):
+                 use_concept_as_root=True, remove_duplicates=True,
+                 semantic_standardization=False):
 
         self.lower = lower
         self.relabel_vars = relabel_vars
@@ -56,6 +58,8 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
         self.norm_logical_ops = norm_logical_ops
         self.use_concept_as_root = use_concept_as_root
         self.remove_duplicates = remove_duplicates
+        self.semantic_standardization = semantic_standardization
+        self._maybe_prepare_semantic_standardization()
 
         return None
 
@@ -96,7 +100,19 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
         if self.remove_duplicates:
             triples = list(set(triples))
             logging.debug("11. removed duplicate triples: {}".format(triples)) 
+        if self.semantic_standardization:
+            triples = subgraph_extraction.semantically_standardize_graph(triples, 
+                                                                            self.inverted_frame_table, 
+                                                                            self.amr_aspects)
+            logging.debug("12. semantically standardized triples: {}".format(triples)) 
         return triples
+
+    def _maybe_prepare_semantic_standardization(self):
+        if self.semantic_standardization:
+            self.amr_aspects = util.read_amr_aspects()
+            frame_table = util.read_frame_table()
+            self.inverted_frame_table = util.invert_frame_table(frame_table, self.amr_aspects)
+        return None
 
     def _relabel_vars(self, triples):
         """standardize variable names"""

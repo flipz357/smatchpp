@@ -158,7 +158,7 @@ Simply run
 
 `pip install smatchpp`
 
-The main interface is a smatchpp.Smatchpp object. With this, all kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
+The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
 
 ### Example I: Smatch++ matching with some basic default
 
@@ -185,7 +185,19 @@ name_subgraph_dict = measure.subgraph_extractor.all_subgraphs_by_name(g)
 print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
 ```
 
-Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`
+Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`. 
+Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer:
+
+```
+from smatchpp import data_helpers, preprocess
+graph_reader = data_helpers.PenmanReader()
+graph_writer = data_helpers.PenmanWriter()
+graph_standardizer = preprocess.AMRGraphStandardizer(semantic_standardization=True)
+string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
+g = graph_reader.string2graph(string_graph)
+g = measure.graph_standardizer.standardize(g)
+print(g) [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (c, arg1, c2), (c2, instance, computer)]
+```
 
 ### Example III: Smatch++ matching same as default but with ILP
 
@@ -217,6 +229,19 @@ print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/b
 ```
 
 Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we show the process from scratch).
+
+### Example V: Read, standardize and write graph
+
+```python
+from smatchpp import data_helpers, preprocess
+graph_reader = data_helpers.PenmanReader()
+graph_writer = data_helpers.PenmanWriter()
+graph_standardizer = preprocess.AMRGraphStandardizer(edges="reify")
+s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
+g = graph_reader.string2graph(s)
+g = graph_standardizer.standardize(g)
+string = graph_writer.graph2string(g)
+```
 
 ## Citation
 

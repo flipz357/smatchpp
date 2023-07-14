@@ -83,7 +83,7 @@ def get_additional_instances(triples, triples_all):
 class SubGraphExtractor():
 
     def __init__(self, reify_rules=None, add_instance=True, amr_aspects=None, 
-                    inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True):
+        inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True):
         
         if not reify_rules:
             reify_rules = util.read_reify_table()

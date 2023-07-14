@@ -6,14 +6,20 @@ logger = logging.getLogger("__main__")
 
 class Smatchpp():
 
-    def __init__(self, graph_reader=None, graph_standardizer=None, graph_pair_preparer=None,
-                    triplematcher=None, alignmentsolver=None, graph_aligner=None, graph_scorer=None,
-                    subgraph_extractor=None, printer=None, score_dimension=None):
-
+    def __init__(self, graph_reader=None, graph_writer=None, graph_standardizer=None, 
+                    graph_pair_preparer=None, triplematcher=None, alignmentsolver=None, 
+                    graph_aligner=None, graph_scorer=None, subgraph_extractor=None, 
+                    printer=None, score_dimension=None):
+        
         self.graph_reader = graph_reader
         if not self.graph_reader:
             from smatchpp import data_helpers
             self.graph_reader = data_helpers.PenmanReader()
+
+        self.graph_writer = graph_writer
+        if not self.graph_writer:
+            from smatchpp import data_helpers
+            self.graph_writer = data_helpers.PenmanWriter()
         
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:

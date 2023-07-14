@@ -55,7 +55,7 @@ class TripleMatcher:
         return self._triplematch(triple1, triple2)
 
 
-class GraphReader():
+class GraphReader:
 
     def string2graph(self, string):
         self._check_args(string)
@@ -70,6 +70,23 @@ class GraphReader():
     def _check_result(self, triples):
         if not isinstance(triples, list):
             raise ValueError("invalid output, must return list")    
+
+
+class GraphWriter:
+
+    def graph2string(self, triples):
+        self._check_args(triples)
+        string = self._graph2string(triples)
+        self._check_result(string)
+        return string
+
+    def _check_args(self, triples):
+        if not isinstance(triples, list):
+            raise ValueError("invalid input, must be a list")
+
+    def _check_result(self, string):
+        if not isinstance(string, str):
+            raise ValueError("invalid output, must return string")    
 
 
 class Solver:
