@@ -196,7 +196,7 @@ graph_standardizer = preprocess.AMRGraphStandardizer(semantic_standardization=Tr
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = graph_reader.string2graph(string_graph)
 g = measure.graph_standardizer.standardize(g)
-print(g) [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (c, arg1, c2), (c2, instance, computer)]
+print(g) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (c, arg1, c2), (c2, instance, computer)]
 ```
 
 ### Example III: Smatch++ matching same as default but with ILP
