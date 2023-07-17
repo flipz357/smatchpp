@@ -31,8 +31,9 @@ class DummySolver(interfaces.Solver):
 
     def __init__(self):
         return None
-
-    def _solve(self, unarymatch_dict, binarymatch_dict, V):
+    
+    @staticmethod
+    def _solve(unarymatch_dict, binarymatch_dict, V):
 
         mat = np.zeros(V)
         for i in range(mat.shape[0]):
@@ -52,8 +53,9 @@ class HillClimber(interfaces.Solver):
     def __init__(self, rand_inits=4):
         self.rand_inits = rand_inits
         return None
- 
-    def _score(self, alignmat, unarymatch_dict, binarymatch_dict):
+    
+    @staticmethod
+    def _score(alignmat, unarymatch_dict, binarymatch_dict):
         """Score an alignment candidate
 
             Args:
@@ -83,7 +85,8 @@ class HillClimber(interfaces.Solver):
                 sc += binarymatch_dict[(i, j)][(k, l)]
         return sc
     
-    def _gain_of_switch(self, amaxs, unarymatch_dict, binarymatch_dict, i, j, k, l):
+    @staticmethod 
+    def _gain_of_switch(amaxs, unarymatch_dict, binarymatch_dict, i, j, k, l):
         """Compute gain of a switch candidate
 
             Args:

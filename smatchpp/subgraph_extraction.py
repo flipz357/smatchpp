@@ -33,7 +33,6 @@ def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
     vc = util.get_var_concept_dict(triples)
     news = {}
     for name in amr_aspects:
-        mapto = None
         map_to = amr_aspects[name].get("map_to")
         if not map_to:
             continue

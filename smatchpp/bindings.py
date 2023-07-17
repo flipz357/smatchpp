@@ -115,7 +115,7 @@ class Smatchpp():
         match_dict = {}
         seconds = time.time() 
         for i, a in enumerate(amrs):
-            match, tmpstatus, alx = self.process_pair(a, amrs2[i])
+            match, tmpstatus, _ = self.process_pair(a, amrs2[i])
             status.append(tmpstatus)
             util.append_dict(match_dict, match)
             if (i + 1) % 100 == 0:

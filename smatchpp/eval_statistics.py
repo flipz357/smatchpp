@@ -43,8 +43,9 @@ class ResultPrinter:
         self.do_bootstrap = do_bootstrap
         self.output_format = output_format
         return None
-
-    def get_fpr(self, match_data_reduced):
+    
+    @staticmethod
+    def get_fpr(match_data_reduced):
         return np.array([f1_score(match_data_reduced), precision(match_data_reduced), recall(match_data_reduced)])
 
     def _aggr_wrapper(self, match_data, axis=0):
@@ -104,8 +105,9 @@ class ResultPrinter:
         if self.score_type == "pairwise":
             return json.dumps(dic)
         return json.dumps(dic, indent=4)
-
-    def _get_partial_result_dict(self, fpr, low, high, multiplier=100, rounder=2):
+    
+    @staticmethod
+    def _get_partial_result_dict(fpr, low, high, multiplier=100, rounder=2):
         fpr *= multiplier
         fpr = np.round(fpr, rounder)
         if low is not None:
@@ -123,8 +125,9 @@ class ResultPrinter:
         dic["Precision"] = {"result": fpr[1], "ci": (low[1], high[1])}
         dic["Recall"] = {"result": fpr[2], "ci": (low[2], high[2])}
         return dic
-
-    def _nice_format2(self, dic):
+    
+    @staticmethod
+    def _nice_format2(dic):
         strings = []
         dic["===> MAIN (\"Smatch\") <==="] = dic.pop("main")
         for score_dim in dic:

@@ -123,8 +123,9 @@ class PenmanReader(interfaces.GraphReader):
 
         logging.debug("3. result after triple extract: {}".format(triples))
         return triples
-
-    def _collect_string(self, tokens, start, stringsign="\""):
+    
+    @staticmethod
+    def _collect_string(tokens, start, stringsign="\""):
         
         attr = tokens[start]
         if attr[-1] == stringsign and len(attr) > 1:
@@ -143,8 +144,9 @@ class PenmanReader(interfaces.GraphReader):
 
 
 class TSVReader(interfaces.GraphReader):
-
-    def _string2graph(self, string):
+    
+    @staticmethod
+    def _string2graph(string):
 
         triples = string.split("\n")
         triples = [tuple(triple.split()) for triple in triples]
@@ -179,7 +181,6 @@ class PenmanWriter(interfaces.GraphWriter):
             root = root[0]
         elif root[2] in v2c:
             root = root[2]
-        newtriples = []
         if self.hide_root:
             triples = [t for t in triples if t[1] != ":root"]
         v2c = util.get_var_concept_dict(triples)
@@ -187,8 +188,9 @@ class PenmanWriter(interfaces.GraphWriter):
         # build string via recursion
         string = "(" + root + " / " + v2c.pop(root) + self._gather(triples, root, v2c, printed_triples=set()) + ")"
         return string
-        
-    def _rel_sort(self, triples):
+    
+    @staticmethod
+    def _rel_sort(triples):
         triples = [t for t in triples if t[1] != ":instance"]
         triples = list(sorted(triples, key=lambda t:t[1]))
         return triples
@@ -215,7 +217,6 @@ class PenmanWriter(interfaces.GraphWriter):
             
             printed_triples.add(triple)
             
-            tmpsrc = triple[0]
             tmprel = triple[1] 
             tmptarget = triple[2]
             
@@ -249,7 +250,6 @@ class PenmanWriter(interfaces.GraphWriter):
             printed_triples.add(triple)
 
             # let's try an inversion
-            tmpsrc = triple[2]
             tmprel = triple[1]
             if "-of" in tmprel:
                 tmprel = tmprel.replace("-of","")
@@ -267,29 +267,33 @@ class PenmanWriter(interfaces.GraphWriter):
                 tmpstring += " " + tmprel + " " + tmptarget + self._gather(triples, tmptarget, v2c, printed_triples)
         
         return tmpstring 
-
-    def _get_childs(self, triples, node):
+    
+    @staticmethod
+    def _get_childs(triples, node):
         childs = []
         for tr in triples:
             if tr[0] == node:
                 childs.append(tr)
         return childs
     
-    def _get_possible_childs(self, triples, node):
+    @staticmethod
+    def _get_possible_childs(triples, node):
         childs = []
         for tr in triples:
             if tr[2] == node:
                 childs.append(tr)
         return childs
 
-    def _n_incoming(self, triples, node):
+    @staticmethod
+    def _n_incoming(triples, node):
         n = 0
         for tr in triples:
             if tr[2] == node:
                 n += 1
         return n
     
-    def _n_outgoing(self, triples, node):
+    @staticmethod
+    def _n_outgoing(triples, node):
         n = 0
         for tr in triples:
             if tr[0] == node:

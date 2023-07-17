@@ -307,7 +307,8 @@ class AMRGraphStandardizer(interfaces.GraphStandardizer):
         
         return None
     
-    def _norm_logical_ops(self, triples):
+    @staticmethod
+    def _norm_logical_ops(triples):
         """Norm logical operators
            
            E.g. (x, :instance, and), (x, :op1, y), (x, :op2, z)
@@ -410,8 +411,9 @@ class AMRGraphPairPreparer(interfaces.GraphPairPreparer):
         #triples1 = list(sorted(triples1))
         #triples2 = list(sorted(triples2))
         return triples1, triples2, var1, var2
-
-    def _transform_with_dict(self, triples, single_ref, var_concept):
+    
+    @staticmethod
+    def _transform_with_dict(triples, single_ref, var_concept):
         delis = []
         for i, tr in enumerate(triples):
             src = tr[0]

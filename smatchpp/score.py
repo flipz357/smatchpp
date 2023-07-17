@@ -9,15 +9,17 @@ logger = logging.getLogger("__main__")
                  
 
 class IDTripleMatcher(interfaces.TripleMatcher):
-
-    def _triplematch(self, t1, t2): 
+    
+    @staticmethod
+    def _triplematch(t1, t2): 
         string1 = str(t1)
         string2 = str(t2)
         return int(string1 == string2)
 
 class ConceptFocusMatcher(interfaces.TripleMatcher): 
     
-    def _triplematch(self, t1, t2): 
+    @staticmethod
+    def _triplematch(t1, t2): 
         string1 = str(t1)
         string2 = str(t2)
         sc = int(string1 == string2)
@@ -69,7 +71,8 @@ class AMRScorer(interfaces.Scorer):
         self.sg_extractor = SubGraphExtractor()
         return None
     
-    def _safe_get_align(self, alignmat, src):
+    @staticmethod
+    def _safe_get_align(alignmat, src):
         target = alignmat[src]
         return target
 

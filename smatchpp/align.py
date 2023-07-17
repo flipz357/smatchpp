@@ -67,8 +67,9 @@ class GraphAligner:
         unary = self._make_unary_match_dict(triples1, triples2, var1, var2, var_index)
         binary = self._make_binary_match_dict(triples1, triples2, var1, var2, var_index)
         return unary, binary
-
-    def _get_var_map(self, alignment, var_index):
+    
+    @staticmethod
+    def _get_var_map(alignment, var_index):
         index_var_1 = {i:v for v, i in var_index.items() if "aa_" in v} 
         index_var_2 = {i:v for v, i in var_index.items() if "bb_" in v} 
         mapping = []
@@ -80,7 +81,8 @@ class GraphAligner:
         
         return mapping
     
-    def _interpretable_mapping(self, varmapping, triples1, triples2):
+    @staticmethod
+    def _interpretable_mapping(varmapping, triples1, triples2):
         
         var_concept_map1 = get_var_concept_dict(triples1)
         var_concept_map2 = get_var_concept_dict(triples2)
