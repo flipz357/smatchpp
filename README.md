@@ -2,7 +2,7 @@
 
 The package targets standardized evaluation of graph parsers with Smatch (structural matching of graphs). While it is oriented at standardized (A)MR evaluation it also allows processing of other kinds of graph structures and operations such as sub-graph extraction or graph compression for faster metric computation. A short overview:
 
-- Standardized graph reading  
+- Graph reading, graph writing, different graph standardization options  
 - Different alignment solvers including optimal ILP alignment
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
