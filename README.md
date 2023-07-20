@@ -246,6 +246,7 @@ s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
 g = graph_standardizer.standardize(g)
 string = graph_writer.graph2string(g)
+print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
 
 ## Citation
