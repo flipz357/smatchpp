@@ -176,3 +176,37 @@ def alignmat_compressed(alignmat):
     alignmatargmax[alignmat.sum(axis=1) == 0] = -1
     alignmat = alignmatargmax
     return alignmat
+
+
+def _get_childs(triples, node):
+    childs = []
+    for tr in triples:
+        if tr[0] == node:
+            childs.append(tr)
+    return childs
+
+
+def _get_possible_childs(triples, node):
+    childs = []
+    for tr in triples:
+        if tr[2] == node:
+            childs.append(tr)
+    return childs
+
+
+def _n_incoming(triples, node):
+    n = 0
+    for tr in triples:
+        if tr[2] == node:
+            n += 1
+    return n
+
+
+def _n_outgoing(triples, node):
+    n = 0
+    for tr in triples:
+        if tr[0] == node:
+            n += 1
+    return n
+
+

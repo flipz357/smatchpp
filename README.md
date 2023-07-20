@@ -186,16 +186,16 @@ print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instan
 ```
 
 Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`. 
-Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer:
+Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer (here without subgraph extraction):
 
-```
+```python
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
 graph_standardizer = preprocess.AMRGraphStandardizer(semantic_standardization=True)
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = graph_reader.string2graph(string_graph)
-g = measure.graph_standardizer.standardize(g)
+g = graph_standardizer.standardize(g)
 print(g) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (c, arg1, c2), (c2, instance, computer)]
 ```
 

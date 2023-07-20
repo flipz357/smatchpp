@@ -198,11 +198,11 @@ class PenmanWriter(interfaces.GraphWriter):
     def _gather(self, triples, node, v2c, printed_triples):
         
         # get outgoing nodes and relations
-        childs = self._get_childs(triples, node)
+        childs = util._get_childs(triples, node)
         childs = self._rel_sort(childs)
 
         #get incoming nodes and relations (that can be inverted with -of) 
-        possible_childs = self._get_possible_childs(triples, node)
+        possible_childs = util._get_possible_childs(triples, node)
         possible_childs = self._rel_sort(possible_childs)
         
         # temporary string
@@ -245,7 +245,7 @@ class PenmanWriter(interfaces.GraphWriter):
                 continue
 
             # maybe it's a leaf then it makes no sense to invert
-            if self._n_outgoing(triples, triple[2]) == 0:
+            if util._n_outgoing(triples, triple[2]) == 0:
                 continue
             printed_triples.add(triple)
 
@@ -267,39 +267,3 @@ class PenmanWriter(interfaces.GraphWriter):
                 tmpstring += " " + tmprel + " " + tmptarget + self._gather(triples, tmptarget, v2c, printed_triples)
         
         return tmpstring 
-    
-    @staticmethod
-    def _get_childs(triples, node):
-        childs = []
-        for tr in triples:
-            if tr[0] == node:
-                childs.append(tr)
-        return childs
-    
-    @staticmethod
-    def _get_possible_childs(triples, node):
-        childs = []
-        for tr in triples:
-            if tr[2] == node:
-                childs.append(tr)
-        return childs
-
-    @staticmethod
-    def _n_incoming(triples, node):
-        n = 0
-        for tr in triples:
-            if tr[2] == node:
-                n += 1
-        return n
-    
-    @staticmethod
-    def _n_outgoing(triples, node):
-        n = 0
-        for tr in triples:
-            if tr[0] == node:
-                n += 1
-        return n
-
-
-
-

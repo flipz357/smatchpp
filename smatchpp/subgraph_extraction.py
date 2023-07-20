@@ -50,6 +50,18 @@ def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
             out.append(triples[i])
     return out
 
+def get_preds(triples, node):
+    triples = [t for t in triples if t[1] != ":instance"]
+    preds = []
+    for tr in triples:
+        if node != tr[2]:
+            continue
+        inode = tr[0]
+        inc = util._n_incoming(triples, inode)
+        outg = util._n_outgoing(triples, inode)
+        if inc == 0 and outg == 1:
+            preds.append(tr)
+    return preds
     
 def subgraph_reentrancies(triples):
     out = []
@@ -82,7 +94,7 @@ def get_additional_instances(triples, triples_all):
 class SubGraphExtractor():
 
     def __init__(self, reify_rules=None, add_instance=True, amr_aspects=None, 
-        inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True):
+        inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True, add_preds=True):
         
         if not reify_rules:
             reify_rules = util.read_reify_table()
@@ -103,6 +115,7 @@ class SubGraphExtractor():
         self.inverted_frame_table = inverted_frame_table
         self.concept_groups = concept_groups
         self.map_core_to_explicit = map_core_to_explicit
+        self.add_preds = add_preds
 
 
     def all_subgraphs_by_name(self, triples):
@@ -118,20 +131,21 @@ class SubGraphExtractor():
         
         if self.map_core_to_explicit:
             tmptriples = semantically_standardize_graph(tmptriples, self.inverted_frame_table, self.amr_aspects)
-            #name_subgraph["semantically standardized graph"] = tmptriples
-        
+            name_subgraph["main (semantically standardized)"] = tmptriples
         for name, subgraph in self._iter_name_subgraph(tmptriples):
             name_subgraph[name] = subgraph
         
         # more complex aspects
         name_subgraph["REENTRANCIES"] = subgraph_reentrancies(tmptriples)
- 
+        
+        exclude = ["main", "main without wiki", "wiki", "main (semantically standardized)"]
         for name in name_subgraph:
- 
+            if name in exclude:
+                continue
             sg = name_subgraph[name]
             sg = self.clean_extend_subgraph(sg, tmptriples, name)
             name_subgraph[name] = sg
-        assert len(triples) == len(name_subgraph["main"])  
+         
         return name_subgraph
 
     def _iter_name_subgraph(self, triples):
@@ -166,17 +180,29 @@ class SubGraphExtractor():
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
         
         sgtriples = self._maybe_add_subtree(sgtriples, triples_all, name)
+        sgtriples = self._maybe_add_preds(sgtriples, triples_all)
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
         sgtriples = list(set(sgtriples))
 
         return sgtriples
 
+    def _maybe_add_preds(self, triples, triples_all):
+        if not self.add_preds:
+            return triples
+        out = []
+        for tr in triples:
+            out += get_preds(triples_all, tr[0]) 
+            out += get_preds(triples_all, tr[2])
+        out = triples + out
+        return out
+
      
     def _maybe_add_instance(self, triples, triples_all):
+        if not self.add_instance:
+            return triples
         out = []
-        if self.add_instance:
-            ai = get_additional_instances(triples, triples_all)
-            out = triples + ai
+        ai = get_additional_instances(triples, triples_all)
+        out = triples + ai
         return out
     
 
