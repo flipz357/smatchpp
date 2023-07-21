@@ -1,6 +1,6 @@
 # SMATCH++
 
-The package focuses on handy processing of AMR graphs with a special focus on standardized evaluation of AMR graph parsers with Smatch (structural matching of graphs). A short overview of some features:
+The package allows handy processing of AMR graphs with a special focus on standardized evaluation of AMR graph parsers with Smatch (structural matching of graphs). A short overview of some features:
 
 - Simple AMR reading, AMR writing, different syntactic and semantic AMR standardization options
 - Alignment solvers including optimal ILP alignment, and optional graph compression
