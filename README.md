@@ -1,13 +1,13 @@
 # SMATCH++
 
-The package targets standardized evaluation of graph parsers with Smatch (structural matching of graphs). While it is oriented at standardized (A)MR evaluation it also allows processing of other kinds of graph structures and operations such as sub-graph extraction or graph compression for faster metric computation. A short overview:
+The package targets standardized evaluation of AMR graph parsers with Smatch (structural matching of graphs) but also allows processing of other kinds of graph types and graph operations such graph reading, graph writing, sub-graph extraction, and graph compression for faster metric computation. A short overview:
 
-- Graph reading, graph writing, different graph standardization options  
+- Simple AMR reading, AMR writing, different syntactic and semantic AMR standardization options
 - Different alignment solvers including optimal ILP alignment
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
 
-Jump directly to [easy and standardized parser evaluation](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++.
+Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++.
 
 ## Requirements
 
@@ -186,7 +186,7 @@ print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instan
 ```
 
 Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`. 
-Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer (here without subgraph extraction):
+Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer (here without subgraph extraction), which explicates core-roles, if possible:
 
 ```python
 from smatchpp import data_helpers, preprocess
@@ -196,7 +196,7 @@ graph_standardizer = preprocess.AMRGraphStandardizer(semantic_standardization=Tr
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = graph_reader.string2graph(string_graph)
 g = graph_standardizer.standardize(g)
-print(g) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m), (c, arg1, c2), (c2, instance, computer)]
+print(g) # [('c', ':instrument', 'm'), ('c', ':instance', 'control-01'), ('c1', ':instance', 'computer'), ('m', ':instance', 'mouse'), ('c', ':arg1', 'c1'), ('c', ':root', 'control-01')]
 ```
 
 ### Example III: Smatch++ matching same as default but with ILP
