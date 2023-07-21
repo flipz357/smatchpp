@@ -21,9 +21,9 @@ numpy (tested: 1.20.1)
 
 The packages can all be installed with `pip ...`
 
-## Example configurations
+## Example configurations for evaluation
 
-### Recommended for average case: ILP alignment, dereification, corpus metrics and confidence intervals<a id="basic-eval"></a>
+### Best practice: ILP alignment, dereification, corpus metrics and confidence intervals<a id="basic-eval"></a>
 
 - Efficiency: + 
 - Optimality: +++
