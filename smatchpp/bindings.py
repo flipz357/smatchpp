@@ -126,7 +126,7 @@ class Smatchpp():
     
     def score_corpus(self, amrs, amrs2):
         
-        match_dict, status = self.process_corpus(self, amrs, amrs2)
+        match_dict, status = self.process_corpus(amrs, amrs2)
         
         final_result = None
 
