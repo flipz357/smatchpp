@@ -148,23 +148,32 @@ if __name__ == "__main__":
                         subgraph_extractor=subgraph_extractor)
 
     if args.score_type == "micromacro":
+        
         match_dict, status = SMATCHPP.process_corpus(amrs, amrs2)
-        print("-------------------------------")
-        print("-------------------------------")
-        print("---------Micro scores----------")
-        print("-------------------------------")
-        print("-------------------------------")
+        
+        #get micro scores
         printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=args.bootstrap, output_format=args.output_format)
-        final_result_dict = printer.get_final_result(match_dict)
-        printer.print_all(final_result_dict)
-        print("\n\n-------------------------------")
-        print("-------------------------------")
-        print("---------Macro scores----------")
-        print("-------------------------------")
-        print("-------------------------------")
+        final_result_dict_micro = printer.get_final_result(match_dict)
+        
+        #get macro scores
         printer = eval_statistics.ResultPrinter(score_type="macro", do_bootstrap=args.bootstrap, output_format=args.output_format)
-        final_result_dict = printer.get_final_result(match_dict)
-        printer.print_all(final_result_dict)
+        final_result_dict_macro = printer.get_final_result(match_dict)
+        
+        if args.output_format == "json":
+            printer.print_all({"micro scores": final_result_dict_micro, "macro scores": final_result_dict_macro})
+        else:
+            print("-------------------------------")
+            print("-------------------------------")
+            print("---------Micro scores----------")
+            print("-------------------------------")
+            print("-------------------------------")
+            printer.print_all(final_result_dict_micro)
+            print("-------------------------------")
+            print("-------------------------------")
+            print("---------Macro scores----------")
+            print("-------------------------------")
+            print("-------------------------------")
+            printer.print_all(final_result_dict_macro)
 
     elif args.score_type == "pairwise":
         final_result_list, status = SMATCHPP.score_corpus(amrs, amrs2)
