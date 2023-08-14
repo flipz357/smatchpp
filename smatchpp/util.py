@@ -5,6 +5,14 @@ from collections import defaultdict
 
 logger = logging.getLogger("__main__")
 
+def remove_quotes_from_triple(triple):
+
+    f = lambda x: x.replace("\"", "").replace("'", "")
+
+    triple = (f(triple[0]), f(triple[1]), f(triple[2]))
+
+    return triple
+
 
 def read_reify_table(p="/resource/reify_table.txt", lower=False):
     """load reification rules"""
@@ -12,7 +20,7 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
     path = os.path.dirname(__file__)
 
     with open(path + p, "r") as f:
-        lines = [l for l in f.read().split("\n") if l]
+        lines = [l for l in f.read().split("\n") if l if not l.startswith("#")]
 
     rel_rule = {}
     rel_rule_inverse = {}
@@ -23,9 +31,13 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
         spl = line.split("|")
         spl = [x.strip() for x in spl]
 
-        rel_rule[spl[0]] = [spl[1], spl[2], spl[3]]
-        rel_rule_inverse[spl[1]] = [spl[0], spl[2], spl[3]]
-
+        for elm in spl[0].split(","):
+            elm = elm.strip()
+            for elm2 in spl[1].split(","):
+                elm2 = elm2.strip()
+                rel_rule[elm] = [elm2, spl[2], spl[3]]
+                rel_rule_inverse[elm2] = [elm, spl[2], spl[3]]
+    
     return rel_rule, rel_rule_inverse
 
 def read_amr_aspects(p="/resource/amr_aspects.json"):

@@ -29,6 +29,7 @@ def unlabel_nodes(triples):
             out.append(t)
     return out
 
+"""
 def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
     vc = util.get_var_concept_dict(triples)
     news = {}
@@ -49,6 +50,7 @@ def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
         else:
             out.append(triples[i])
     return out
+"""
 
 def get_preds(triples, node):
     triples = [t for t in triples if t[1] != ":instance"]
@@ -93,30 +95,18 @@ def get_additional_instances(triples, triples_all):
 
 class SubGraphExtractor():
 
-    def __init__(self, reify_rules=None, add_instance=True, amr_aspects=None, 
-        inverted_frame_table=None, concept_groups=None, map_core_to_explicit=True, add_preds=True):
-        
-        if not reify_rules:
-            reify_rules = util.read_reify_table()
-        
-        if not amr_aspects:
-            amr_aspects = util.read_amr_aspects()
-            frame_table = util.read_frame_table()
-        
-        if not inverted_frame_table:
-            inverted_frame_table = util.invert_frame_table(frame_table, amr_aspects)
-        
-        if not concept_groups:
-            concept_groups = util.read_concept_groups()
-        
-        self.reify_rules = reify_rules
+    def __init__(self, add_instance=True, semantic_standardization=True, add_preds=True):
+         
+         
         self.add_instance = add_instance
-        self.amr_aspects = amr_aspects
-        self.inverted_frame_table = inverted_frame_table
-        self.concept_groups = concept_groups
-        self.map_core_to_explicit = map_core_to_explicit
+        self.semantic_standardization = semantic_standardization
+        if self.semantic_standardization:
+            from smatchpp.preprocess import SemanticAMRStandardizer
+        self.semantic_standardizer = SemanticAMRStandardizer()
         self.add_preds = add_preds
-
+        self.reify_rules = util.read_reify_table()
+        self.concept_groups = util.read_concept_groups()
+        self.amr_aspects = util.read_amr_aspects()
 
     def all_subgraphs_by_name(self, triples):
         name_subgraph = {}
@@ -129,8 +119,8 @@ class SubGraphExtractor():
         # remove wiki from all subgraphs that will be extracted
         tmptriples = name_subgraph["main without wiki"]
         
-        if self.map_core_to_explicit:
-            tmptriples = semantically_standardize_graph(tmptriples, self.inverted_frame_table, self.amr_aspects)
+        if self.semantic_standardization:
+            tmptriples = self.semantic_standardizer.standardize(triples)
             name_subgraph["main (semantically standardized)"] = tmptriples
         for name, subgraph in self._iter_name_subgraph(tmptriples):
             name_subgraph[name] = subgraph
@@ -239,5 +229,3 @@ class SubGraphExtractor():
 
         out = list(set(out))
         return out
-
-

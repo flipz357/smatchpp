@@ -24,12 +24,12 @@ class Smatchpp():
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:
             from smatchpp import preprocess
-            self.graph_standardizer = preprocess.AMRGraphStandardizer()
+            self.graph_standardizer = preprocess.AMRStandardizer()
 
         self.graph_pair_preparer = graph_pair_preparer
         if not self.graph_pair_preparer:
             from smatchpp import preprocess
-            self.graph_pair_preparer = preprocess.AMRGraphPairPreparer()
+            self.graph_pair_preparer = preprocess.AMRPairPreparer()
         
         self.triplematcher = triplematcher
         if not self.triplematcher:

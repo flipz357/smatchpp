@@ -11,6 +11,11 @@ class GraphAligner:
     def __init__(self, triplematcher, solver):  
         self.triplematcher = triplematcher
         self.solver = solver
+    
+    def _compute_match_dicts(self, triples1, triples2, var1, var2, var_index):
+        unary = self._make_unary_match_dict(triples1, triples2, var1, var2, var_index)
+        binary = self._make_binary_match_dict(triples1, triples2, var1, var2, var_index)
+        return unary, binary
      
     def _make_binary_match_dict(self, triples1, triples2, var1, var2, var_index): 
          
@@ -62,11 +67,6 @@ class GraphAligner:
                     continue
         
         return data
-    
-    def _compute_match_dicts(self, triples1, triples2, var1, var2, var_index):
-        unary = self._make_unary_match_dict(triples1, triples2, var1, var2, var_index)
-        binary = self._make_binary_match_dict(triples1, triples2, var1, var2, var_index)
-        return unary, binary
     
     @staticmethod
     def _get_var_map(alignment, var_index):

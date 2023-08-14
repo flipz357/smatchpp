@@ -192,7 +192,7 @@ Such a semantic standarization can also be performed on a full graph by loading 
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-graph_standardizer = preprocess.AMRGraphStandardizer(semantic_standardization=True)
+graph_standardizer = preprocess.AMRStandardizer(semantic_standardization=True)
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = graph_reader.string2graph(string_graph)
 g = graph_standardizer.standardize(g)
@@ -241,7 +241,7 @@ In this example, we read a basic graph from a string, apply reification standard
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-graph_standardizer = preprocess.AMRGraphStandardizer(edges="reify")
+graph_standardizer = preprocess.AMRStandardizer(edges="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
 g = graph_standardizer.standardize(g)
