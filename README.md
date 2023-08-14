@@ -68,7 +68,7 @@ x w rel
 python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver hillclimber \
-			-edges dereify \
+			-syntactic_standardization dereify \
 			-score_dimension main \
 			-score_type micromacro \
 			-log_level 20 \
@@ -87,7 +87,7 @@ python -m smatchpp      -a <amrs1> \
 python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
-			-edges dereify \
+			-syntactic_standardization dereify \
 			-score_dimension main \
 			-score_type micromacro \
 			-log_level 20 \
@@ -106,7 +106,7 @@ python -m smatchpp      -a <amrs1> \
 python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
-			-edges reify \
+			-syntactic_standardization reify \
 			-score_dimension main \
 			-score_type micromacro \
 			-log_level 20 \
@@ -124,7 +124,7 @@ python -m smatchpp      -a <amrs1> \
 python -m smatchpp      -a <amrs1> \
 			-b <amrs2> \
 			-solver ilp \
-			-edges dereify \
+			-syntactic_standardization dereify \
 			-score_dimension all-multialign \
 			-score_type micromacro \
 			-log_level 20 \
@@ -241,7 +241,7 @@ In this example, we read a basic graph from a string, apply reification standard
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-graph_standardizer = preprocess.AMRStandardizer(edges="reify")
+graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
 g = graph_standardizer.standardize(g)

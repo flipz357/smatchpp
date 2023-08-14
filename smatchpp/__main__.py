@@ -73,7 +73,7 @@ def build_arg_parser():
             , action='store_true'
             , help='enable for removing duplicate triples, which makes sense for most cases')
      
-    parser.add_argument('-edges'
+    parser.add_argument('-syntactic_standardization'
             , default=None
             , nargs='?'
             , choices=["reify", "dereify"]
@@ -115,7 +115,9 @@ if __name__ == "__main__":
     logger.info("loading processing modules ...")
     graph_reader = data_helpers.get_reader(args.input_format)
     logger.info("1. Penman reader loaded")
-    graph_standardizer = preprocess.AMRStandardizer(edges=args.edges, remove_duplicates=args.remove_duplicates)
+    graph_standardizer = preprocess.AMRStandardizer(
+                                        syntactic_standardization=args.syntactic_standardization, 
+                                        remove_duplicates=args.remove_duplicates)
     logger.info("2. triple standardizer loaded")
     graph_pair_preparer = preprocess.AMRPairPreparer(lossless_graph_compression=args.lossless_graph_compression)
     logger.info("3. graph pair processor loaded")
@@ -136,7 +138,9 @@ if __name__ == "__main__":
     logger.info("5. scorer loaded")
     logger.info("starting score calculations")
     
-    printer = eval_statistics.ResultPrinter(score_type=args.score_type, do_bootstrap=args.bootstrap, output_format=args.output_format)
+    printer = eval_statistics.ResultPrinter(score_type=args.score_type, 
+                                            do_bootstrap=args.bootstrap, 
+                                            output_format=args.output_format)
     seconds = time.time()
     
     from smatchpp.bindings import Smatchpp

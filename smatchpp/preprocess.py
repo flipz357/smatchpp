@@ -9,38 +9,35 @@ logger = logging.getLogger("__main__")
 class AMRStandardizer(interfaces.GraphStandardizer):
     """Class for graph standardization
 
-       This class allows standardization of amr graphs, i.a., 
-       node/edge reification, quote removal, etc.
+       This class preforms standardization of amr graphs
 
        Attributes:
-           reify_nodes (bool): reify nodes, e.g. (x, polarity, -) 
-                                -> (x, polarity, z), (z, instance, -)
-           reify_edges (bool): reify edges e.g, (x, location, y) 
-                                -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
-           dereify_edges (bool): inverse of edge reification
-           lower (bool): lower case, e.g. (x, op1, "Obama") -> (x, op1, "obama")
-           reomve_quotes (bool): remove quotes e.g. (x, op1, "Obama") -> (x, op1, Obama)
-           deinvert_edges (bool): deinvert edges, e.g. (x,a-of,y) -> (y, a, x)
-           norm_logical_ops (bool): dafault=False, if true, or and and will be treated as commutative, e.g.,
-                                    (x, instance, and), (x, op1, y), (x, op2, z)
-                                    -> (x, instance, and), (x, op, y), (x, op, z)
-           use_concept_as_root (bool): do smatch style, where root is not attached to
-                                        a var, but concept to var via root relation 
-                                        (xvar, :root, concept) if false, we use (xvar, :root, root_of_graph)
-           remove_duplicates (bool): remove duplicate triples, default=True since the have no clear meaning in AMR
-                                     and can lead to ambiguous evaluation with Smatch
-           semantic_standardization (bool): default=False, if True, we apply rules and heuristics to map 
-                                            core roles to explicit roles
+           reify_nodes (bool):                 reify nodes, e.g. (x, polarity, -) -> (x, polarity, z), (z, instance, -)
+           syntactic_standardization (string): None or \"dereify\", or \"reify\". e.g.,
+                                               None: do nothing
+                                               dereify: (z, instance, locatedAt), (z, a1, x), (z, a2, y) -> (x, location, y)
+                                               reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
+           lower (bool):                       lower case, e.g. (x, op1, "Obama") -> (x, op1, "obama")
+           reomve_quotes (bool):               remove quotes e.g. (x, op1, "Obama") -> (x, op1, Obama)
+           deinvert_edges (bool):              deinvert edges, e.g. (x,a-of,y) -> (y, a, x)
+           norm_logical_ops (bool):            if true, or and and are seen as commutative, e.g., 
+                                               (x, instance, and), (x, op1, y), (x, op2, z) -> (x, instance, and), (x, op, y), (x, op, z)
+           use_concept_as_root (bool):         smatch style root, where root is not attached to a ROOT, but to a concept 
+                                               e.g. if true: (xvar, :root, concept) if false: (xvar, :root, root_of_graph)
+           remove_duplicates (bool):           default=True since duplicates have no clear meaning in AMR
+                                               and can lead to ambiguous evaluation with Smatch
+           semantic_standardization (bool):    default=False, if True, we apply rules and heuristics to map 
+                                               core roles to explicit roles
     """
 
-    def __init__(self, reify_nodes=False, edges=None, lower=True, relabel_vars=True, 
+    def __init__(self, reify_nodes=False, syntactic_standardization=None, lower=True, relabel_vars=True, 
                  remove_quote=True, deinvert_edges=True, norm_logical_ops=False, 
                  use_concept_as_root=True, remove_duplicates=True, semantic_standardization=False):
 
         self.lower = lower
         self.relabel_vars = relabel_vars
         self.reify_nodes = reify_nodes
-        self.edges = edges
+        self.syntactic_standardization = syntactic_standardization
         self._maybe_prepare_syntactic_standardization()
         
         self.deinvert_edges = deinvert_edges
@@ -81,9 +78,9 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         if self.use_concept_as_root:
             self._concept_as_root(triples)
             logging.debug("8. make concept to root (smatch style): {}".format(triples)) 
-        if self.edges:
+        if self.syntactic_standardization:
             triples = self.syntactic_standardizer_edge.standardize(triples)
-            logging.debug("9. syntactic standardization via {}: {}".format(self.edges, triples)) 
+            logging.debug("9. syntactic standardization via {}: {}".format(self.syntactic_standardization, triples)) 
         if self.semantic_standardization:
             triples = self.semantic_standardizer.standardize(triples) 
             logging.debug("10. semantically standardized triples: {}".format(triples)) 
@@ -109,8 +106,10 @@ class AMRStandardizer(interfaces.GraphStandardizer):
 
             This parses the file into applicable rules
         """
-        if self.edges:
-            self.syntactic_standardizer_edge = SyntacticAMRStandardizerEdge(mode=self.edges, lower=self.lower)
+        if self.syntactic_standardization:
+            self.syntactic_standardizer_edge = SyntacticAMRStandardizerEdge(
+                                                        mode=self.syntactic_standardization, 
+                                                        lower=self.lower)
         if self.reify_nodes:
             self.syntactic_standardizer_node = SyntacticAMRStandardizerNode()
         return None
