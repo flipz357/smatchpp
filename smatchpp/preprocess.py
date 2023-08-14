@@ -498,15 +498,7 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
         return triples
 
     def _reify_graph(self, triples):
-        """ Reifiy a graph in place
-
-        Args:
-            triples: triples
-
-        Returns: 
-            None
-            
-        """
+        """ Reifiy a graph in place """
         new = []
         delis = []
         for i, tr in enumerate(triples):
@@ -522,7 +514,7 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
         return None
         
     def _maybe_get_dereification(self, variable, triples):
-        """Checks if variable allows a dereification
+        """Checks if variable allows a dereification 
 
         Args:
             variable: a variable
@@ -582,15 +574,7 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
 
     
     def _dereify_graph(self, triples):
-        """Dereify a graph in place
-
-        Args:
-            triples: triple
-
-        Returns:
-            None
-            
-        """
+        """Dereify a graph in place"""
         
         new = []
         delis = []
@@ -603,7 +587,7 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
             done.append(var)
 
             # check if a dereification can be applied 
-            # e.g.     x instance be-located-91;    x :arg1 y;    x :arg2 z
+            # e.g.     x instance be-located-91;    x :arg1 y;    x :arg2 z ----> y :location z
             rule = self._maybe_get_dereification(var, triples)
             if not rule:
                 continue
