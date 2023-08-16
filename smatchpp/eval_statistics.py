@@ -6,84 +6,173 @@ import math
 
 logger = logging.getLogger("__main__")
 
-def precision(matches, sumzerothenone=True):
-    if sumzerothenone and sum(matches) == 0.0:
+
+def precision(match_statistic, sumzerothenone=True):
+    """Calculates precision given match statistic
+
+    Args:
+        match_statistic: [a, b, c, d]
+                 a is number of match_statistic from 1st graph in 2nd
+                 b is number of match_statistic from 2nd graph in 1nd
+                 c is size of 1st graph
+                 d is size of 2nd graph
+                 Note that usually a == b
+                
+        sumzerothenone: if both graphs are of size 0 (can happen for fine-grained score)
+                        then we return a score of 1.00
+
+    Returns:
+        Precision score: a / c
+    """
+
+    if sumzerothenone and sum(match_statistic) == 0.0:
         return 1.0
-    num = matches[0]
-    denom = matches[2]
+    num = match_statistic[0]
+    denom = match_statistic[2]
     if denom < 0.00000001:
         return 0.0
     return num / denom
 
-def recall(matches, sumzerothenone=True):
-    if sumzerothenone and sum(matches) == 0.0:
+
+def recall(match_statistic, sumzerothenone=True):
+    """Calculates recall given match statistic
+
+    Args:
+        match_statistic: [a, b, c, d]
+                 a is number of match_statistic from 1st graph in 2nd
+                 b is number of match_statistic from 2nd graph in 1nd
+                 c is size of 1st graph
+                 d is size of 2nd graph
+                 Note that usually a == b
+                
+        sumzerothenone: if both graphs are of size 0 (can happen for fine-grained score)
+                        then we return a score of 1.00
+
+    Returns:
+        Recall score: b / d
+    """
+
+    if sumzerothenone and sum(match_statistic) == 0.0:
         return 1.0
-    num = matches[1]
-    denom = matches[3]
+    num = match_statistic[1]
+    denom = match_statistic[3]
     if denom < 0.00000001:
         return 0.0
     return num / denom
 
-def f1_score(matches, sumzerothenone=True):
-    if sumzerothenone and sum(matches) == 0.0:
+
+def f1_score(match_statistic, sumzerothenone=True):
+    """Calculates F1 given match statistic
+
+    Args:
+        match_statistic: [a, b, c, d]
+                 a is number of match_statistic from 1st graph in 2nd
+                 b is number of match_statistic from 2nd graph in 1nd
+                 c is size of 1st graph
+                 d is size of 2nd graph
+                 Note that usually a == b
+                
+        sumzerothenone: if both graphs are of size 0 (can happen for fine-grained score)
+                        then we return a score of 1.00
+
+    Returns:
+        F1 score: 2PR / (P+R)
+    """
+
+    if sumzerothenone and sum(match_statistic) == 0.0:
         return 1.0
-    p = precision(matches)
-    r = recall(matches)
+    p = precision(match_statistic)
+    r = recall(match_statistic)
     denom = p + r
     if denom < 0.00000001:
         return 0.0
-    num = 2 * (p * r)
+    num = 2 * p * r
     return num / denom
+    
+def get_fpr(match_statistic):
+    """Returns F1 score, precision and recall in a list"""
+    return np.array([f1_score(match_statistic), precision(match_statistic), recall(match_statistic)])
 
 
 class ResultPrinter:
+    """Class for printing matching statistics in a reasonable format like corpus precision, recall and F1
+    
+       Attributes:
+            score_type (string): either 'micro' or 'macro', or 'pairwise'
+            do_bootstrap (bool): calculate confidence intervals
+            output_format (string): either 'text' or 'json'
+    """
 
     def __init__(self, score_type="micro", do_bootstrap=False, output_format="text"):
+        
+        assert score_type in ["micro", "macro", None]
+        assert output_format in ["text", "json"] 
         self.score_type = score_type
         self.do_bootstrap = do_bootstrap
         self.output_format = output_format
         return None
     
-    @staticmethod
-    def get_fpr(match_data_reduced):
-        return np.array([f1_score(match_data_reduced), precision(match_data_reduced), recall(match_data_reduced)])
-
     def _aggr_wrapper(self, match_data, axis=0):
-        result = None
+        """ needed for vectorized bootstrapping 
 
-        if self.score_type == "micro":        
+            From scipy docs: Statistic for which the confidence interval is to be calculated. 
+                             statistic must be a callable that accepts len(data) samples as separate arguments 
+                             and returns the resulting statistic. If vectorized is set True, 
+                             statistic must also accept a keyword argument axis and 
+                             be vectorized to compute the statistic along the provided axis.
+        """
+        
+        result = None
+        
+        if self.score_type == "micro":   
+            # raw match statistics as input, we calculate micro scores
             dat = np.sum(match_data, axis=axis)
             p = dat[0]/dat[2]
             r = dat[1]/dat[3]
-            stat =  2 * (p * r) / (p + r)
-            result = np.array([stat, p, r])
+            f1 =  (2 * p * r) / (p + r)
+            stat = np.array([f1, p, r])
         
-        if self.score_type == "macro":        
-            result = np.mean(match_data, axis=axis)
+        if self.score_type == "macro":
+            # f1, precision, recall already calculated, we need only take the mean for macro scores
+            stat = np.mean(match_data, axis=axis)
 
-        return result
+        return stat
               
-    def print_all(self, final_result_dic):
+    def print_all(self, final_result_dic, jsonindent=4):
         if self.output_format == "json":
-            string = self._nice_format(final_result_dic)
+            string = self._nice_format(final_result_dic, jsonindent)
         if self.output_format == "text":
             string = self._nice_format2(final_result_dic)
         print(string)
     
     def get_final_result(self, result_dic):
+        # for each score dimension we have a list with pair-wise match statistics
         final_result_dic = {k:np.array(v) for k, v in result_dic.items()}
+
+        # we iterate over each score dimension
         for score_dim in result_dic:
             match_data = result_dic[score_dim]
-            if score_dim != "main" and self.score_type != "pairwise":
+
+            # when fine-grained sub-graphs are inspected it can happen 
+            # that two graphs in a pair are both empty, in that case
+            # we only need the pairs where either both or one graph is not an empty graph
+            if score_dim != "main":
                 match_data = [m for m in match_data if sum(m) > 0.0]
+                # except if result printer is called over a single pairs we do not need to do anything
+                if not (len(match_data) == 1 and sum(match_data) == 0):
+                    match_data = [m for m in match_data if sum(m) > 0.0]
+            
+            # if score type micro or pair
+            if self.score_type in ["micro", None]:
+                match_data_reduced = np.sum(match_data, axis=0)
+                res = get_fpr(match_data_reduced)
+
+            if self.score_type == "macro":
+                match_data = np.array([get_fpr(m) for m in match_data])
+                res = np.mean(match_data, axis=0)
+            
             low = None
             high = None
-            if self.score_type in ["micro", "pairwise"]:
-                match_data_reduced = np.sum(match_data, axis=0)
-                res = self.get_fpr(match_data_reduced)
-            if self.score_type == "macro":
-                match_data = np.array([self.get_fpr(m) for m in match_data])
-                res = np.mean(match_data, axis=0)
             if self.do_bootstrap:
                 try:
                     bs = bootstrap((match_data,), self._aggr_wrapper, vectorized=True, axis=0)
@@ -99,12 +188,13 @@ class ResultPrinter:
                     high = [100.0, 100.0]
 
             final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high)
+        
         return final_result_dic
 
-    def _nice_format(self, dic):
-        if self.score_type == "pairwise":
+    def _nice_format(self, dic, jsonindent):
+        if jsonindent == 0:
             return json.dumps(dic)
-        return json.dumps(dic, indent=4)
+        return json.dumps(dic, indent=jsonindent)
     
     @staticmethod
     def _get_partial_result_dict(fpr, low, high, multiplier=100, rounder=2):

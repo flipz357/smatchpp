@@ -138,9 +138,15 @@ if __name__ == "__main__":
     logger.info("5. scorer loaded")
     logger.info("starting score calculations")
     
-    printer = eval_statistics.ResultPrinter(score_type=args.score_type, 
+    if args.score_type in ["micro", "macro"]:
+        printer = eval_statistics.ResultPrinter(score_type=args.score_type, 
                                             do_bootstrap=args.bootstrap, 
                                             output_format=args.output_format)
+    else:
+        printer = eval_statistics.ResultPrinter(score_type=None, 
+                                            do_bootstrap=args.bootstrap, 
+                                            output_format=args.output_format)
+
     seconds = time.time()
     
     from smatchpp.bindings import Smatchpp
@@ -182,7 +188,7 @@ if __name__ == "__main__":
     elif args.score_type == "pairwise":
         final_result_list, status = SMATCHPP.score_corpus(amrs, amrs2)
         for singlepair in final_result_list:
-            SMATCHPP.printer.print_all(singlepair)
+            SMATCHPP.printer.print_all(singlepair, jsonindent=0)
     else:
         final_result_dic, status = SMATCHPP.score_corpus(amrs, amrs2)
         SMATCHPP.printer.print_all(final_result_dic)

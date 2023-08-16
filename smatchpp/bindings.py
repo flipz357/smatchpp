@@ -79,16 +79,25 @@ class Smatchpp():
             logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1, g2, v1, v2))
             alignment, varindex, status = self.graph_aligner.align(g1, g2, v1, v2)
             logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-            match = self.graph_scorer.main_scores(g1, g2, alignment, varindex)
-
-        elif self.score_dimension == "all-onealign":
+            match = self.graph_scorer.score(g1, g2, alignment, varindex)
+        
+        if self.score_dimension == "all-onealign":    
             g1, g2, v1, v2 = self.graph_pair_preparer.prepare_get_vars(g1, g2)
             logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1, g2, v1, v2))
             alignment, varindex, status = self.graph_aligner.align(g1, g2, v1, v2)
-            logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-            match = self.graph_scorer.subtask_scores(g1, g2, alignment, varindex)
-
-        elif self.score_dimension == "all-multialign":
+            match = {}
+            alignments = {}
+            
+            name_subgraph1 = self.subgraph_extractor.all_subgraphs_by_name(g1)
+            name_subgraph2 = self.subgraph_extractor.all_subgraphs_by_name(g2)
+            for name in name_subgraph1:
+                g1t = name_subgraph1[name]
+                g2t = name_subgraph2[name]
+                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)["main"]
+                alignments[name] = alignment
+            alignment = alignments
+        
+        if self.score_dimension == "all-multialign":
             name_subgraph1 = self.subgraph_extractor.all_subgraphs_by_name(g1)
             name_subgraph2 = self.subgraph_extractor.all_subgraphs_by_name(g2)
             match = {}
@@ -100,9 +109,10 @@ class Smatchpp():
                 logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1t, g2t, v1t, v2t))
                 alignment, varindex, status = self.graph_aligner.align(g1t, g2t, v1t, v2t)
                 logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-                match[name] = self.graph_scorer.main_scores(g1t, g2t, alignment, varindex)["main"]
+                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)["main"]
                 alignments[name] = alignment
             alignment = alignments
+        
         logger.debug("match computed: {}".format(match))
         status = (status[0], min(len(g1), len(g2), status[1]))
         
@@ -130,10 +140,10 @@ class Smatchpp():
         
         final_result = None
 
-        if self.printer.score_type == "pairwise":
+        if self.printer.score_type is None:
             final_result = []
             for i in range(len(amrs)):
-                match_dict_tmp = {k:[match_dict[k][i]] for k in match_dict.keys()}
+                match_dict_tmp = {k: [match_dict[k][i]] for k in match_dict.keys()}
                 result = self.printer.get_final_result(match_dict_tmp)
                 final_result.append(result)
         

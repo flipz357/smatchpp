@@ -27,6 +27,7 @@ class ConceptFocusMatcher(interfaces.TripleMatcher):
             sc *= 3.0
         return sc
 
+
 class EmbeddingConceptMatcher(interfaces.TripleMatcher): 
     
     def __init__(self):
@@ -67,7 +68,6 @@ class AMRScorer(interfaces.Scorer):
         if not triplematcher:
             triplematcher = IDTripleMatcher()
         self.triplematcher = triplematcher
-        self.reify_rules = util.read_reify_table()
         self.sg_extractor = SubGraphExtractor()
         return None
     
@@ -77,52 +77,71 @@ class AMRScorer(interfaces.Scorer):
         return target
 
     def _map_triples(self, triples, alignmat, varindex, identifier="bb_"):
-        
-        triples_aligned = deepcopy(triples)
+        """This function overwrites variables in one graph with variables 
+            from another graph given an alignment. The goal is then that the graphs
+            can be matched in a transparent and controlled way. 
+
+        Args:
+            triples (list with tuples): a graph
+            alignmat (an arry): an alignment mapping, e.g. [4, 0, 1] which would mean node
+                                0 of first graph aligns with node 4 of second graph
+                                node 1 of first graph aligns with node 0 of second graph, and so on
+            varindex (dict): a mapping from indeces to variable names
+            identifier (string): to identify the variables in varindex that we can map to
+
+        Returns:
+            None; it is in-place mapping of the graph
+        """
+         
         var_newvar = {}
         
-        for k, tr in enumerate(triples_aligned):
+        # build mapping from alignment index to variable names that we can map to
+        index_var = {v: k for k, v in varindex.items() if identifier in k}
+        
+        # iterate over triples
+        for k, tr in enumerate(triples):
             
             s, r, t = tr
-            news  = s
+            news = s
             newt = t
             
-            if s in varindex:
-                i = varindex[s]
-                j = self._safe_get_align(alignmat, i)
-                found = None
-                for v in varindex:
-                    if identifier in v and varindex[v] == j:
-                        found = v
-                if found:
-                    news = found
+            # look if the source is variable and maybe get its alignment index
+            i = varindex.get(s)
+            if i != None:
+                
+                # maybe get its partner from the alignmnet
+                j = alignmat[i]
+                maybe_s = index_var.get(j)
+                # if there is a partner, set the old variable name to the variable name of the partner
+                if maybe_s:
+                    news = maybe_s
             
-            if t in varindex:
-                i = varindex[t]
-                j = self._safe_get_align(alignmat, i)
-                found = None
-                for v in varindex:
-                    if identifier in v and varindex[v] == j:
-                        found = v
-                if found:
-                    newt = found
+            # same as above, but for the target of the triple
+            i = varindex.get(t)
+            if i != None:
+                j = alignmat[i]
+                maybe_t = index_var.get(j)
+                if maybe_t:
+                    newt = maybe_t
             
+            # set mapping of nodes
             var_newvar[s] = news
             var_newvar[t] = newt
         
-        for k, tr in enumerate(triples_aligned):
+        # map nodes
+        for k, tr in enumerate(triples):
             s, r, t = tr
             s = var_newvar[s]
             t = var_newvar[t]
-            triples_aligned[k] = (s, r, t)
+            triples[k] = (s, r, t)
 
-        return triples_aligned
+        return None
 
-    def _score(self, triples1, triples2, alignmat, varindex):
+    def _score_given_alignment(self, triples1, triples2, alignmat, varindex):
         
-        triples1_aligned = deepcopy(triples1)
-         
-        triples1_aligned = self._map_triples(triples1, alignmat, varindex)
+        triples1_aligned = list(triples1)
+        self._map_triples(triples1_aligned, alignmat, varindex)
+
         xlen = len(triples1_aligned)
         ylen = len(triples2)
         matchsum_x = 0.0
@@ -141,23 +160,11 @@ class AMRScorer(interfaces.Scorer):
         #note: in basic Smatch w/o duplicates we have IDTripleMatch matchsum_x = matchsum_y = len(set(triples1_aligned).intersection(triples2))
         return match
     
-    def main_scores(self, triples1, triples2, alignmat, varindex):
+    def _score(self, triples1, triples2, alignmat, varindex):
         
-        match = self._score(triples1, triples2, alignmat, varindex)
+        match = self._score_given_alignment(triples1, triples2, alignmat, varindex)
         return {"main": match}
-
-    def subtask_scores(self, triples1, triples2, alignmat, varindex):
-         
-        sub_graphs_1 = self.sg_extractor.all_subgraphs_by_name(triples1)
-        sub_graphs_2 = self.sg_extractor.all_subgraphs_by_name(triples2)
-
-        score_dict = {}
-        for name in sub_graphs_1:
-            score = self._score(sub_graphs_1[name], sub_graphs_2[name], alignmat, varindex)
-            score_dict[name] = score
-
-        return score_dict
-
+    
 
 
 

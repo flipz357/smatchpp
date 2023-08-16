@@ -35,10 +35,13 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
             elm = elm.strip()
             for elm2 in spl[1].split(","):
                 elm2 = elm2.strip()
-                rel_rule[elm] = [elm2, spl[2], spl[3]]
-                rel_rule_inverse[elm2] = [elm, spl[2], spl[3]]
+                if elm not in rel_rule:
+                    rel_rule[elm] = [elm2, spl[2], spl[3]]
+                if elm2 not in rel_rule_inverse:
+                    rel_rule_inverse[elm2] = [elm, spl[2], spl[3]]
     
     return rel_rule, rel_rule_inverse
+
 
 def read_amr_aspects(p="/resource/amr_aspects.json"):
     """load reification rules"""
@@ -50,6 +53,7 @@ def read_amr_aspects(p="/resource/amr_aspects.json"):
 
     return data
 
+
 def read_concept_groups(p="/resource/concept_groups.json"):
     """load reification rules"""
     
@@ -59,6 +63,7 @@ def read_concept_groups(p="/resource/concept_groups.json"):
         data = json.load(f)
 
     return data
+
 
 def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
     """load frame-argument rules"""
@@ -83,6 +88,7 @@ def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True
             frame_table[pred][":arg" + role_descr[0]] = " " + " ".join(role_descr[1].split()) + " "
     return frame_table
 
+
 def invert_frame_table(frame_table, aspects):
     aspects_pred_role = defaultdict(list)    
     for aspect in aspects:
@@ -92,6 +98,7 @@ def invert_frame_table(frame_table, aspects):
                 if any(string in frame_table[pred][role] for string in strings):
                     aspects_pred_role[aspect].append((pred, role))
     return aspects_pred_role
+
 
 def xor(a, b):
     if a and b:
@@ -108,6 +115,7 @@ def get_var_concept_dict(triples):
         if tr[1] == ":instance":
             vc[tr[0]] = tr[2]
     return vc
+
 
 def get_constant_set(triples):
     # this includes all leaves that are leaves and the root node, 
@@ -126,6 +134,7 @@ def get_constant_set(triples):
             constants.add(tgt)
     return constants.union(vc.values())
 
+
 def isroot(var, triples):
     """ check if triple is root """
     trs = [tr for tr in triples if tr[2] == var]
@@ -136,6 +145,7 @@ def isroot(var, triples):
             return True
     return False
 
+
 def add_dict(todic, fromdic):
     for key in fromdic:
         if key not in todic:
@@ -143,6 +153,7 @@ def add_dict(todic, fromdic):
         else:
             todic[key] += fromdic[key]
     return None
+
 
 def append_dict(todic, fromdic):
     for key in fromdic:
@@ -183,6 +194,7 @@ def score(alignmat, unarymatch_dict, binarymatch_dict):
             sc += binarymatch_dict[(i, j, k, l)]
     return sc
 
+
 def alignmat_compressed(alignmat):
     alignmatargmax = alignmat.argmax(axis=1)
     alignmatargmax[alignmat.sum(axis=1) == 0] = -1
@@ -220,5 +232,6 @@ def _n_outgoing(triples, node):
         if tr[0] == node:
             n += 1
     return n
+ 
 
 

@@ -33,6 +33,8 @@ class AMRStandardizer(interfaces.GraphStandardizer):
     def __init__(self, reify_nodes=False, syntactic_standardization=None, lower=True, relabel_vars=True, 
                  remove_quote=True, deinvert_edges=True, norm_logical_ops=False, 
                  use_concept_as_root=True, remove_duplicates=True, semantic_standardization=False):
+        
+        assert syntactic_standardization in [None, "dereify", "reify"] 
 
         self.lower = lower
         self.relabel_vars = relabel_vars

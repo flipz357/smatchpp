@@ -122,5 +122,5 @@ class Scorer:
         return score
 
     @staticmethod
-    def _check_args(unarymatch_dict, binarymatch_dict, V):
+    def _check_args(triples1, triples2, alignmat, varindex):
         return None
