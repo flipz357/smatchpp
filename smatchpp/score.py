@@ -1,9 +1,6 @@
-from copy import deepcopy
 import numpy as np
 import logging
-from smatchpp import util
 from smatchpp import interfaces
-from smatchpp.subgraph_extraction import SubGraphExtractor
 
 logger = logging.getLogger("__main__")
                  
@@ -68,7 +65,6 @@ class AMRScorer(interfaces.Scorer):
         if not triplematcher:
             triplematcher = IDTripleMatcher()
         self.triplematcher = triplematcher
-        self.sg_extractor = SubGraphExtractor()
         return None
     
     @staticmethod

@@ -122,7 +122,7 @@ class ResultPrinter:
                              be vectorized to compute the statistic along the provided axis.
         """
         
-        result = None
+        stat = None
         
         if self.score_type == "micro":   
             # raw match statistics as input, we calculate micro scores
@@ -190,8 +190,9 @@ class ResultPrinter:
             final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high)
         
         return final_result_dic
-
-    def _nice_format(self, dic, jsonindent):
+    
+    @staticmethod
+    def _nice_format(dic, jsonindent):
         if jsonindent == 0:
             return json.dumps(dic)
         return json.dumps(dic, indent=jsonindent)

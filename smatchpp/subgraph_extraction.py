@@ -29,28 +29,6 @@ def unlabel_nodes(triples):
             out.append(t)
     return out
 
-"""
-def semantically_standardize_graph(triples, inverted_frame_table, amr_aspects):
-    vc = util.get_var_concept_dict(triples)
-    news = {}
-    for name in amr_aspects:
-        map_to = amr_aspects[name].get("map_to")
-        if not map_to:
-            continue
-        associated_frame_rels = inverted_frame_table[name]
-        for (frame, rel) in associated_frame_rels:
-            for i in range(len(triples)):
-                s, r, t = triples[i]
-                if r == rel and (s == frame or vc.get(s) == frame):
-                    news[i] = (s, map_to, t)
-    out = []
-    for i in range(len(triples)):
-        if i in news:
-            out.append(news[i])
-        else:
-            out.append(triples[i])
-    return out
-"""
 
 def get_preds(triples, node):
     triples = [t for t in triples if t[1] != ":instance"]
@@ -65,6 +43,7 @@ def get_preds(triples, node):
             preds.append(tr)
     return preds
     
+
 def subgraph_reentrancies(triples):
     out = []
     inc_rels = defaultdict(int)
@@ -76,6 +55,7 @@ def subgraph_reentrancies(triples):
         if t in var_concept_dict and inc_rels[t] > 1:
             out.append((s, r, t))
     return out
+
 
 def get_additional_instances(triples, triples_all):
     additional_instance = []
@@ -92,6 +72,7 @@ def get_additional_instances(triples, triples_all):
             additional_instance.append(itriple)
 
     return additional_instance
+
 
 class SubGraphExtractor():
 
@@ -185,8 +166,7 @@ class SubGraphExtractor():
             out += get_preds(triples_all, tr[2])
         out = triples + out
         return out
-
-     
+ 
     def _maybe_add_instance(self, triples, triples_all):
         if not self.add_instance:
             return triples
@@ -195,14 +175,11 @@ class SubGraphExtractor():
         out = triples + ai
         return out
     
-
     def _maybe_add_subtree(self, triples, triples_all, name):
         
         out = list(triples)
-
         if name not in self.amr_aspects:
             return out
-
         subtree_context_depth = self.amr_aspects[name].get("subgraph_extraction_range")
         subtree_context_depth = int(subtree_context_depth)
         
