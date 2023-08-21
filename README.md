@@ -162,27 +162,82 @@ The main interface is a smatchpp.Smatchpp object. With this, most kinds of opera
 
 ### Example I: Smatch++ matching with some basic default
 
+This uses some basic default such as lower-casing and hill-climber.
+
 ```python
-import smatchpp
-measure = smatchpp.Smatchpp()
+from smatchpp import Smatchpp
+measure = Smatchpp()
 match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
-print(match) # [2, 2, 2, 2], 2 left->right, 2 in right->left, 2 length of left, 2 length of right
+print(match) # {'main': array([2., 2., 2., 2.])}, 2 left->right, 2 in right->left, 2 length of left, 2 length of right
 ```
 Note: Here it's two triples matching since there is an implicit root.
 
 For greater convienience, we can also directly get an F1 / Precision / Recall score:
 
 ```python
-import smatchpp
-measure = smatchpp.Smatchpp()
+from smatchpp import Smatchpp
+measure = Smatchpp()
 score = measure.score_pair("(t / test)", "(t / test)")
-print(score) # prints a json dict with convenient scores
+print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example II: Standardize and extract subgraphs
+### Example II: Smatch++ matching same as default but with ILP
+
+In this example, we use ILP for optimal alignment.
 
 ```python
-import smatchpp
+from smatchpp import Smatchpp, solvers
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp)
+match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
+print(match) # in this case same result as Example I
+```
+
+As in the first example, for convenience, we can also get directly an F1/Precision/Recall score.
+
+```python
+from smatchpp import Smatchpp, solvers
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp)
+score = measure.score_pair("(t / test)", "(t / test)")
+print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+```
+
+### Example III: Best-Practice matching for a pair of AMR graphs.
+
+Beyond basic defaults, we need an ILP solver for best alignment and dereification for graph standadization.
+
+```python
+from smatchpp import Smatchpp, solvers, preprocess
+graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="dereify")
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer)
+score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") # equivalent AMR graphs 
+print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+```
+
+Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that even de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
+
+### Example IV: Best practice for AMR corpus scoring
+
+According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals.
+
+```python
+from smatchpp import Smatchpp, solvers, preprocess, eval_statistics
+graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="dereify")
+printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=True, output_format="json")
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, printer=printer)
+corpus1 = ["(t / test)", "(d / duck)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
+corpus2 = ["(t / test)", "(a / ant)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
+score, optimization_status = measure.score_corpus(corpus1, corpus2)
+print(score) # {'main': {'F1': {'result': 50.0, 'ci': (42.5, 56.5)}, 'Precision': {'result': 50.0, 'ci': (42.5, 56.5)}, 'Recall': {'result': 50.0, 'ci': (42.5, 56.5)}}} 
+```
+
+### Example V: Standardize and extract subgraphs
+
+```python
+from smatchpp import Smatchpp
 measure = smatchpp.Smatchpp()
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = measure.graph_reader.string2graph(string_graph)
@@ -207,35 +262,13 @@ g = graph_standardizer.standardize(g)
 print(g) # [('c', ':instrument', 'm'), ('c', ':instance', 'control-01'), ('c1', ':instance', 'computer'), ('m', ':instance', 'mouse'), ('c', ':arg1', 'c1'), ('c', ':root', 'control-01')]
 ```
 
-### Example III: Smatch++ matching same as default but with ILP
-
-In this example, we use ILP for optimal alignment.
-
-```python
-import smatchpp, smatchpp.solvers
-ilp = smatchpp.solvers.ILP()
-measure = smatchpp.Smatchpp(alignmentsolver=ilp)
-match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
-print(match) # in this case same result as Example I
-```
-
-As in the first example, for convenience, we can also get directly an F1/Precision/Recall score
-
-```python
-import smatchpp, smatchpp.solvers
-ilp = smatchpp.solvers.ILP()
-measure = smatchpp.Smatchpp(alignmentsolver=ilp)
-score = measure.score_pair("(t / test)", "(t / test)")
-print(score) # prints a json dict with convenient scores
-```
-
-### Example IV: get an alignment
+### Example VI: get an alignment
 
 In this example, we retrieve an alignment between graph nodes.
 
 ```python
-import smatchpp
-measure = smatchpp.Smatchpp()
+from smatcppp import Smatchpp
+measure = Smatchpp()
 measure.graph_standardizer.relabel_vars = False
 s1 = "(x / test)"
 s2 = "(y / test)"
@@ -252,9 +285,10 @@ print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/b
 
 Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we showed the process from scratch).
 
-### Example V: Read, standardize and write graph
+### Example VII: Read, standardize and write graph
 
 In this example, we read a basic graph from a string, apply reification standardization, and write the reified graph to a string.
+
 ```python
 from smatchpp import data_helpers, preprocess
 graph_reader = data_helpers.PenmanReader()
@@ -266,6 +300,22 @@ g = graph_standardizer.standardize(g)
 string = graph_writer.graph2string(g)
 print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
+
+# Example VIII: Lossless pairwise graph compression
+
+Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
+
+```
+from smatchpp import preprocess
+pair_preparer_compressor = preprocess.AMRPairPreparer(lossless_graph_compression=True)
+g1 = [("c", ":instance", "cat"), ("c2", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d"), ("c2", ":otherrel", "d")]
+g2 = [("c", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d")]
+print(len(g1), len(g2)) #5, 3
+g1, g2, _, _ = pair_preparer_compressor.prepare_get_vars(g1, g2)
+print(len(g1), len(g2)) #4, 2
+```
+
+If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
 
 ## Citation
 

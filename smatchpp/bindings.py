@@ -79,8 +79,8 @@ class Smatchpp():
             logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1, g2, v1, v2))
             alignment, varindex, status = self.graph_aligner.align(g1, g2, v1, v2)
             logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-            match = self.graph_scorer.score(g1, g2, alignment, varindex)
-        
+            match = {"main": self.graph_scorer.score(g1, g2, alignment, varindex)}
+
         if self.score_dimension == "all-onealign":    
             g1, g2, v1, v2 = self.graph_pair_preparer.prepare_get_vars(g1, g2)
             logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1, g2, v1, v2))
@@ -93,7 +93,7 @@ class Smatchpp():
             for name in name_subgraph1:
                 g1t = name_subgraph1[name]
                 g2t = name_subgraph2[name]
-                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)["main"]
+                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)
                 alignments[name] = alignment
             alignment = alignments
         
@@ -109,7 +109,7 @@ class Smatchpp():
                 logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1t, g2t, v1t, v2t))
                 alignment, varindex, status = self.graph_aligner.align(g1t, g2t, v1t, v2t)
                 logger.debug("alignment computed: {}; varindex: {}".format(alignment, varindex))
-                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)["main"]
+                match[name] = self.graph_scorer.score(g1t, g2t, alignment, varindex)
                 alignments[name] = alignment
             alignment = alignments
         

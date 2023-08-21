@@ -159,7 +159,7 @@ class AMRScorer(interfaces.Scorer):
     def _score(self, triples1, triples2, alignmat, varindex):
         
         match = self._score_given_alignment(triples1, triples2, alignmat, varindex)
-        return {"main": match}
+        return match
     
 
 
