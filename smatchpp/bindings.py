@@ -139,7 +139,8 @@ class Smatchpp():
         match_dict, status = self.process_corpus(amrs, amrs2)
         
         final_result = None
-
+        
+        # pairwise statistic
         if self.printer.score_type is None:
             final_result = []
             for i in range(len(amrs)):
@@ -147,10 +148,20 @@ class Smatchpp():
                 result = self.printer.get_final_result(match_dict_tmp)
                 final_result.append(result)
         
-        if self.printer.score_type == "macro":
-            final_result = self.printer.get_final_result(match_dict)
-        
-        if self.printer.score_type == "micro":
-            final_result = self.printer.get_final_result(match_dict)
-        
+        # aggregate statistic (micro, macro...)
+        else:
+            final_result = self.printer.get_final_result(match_dict) 
         return final_result, status
+    
+
+    # for convenience
+    def score_pair(self, amr1, amr2):
+        score, status = self.score_corpus([amr1], [amr2])
+        # confidence intervals don't make sense for a single pair
+        for score_dim in score:
+            for score_type in score[score_dim]:
+                score[score_dim][score_type] = score[score_dim][score_type]["result"]
+        return score
+
+
+

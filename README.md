@@ -166,10 +166,18 @@ The main interface is a smatchpp.Smatchpp object. With this, most kinds of opera
 import smatchpp
 measure = smatchpp.Smatchpp()
 match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
-print(match) # [2, 2, 2, 2], 2 left->right, 2 in right->left, 2 length of left, 2 length of right 
+print(match) # [2, 2, 2, 2], 2 left->right, 2 in right->left, 2 length of left, 2 length of right
 ```
-
 Note: Here it's two triples matching since there is an implicit root.
+
+For greater convienience, we can also directly get an F1 / Precision / Recall score:
+
+```python
+import smatchpp
+measure = smatchpp.Smatchpp()
+score = measure.score_pair("(t / test)", "(t / test)")
+print(score) # prints a json dict with convenient scores
+```
 
 ### Example II: Standardize and extract subgraphs
 
@@ -211,6 +219,16 @@ match, optimization_status, alignment = measure.process_pair("(t / test)", "(t /
 print(match) # in this case same result as Example I
 ```
 
+As in the first example, for convenience, we can also get directly an F1/Precision/Recall score
+
+```python
+import smatchpp, smatchpp.solvers
+ilp = smatchpp.solvers.ILP()
+measure = smatchpp.Smatchpp(alignmentsolver=ilp)
+score = measure.score_pair("(t / test)", "(t / test)")
+print(score) # prints a json dict with convenient scores
+```
+
 ### Example IV: get an alignment
 
 In this example, we retrieve an alignment between graph nodes.
@@ -232,7 +250,7 @@ interpretable_mapping = measure.graph_aligner._interpretable_mapping(var_map, g1
 print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/bb indicates 1st/2nd graph
 ```
 
-Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we show the process from scratch).
+Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we showed the process from scratch).
 
 ### Example V: Read, standardize and write graph
 
