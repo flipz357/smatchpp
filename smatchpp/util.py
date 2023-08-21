@@ -28,6 +28,7 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
     for line in lines:
         if lower:
             line = line.lower()
+        line = line.replace("`", "").replace("'", "") 
         spl = line.split("|")
         spl = [x.strip() for x in spl]
 
