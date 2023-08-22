@@ -305,7 +305,7 @@ print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / 
 
 Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
 
-```
+```python
 from smatchpp import preprocess
 pair_preparer_compressor = preprocess.AMRPairPreparer(lossless_graph_compression=True)
 g1 = [("c", ":instance", "cat"), ("c2", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d"), ("c2", ":otherrel", "d")]
