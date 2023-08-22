@@ -267,7 +267,7 @@ print(g) # [('c', ':instrument', 'm'), ('c', ':instance', 'control-01'), ('c1', 
 In this example, we retrieve an alignment between graph nodes.
 
 ```python
-from smatcppp import Smatchpp
+from smatchpp import Smatchpp
 measure = Smatchpp()
 measure.graph_standardizer.relabel_vars = False
 s1 = "(x / test)"
