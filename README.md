@@ -61,7 +61,7 @@ x w rel
 ### Hill-climber alignment, dereification, corpus metrics and confidence intervals
 
 - Efficiency: ++ 
-- Optimality: +
+- Optimality: -
 - Graph standardization: ++
 
 ```
