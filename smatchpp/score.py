@@ -160,9 +160,3 @@ class AMRScorer(interfaces.Scorer):
         
         match = self._score_given_alignment(triples1, triples2, alignmat, varindex)
         return match
-    
-
-
-
-
-

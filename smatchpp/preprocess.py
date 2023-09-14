@@ -62,21 +62,21 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         if self.lower:
             triples = [(s.lower(), r.lower(), t.lower()) for (s, r, t) in triples]
             logging.debug("2. lower cased: {}".format(triples)) 
-        if self.relabel_vars:
-            self._relabel_vars(triples)
-            logging.debug("3. ensure no varname equal concept: {}".format(triples)) 
-        if self.reify_nodes:
-            triples = self.syntactic_standardizer_node.standardize(triples)
-            logging.debug("4. reify nodes: {}".format(triples)) 
-        if self.deinvert_edges:
-            self._deinvert_e(triples)
-            logging.debug("5. deinvert edges: {}".format(triples)) 
-        if self.norm_logical_ops:
-            self._norm_logical_ops(triples)
-            logging.debug("6. norm logical operators: {}".format(triples)) 
         if self.remove_quote:
             triples = [util.remove_quotes_from_triple(t) for t in triples]
-            logging.debug("7. remove quotes: {}".format(triples)) 
+            logging.debug("3. remove quotes: {}".format(triples)) 
+        if self.relabel_vars:
+            self._relabel_vars(triples)
+            logging.debug("4. ensure no varname equal concept: {}".format(triples)) 
+        if self.reify_nodes:
+            triples = self.syntactic_standardizer_node.standardize(triples)
+            logging.debug("5. reify nodes: {}".format(triples)) 
+        if self.deinvert_edges:
+            self._deinvert_e(triples)
+            logging.debug("6. deinvert edges: {}".format(triples)) 
+        if self.norm_logical_ops:
+            self._norm_logical_ops(triples)
+            logging.debug("7. norm logical operators: {}".format(triples)) 
         if self.use_concept_as_root:
             self._concept_as_root(triples)
             logging.debug("8. make concept to root (smatch style): {}".format(triples)) 

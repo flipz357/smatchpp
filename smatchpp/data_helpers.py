@@ -102,7 +102,13 @@ class PenmanReader(interfaces.GraphReader):
 
                 var = tokens[i]
                 concept = tokens[i+2]
-                
+                 
+                if concept[0] in ["\"", "\'"]:
+                    concept, newincr = self._collect_string(tokens, i+2, stringsign=concept[0])
+                    i = newincr + 1
+                else:
+                    i += 3
+
                 tmpsrc[nested_level] = var
                 
                 triple = (var, ":instance", concept) 
@@ -111,8 +117,6 @@ class PenmanReader(interfaces.GraphReader):
                 triple = (tmpsrc[nested_level-1], tmprel[nested_level-1], var) 
                 triples.append(triple)
 
-                i += 3
-
             else:
                 # variable token without instance
                 #-> get var, get incoming relation, append triple
@@ -120,7 +124,6 @@ class PenmanReader(interfaces.GraphReader):
                 triple = (tmpsrc[nested_level], tmprel[nested_level], tgt) 
                 triples.append(triple)
                 i += 1
-
         logging.debug("3. result after triple extract: {}".format(triples))
         return triples
     
@@ -135,11 +138,11 @@ class PenmanReader(interfaces.GraphReader):
             return attr, start
         
         for i, token in enumerate(tokens[start+1:]):
-            attr += token
+            attr += " " + token
             if token[-1] == stringsign:
                 newi = start + i + 1
                 return attr, newi
-        
+         
         return tokens[start], start
 
 
