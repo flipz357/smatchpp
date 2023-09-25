@@ -1,6 +1,6 @@
 # SMATCH++
 
-The package allows handy processing of semantic graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of AMR parsing via structural matching of graphs, but in principle the package allows straightforward extension to working also with kinds of graphs. A short overview of some features:
+The package allows handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of semantic AMR graphs via structural matching ('Smatch'), but in principle the package allows straightforward extension to working also with kinds of graphs. A short overview of some features:
 
 - Simple graph reading, graph writing, different syntactic and semantic standardization options tailored to AMR
 - Alignment solvers including optimal ILP alignment, and optional graph compression
