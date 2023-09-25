@@ -15,7 +15,7 @@ For the most basic version, there shouldn't be a need to install additional modu
 
 ```
 mip (tested: 1.13.0)
-scipy (tested: 1.7.3)
+scipy (tested: 1.10.1)
 numpy (tested: 1.20.1)
 ```
 
@@ -231,8 +231,10 @@ measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, p
 corpus1 = ["(t / test)", "(d / duck)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
 corpus2 = ["(t / test)", "(a / ant)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
 score, optimization_status = measure.score_corpus(corpus1, corpus2)
-print(score) # {'main': {'F1': {'result': 50.0, 'ci': (42.5, 56.5)}, 'Precision': {'result': 50.0, 'ci': (42.5, 56.5)}, 'Recall': {'result': 50.0, 'ci': (42.5, 56.5)}}} 
+print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Recall': {'result': 50.0, 'ci': (43.0, 57.0)}}}
 ```
+
+If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
 ### Example V: Standardize and extract subgraphs
 

@@ -103,13 +103,18 @@ class ResultPrinter:
             output_format (string): either 'text' or 'json'
     """
 
-    def __init__(self, score_type="micro", do_bootstrap=False, output_format="text"):
+    def __init__(self, score_type="micro", do_bootstrap=False, 
+                    also_return_bootstrap_distribution=False, output_format="text"):
         
         assert score_type in ["micro", "macro", None]
         assert output_format in ["text", "json"] 
         self.score_type = score_type
         self.do_bootstrap = do_bootstrap
         self.output_format = output_format
+        self.also_return_bootstrap_distribution = also_return_bootstrap_distribution
+        if not self.do_bootstrap and self.also_return_bootstrap_distribution:
+            raise ValueError("contradictory arguments, if you want to have bootstrap \
+                                distribution do not forget to enable boostrap")
         return None
     
     def _aggr_wrapper(self, match_data, axis=0):
@@ -173,11 +178,14 @@ class ResultPrinter:
             
             low = None
             high = None
+            distribution = None
             if self.do_bootstrap:
                 try:
                     bs = bootstrap((match_data,), self._aggr_wrapper, vectorized=True, axis=0)
                     low = bs.confidence_interval.low
                     high = bs.confidence_interval.high
+                    if self.also_return_bootstrap_distribution:
+                        distribution = bs.bootstrap_distribution
                 except ValueError: # ValueError:
                     logger.warning("can't do bootstrap, too many zeros in result.\
                             setting confidence interval to [0,100]")
@@ -186,8 +194,8 @@ class ResultPrinter:
                 if any(math.isnan(x) for x in np.concatenate((low, high))):
                     low = [0.0, 0.0]
                     high = [100.0, 100.0]
-
-            final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high)
+            
+            final_result_dic[score_dim] = self._get_partial_result_dict(res, low, high, distribution)
         
         return final_result_dic
     
@@ -197,8 +205,7 @@ class ResultPrinter:
             return json.dumps(dic)
         return json.dumps(dic, indent=jsonindent)
     
-    @staticmethod
-    def _get_partial_result_dict(fpr, low, high, multiplier=100, rounder=2):
+    def _get_partial_result_dict(self, fpr, low, high, distribution, multiplier=100, rounder=2):
         fpr *= multiplier
         fpr = np.round(fpr, rounder)
         if low is not None:
@@ -215,6 +222,12 @@ class ResultPrinter:
         dic["F1"] = {"result": fpr[0], "ci": (low[0], high[0])}
         dic["Precision"] = {"result": fpr[1], "ci": (low[1], high[1])}
         dic["Recall"] = {"result": fpr[2], "ci": (low[2], high[2])}
+
+        if self.also_return_bootstrap_distribution:
+            dic["F1"]["bootstrap_distribution"] = distribution[0]
+            dic["Precision"]["bootstrap_distribution"] = distribution[1]
+            dic["Recall"]["bootstrap_distribution"] = distribution[2]
+
         return dic
     
     @staticmethod
