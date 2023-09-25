@@ -31,7 +31,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
     """
 
     def __init__(self, reify_nodes=False, syntactic_standardization=None, lower=True, relabel_vars=True, 
-                 remove_quote=True, deinvert_edges=True, norm_logical_ops=False, 
+                 remove_quote=True, deinvert_edges=True, domain_to_mod=True, norm_logical_ops=False, 
                  use_concept_as_root=True, remove_duplicates=True, semantic_standardization=False):
         
         assert syntactic_standardization in [None, "dereify", "reify"] 
@@ -42,6 +42,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         self.syntactic_standardization = syntactic_standardization
         self._maybe_prepare_syntactic_standardization()
         
+        self.domain_to_mod = domain_to_mod
         self.deinvert_edges = deinvert_edges
         self.remove_quote = remove_quote
         self.norm_logical_ops = norm_logical_ops
@@ -67,10 +68,13 @@ class AMRStandardizer(interfaces.GraphStandardizer):
             logging.debug("3. remove quotes: {}".format(triples)) 
         if self.relabel_vars:
             self._relabel_vars(triples)
-            logging.debug("4. ensure no varname equal concept: {}".format(triples)) 
+            logging.debug("3. ensure no varname equal concept: {}".format(triples)) 
         if self.reify_nodes:
             triples = self.syntactic_standardizer_node.standardize(triples)
-            logging.debug("5. reify nodes: {}".format(triples)) 
+            logging.debug("4. reify nodes: {}".format(triples)) 
+        if self.domain_to_mod: 
+            self.domain2mod(triples)
+            logging.debug("5. domain relation has been converted to mod relation: {}".format(triples)) 
         if self.deinvert_edges:
             self._deinvert_e(triples)
             logging.debug("6. deinvert edges: {}".format(triples)) 
@@ -79,17 +83,27 @@ class AMRStandardizer(interfaces.GraphStandardizer):
             logging.debug("7. norm logical operators: {}".format(triples)) 
         if self.use_concept_as_root:
             self._concept_as_root(triples)
-            logging.debug("8. make concept to root (smatch style): {}".format(triples)) 
+            logging.debug("9. make concept to root (smatch style): {}".format(triples)) 
         if self.syntactic_standardization:
             triples = self.syntactic_standardizer_edge.standardize(triples)
-            logging.debug("9. syntactic standardization via {}: {}".format(self.syntactic_standardization, triples)) 
+            logging.debug("10. syntactic standardization via {}: {}".format(self.syntactic_standardization, triples)) 
         if self.semantic_standardization:
             triples = self.semantic_standardizer.standardize(triples) 
-            logging.debug("10. semantically standardized triples: {}".format(triples)) 
+            logging.debug("11. semantically standardized triples: {}".format(triples)) 
         if self.remove_duplicates:
             triples = list(set(triples))
-            logging.debug("11. removed duplicate triples: {}".format(triples)) 
+            logging.debug("12. removed duplicate triples: {}".format(triples)) 
         return triples
+    
+    @staticmethod
+    def domain2mod(triples):
+        for i, triple in enumerate(triples):
+            s, r, t = triple
+            if r == ":domain":
+                triples[i] = (s, ":mod-of", t)
+            if r == ":domain-of":
+                triples[i] = (s, ":mod", t)
+        return None
 
     def _maybe_prepare_semantic_standardization(self):
         """Semantic standardization happens according to rules 

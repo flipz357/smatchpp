@@ -1,13 +1,13 @@
 # SMATCH++
 
-The package allows handy processing of semantic graphs such as AMRs, with a special focus on standardized evaluation of graph parsers with Smatch (structural matching of graphs). A short overview of some features:
+The package allows handy processing of semantic graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of AMR parsing via structural matching of graphs, but in principle the package allows straightforward extension to working also with kinds of graphs. A short overview of some features:
 
-- Simple AMR reading, AMR writing, different syntactic and semantic AMR standardization options
+- Simple graph reading, graph writing, different syntactic and semantic standardization options tailored to AMR
 - Alignment solvers including optimal ILP alignment, and optional graph compression
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
 
-Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++.
+Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
 
 ## Requirements
 
