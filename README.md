@@ -1,6 +1,6 @@
 # SMATCH++
 
-The package allows handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of semantic AMR graphs via structural matching ('Smatch'), but in principle the package allows straightforward extension to working also with kinds of graphs. A short overview of some features:
+The package allows handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of semantic AMR graphs via structural matching ('Smatch'), but in principle the package allows straightforward extension to working also with other kinds of graphs. A short overview of some features:
 
 - Simple graph reading, graph writing, different syntactic and semantic standardization options tailored to AMR
 - Alignment solvers including optimal ILP alignment, and optional graph compression
@@ -240,7 +240,7 @@ If you want to get access to the *full bootstrap distribution* you can add `also
 
 ```python
 from smatchpp import Smatchpp
-measure = smatchpp.Smatchpp()
+measure = Smatchpp()
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = measure.graph_reader.string2graph(string_graph)
 g = measure.graph_standardizer.standardize(g)
@@ -303,7 +303,7 @@ string = graph_writer.graph2string(g)
 print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
 
-### Example VIII: Lossless pairwise graph compression
+### Example VIII: Lossless pairwise graph compression<a id="lossless-gc"></a>
 
 Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
 
@@ -318,6 +318,12 @@ print(len(g1), len(g2)) #4, 2
 ```
 
 If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
+
+## FAQ
+
+- *I want to process other kinds of graphs* While tailored to AMR the package allows processing of all kinds of graphs. To process graphs that are different from AMR, it can help to write your own standardizer (see AMRStandardizer in `smatchpp/preprocess.py`) and possibly allows another Reader (currently it is possibly to read graphs in penman form or tsv, see readers in `smatchpp/data_helpers.py') 
+
+- *I have very large graphs and optimal ILP doesn't terminate* This is because optimal alignment is fundamentally an NP complete problem. In this case we can 1. use a heuristic by setting solver as HillClimber (unfortunately the solutions by heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). Otherwise 2. It can be useful to set `--lossless_graph_compression` as argument from console (for python see [Example VIII](#lossless-gc)), which makes evaluation much faster and still gives an optimal score (the score tends to be slightly harsher/lower though). Alternatively you can use the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to be provided with a solution that may be not optimal (as in the hill-climber) but also comes with a useful upper-bound to tell you about solution quality. Maybe, in case of very large graphs option ii) is most suitable.
 
 ## Citation
 
