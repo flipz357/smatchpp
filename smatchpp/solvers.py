@@ -386,7 +386,14 @@ class ILP(interfaces.Solver):
         
         # some short cuts 
         ux = unarymatch_dict
-        bx = binarymatch_dict
+        
+        # prune space by making symmetric match dict to asymetric
+        bx = Counter()
+        for (i, j, k, l) in binarymatch_dict:
+            if (k, l, i, j) in bx:
+                continue
+            bx[(i, j, k, l)] += binarymatch_dict[(i, j, k, l)] + binarymatch_dict[(k, l, i, j)]
+
         Vr = range(V)
         
         # init binary alignment vars
@@ -394,13 +401,14 @@ class ILP(interfaces.Solver):
         
         # init binary match vars for binary structural matches
         y = {}
+        
         for (i, j, k, l) in bx:
             y[(i, j, k, l)] = model.add_var(var_type=self.mip.BINARY)
         
         # set model objective
         model.objective = self.mip.maximize(
                 self.mip.xsum(ux[(i, j)] * x[i][j] for i in Vr for j in Vr) 
-                + self.mip.xsum(bx[(i, j, k, l)]*y[(i, j, k, l)] for (i, j, k, l) in bx))
+                + self.mip.xsum(bx[(i, j, k, l)] * y[(i, j, k, l)] for (i, j, k, l) in bx))
         
 
         # constraints: every var must be aligned only to one other var (or remain unaligned)
@@ -450,7 +458,10 @@ class ILP(interfaces.Solver):
 ########################################################################
 # What follows are experimental relaxed iterative ILP solvers.         #
 # They should provide optimal result in polynomial time or can provide #
-# intermediate solution with upper-bound                               ä
+# intermediate solution with upper-bound                               #
+# c.f. Gunnar W Klau. 2009. A new graph-based method for               #
+# pairwise global network alignment. BMC bioinformatics, 10(1):1–9     #
+# .... Implementation attempts with python don't satisfingly work yet  # 
 ########################################################################
 ########################################################################
 
