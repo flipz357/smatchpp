@@ -1,6 +1,7 @@
 import numpy as np
 import logging
 from smatchpp import interfaces
+from collections import Counter
 
 logger = logging.getLogger("__main__")
                  
@@ -13,8 +14,10 @@ class IDTripleMatcher(interfaces.TripleMatcher):
         string2 = str(t2)
         return int(string1 == string2)
 
+
 class ConceptFocusMatcher(interfaces.TripleMatcher): 
-    
+    # experimental matcher example for focusing on node labels
+
     @staticmethod
     def _triplematch(t1, t2): 
         string1 = str(t1)
@@ -26,6 +29,8 @@ class ConceptFocusMatcher(interfaces.TripleMatcher):
 
 
 class EmbeddingConceptMatcher(interfaces.TripleMatcher): 
+    # experimental matcher example for allowing graded matches 
+    # of node labels(cat -- kitten)
     
     def __init__(self):
 
@@ -42,7 +47,6 @@ class EmbeddingConceptMatcher(interfaces.TripleMatcher):
             raise ModuleNotFoundError("gensim not found")
 
         self.vectors = self.gensim.downloader.api.load("glove-wiki-gigaword-100")
-
 
     def _triplematch(self, t1, t2): 
         string1 = str(t1)
@@ -133,6 +137,43 @@ class AMRScorer(interfaces.Scorer):
 
         return None
 
+    def _get_matchsum_possibly_asymmetric(self, triplecountdict1, triplecountdict2):
+        """Checks how many triples from graph1 have matching counterparts from graph2.
+
+        Notes:
+           1. In default Smatch we remove duplicates in pre-processing so, 
+              all triple counts will equal 1. Otherwise, if we allow duplicate triples, the counts
+              allow us to properly calculate the matching sum, in accordance with the optimal alignment solution
+           2. To allow for possible graded matching of triples we use greedy max scoring.
+              For basic Smatch where we match triples only if identical this has no effect.
+
+        Args:
+            triplecountdict1: mapping from triples to counts 
+            triplecountdict2: mapping from triples to counts
+
+        Returns:
+            matchsum from arg1 to arg2
+
+        """
+        
+        matchsum = 0.0
+        for triple in triplecountdict1:
+            # greedy matching to account if we want 
+            # to allow graded triple matching (which we normally don't)
+            # that's a source of asymmetry
+            scores = [0.0] 
+            for triple_other in triplecountdict2:
+                match = self.triplematcher.triplematch(triple, triple_other)
+                # count == 1 if there are no duplicate triples
+                count = min(triplecountdict1[triple], triplecountdict2[triple_other])
+                if triplecountdict1[triple] + triplecountdict2[triple_other] != 2:
+                    asd
+                # this is how many we can possibly match
+                match *= count
+                scores.append(match)
+            matchsum += max(scores)
+        return matchsum
+
     def _score_given_alignment(self, triples1, triples2, alignmat, varindex):
         
         triples1_aligned = list(triples1)
@@ -140,18 +181,13 @@ class AMRScorer(interfaces.Scorer):
 
         xlen = len(triples1_aligned)
         ylen = len(triples2)
-        matchsum_x = 0.0
-        for triple in triples1_aligned:
-            scores = [0.0] 
-            scores += [self.triplematcher.triplematch(triple, triples2[i]) for i in range(len(triples2))]
-            matchsum_x += max(scores)
         
-        matchsum_y = 0.0
-        for triple in triples2:
-            scores = [0.0] 
-            scores += [self.triplematcher.triplematch(triple, triples1_aligned[i]) for i in range(len(triples1_aligned))]
-            matchsum_y += max(scores)
+        triples1_aligned = Counter(triples1_aligned)
+        triples2 = Counter(triples2)
         
+        matchsum_x = self._get_matchsum_possibly_asymmetric(triples1_aligned, triples2)
+        matchsum_y = self._get_matchsum_possibly_asymmetric(triples2, triples1_aligned)
+
         match = np.array([matchsum_x, matchsum_y, xlen, ylen])
         #note: in basic Smatch w/o duplicates we have IDTripleMatch matchsum_x = matchsum_y = len(set(triples1_aligned).intersection(triples2))
         return match

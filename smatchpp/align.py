@@ -19,9 +19,10 @@ class GraphAligner:
      
     def _make_binary_match_dict(self, triples1, triples2, var1, var2, var_index): 
          
-        data = Counter() 
-        triples1 = [tr for tr in triples1 if (tr[0] in var1 and tr[2] in var1)]
-        triples2 = [tr for tr in triples2 if (tr[0] in var2 and tr[2] in var2)]
+        data = Counter()
+
+        triples1 = Counter([tr for tr in triples1 if (tr[0] in var1 and tr[2] in var1)])
+        triples2 = Counter([tr for tr in triples2 if (tr[0] in var2 and tr[2] in var2)])
 
         for triple in triples1:
             s, r, t  = triple
@@ -33,6 +34,7 @@ class GraphAligner:
                 j_other = var_index[t_other]
                 match = self.triplematcher.triplematch(("xtmp", r, "ytmp"), ("xtmp", r_other, "ytmp"))
                 if match > 0.0:
+                    match *= min(triples1[triple], triples2[triple_other])
                     data[(i, i_other, j, j_other)] += match / 2
                     data[(j, j_other, i, i_other)] += match / 2
         
