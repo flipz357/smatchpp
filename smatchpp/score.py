@@ -164,13 +164,14 @@ class AMRScorer(interfaces.Scorer):
             scores = [0.0] 
             for triple_other in triplecountdict2:
                 match = self.triplematcher.triplematch(triple, triple_other)
+                
                 # count == 1 if there are no duplicate triples
                 count = min(triplecountdict1[triple], triplecountdict2[triple_other])
-                if triplecountdict1[triple] + triplecountdict2[triple_other] != 2:
-                    asd
+                
                 # this is how many we can possibly match
                 match *= count
                 scores.append(match)
+            
             matchsum += max(scores)
         return matchsum
 
