@@ -77,7 +77,7 @@ python -m smatchpp      -a <amrs1> \
 ```
 
 
-### Fast ILP with graph compression, corpus metrics and confidence intervals
+### Fast ILP alignment with graph compression, corpus metrics and confidence intervals
 
 - Efficiency: ++ 
 - Optimality: +++
@@ -138,17 +138,7 @@ See
 
 ```
 python -m smatchpp --help
-```
-
-## Additional functionality
-
-### Custom triple matching
-
-Can be implemented in `score.py`
-
-### Changing subgraph metrics
-
-See `subgraph_extraction.py` 
+``` 
 
 ## Pip install<a id="pip-install"></a>
 
