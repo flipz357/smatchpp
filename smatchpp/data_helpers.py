@@ -121,9 +121,18 @@ class PenmanReader(interfaces.GraphReader):
                 # variable token without instance
                 #-> get var, get incoming relation, append triple
                 tgt = tokens[i]
-                triple = (tmpsrc[nested_level], tmprel[nested_level], tgt) 
+                
+                #adapt better to possibly redundant brackets
+                tmp_nested_level = nested_level
+                j = i - 1
+                while tokens[j] == "(":
+                    tmp_nested_level -= 1
+                    j -= 1
+
+                triple = (tmpsrc[tmp_nested_level], tmprel[tmp_nested_level], tgt) 
                 triples.append(triple)
                 i += 1
+        
         logging.debug("3. result after triple extract: {}".format(triples))
         return triples
     
