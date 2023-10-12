@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='smatchpp',
-    version='1.3.1',    
+    version='1.3.2',    
     description='A Python package for graph processing',
     url='https://github.com/flipz357/smatchpp',
     author='Juri Opitz',
