@@ -23,8 +23,13 @@ class PenmanReader(interfaces.GraphReader):
         return None
 
     def _string2graph(self, string):
-        """ Parses a Penman string to triples
+        """Parses a Penman string to triples. 
 
+            Tries to correctly extract as many triples as possible, 
+            possibly also allowing some theoretically invalid/incomplete 
+            graphs such as "(a / b :x (y / z)" which misses a final closing 
+            bracket but would get parsed same as "(a / b :x (y / z))".
+            
             Args:
                 string (str): the string in Penman format
 
@@ -62,14 +67,14 @@ class PenmanReader(interfaces.GraphReader):
                     #-> get var, get instance, get incoming relation, append triple
 
                     var = tokens[i]
-                    concept = tokens[i+2]
+                    concept = tokens[i + 2]
                     
                     tmpsrc[nested_level] = var
                     
                     triple = (var, ":instance", concept) 
                     triples.append(triple)
                     
-                    triple = (tmpsrc[nested_level-1], tmprel[nested_level-1], var) 
+                    triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
                     triples.append(triple)
 
                     i += 3
@@ -104,7 +109,7 @@ class PenmanReader(interfaces.GraphReader):
                 concept = tokens[i+2]
                  
                 if concept[0] in ["\"", "\'"]:
-                    concept, newincr = self._collect_string(tokens, i+2, stringsign=concept[0])
+                    concept, newincr = self._collect_string(tokens, i + 2, stringsign=concept[0])
                     i = newincr + 1
                 else:
                     i += 3
@@ -114,7 +119,7 @@ class PenmanReader(interfaces.GraphReader):
                 triple = (var, ":instance", concept) 
                 triples.append(triple)
                 
-                triple = (tmpsrc[nested_level-1], tmprel[nested_level-1], var) 
+                triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
                 triples.append(triple)
 
             else:
