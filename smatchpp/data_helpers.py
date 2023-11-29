@@ -36,7 +36,6 @@ class PenmanReader(interfaces.GraphReader):
             Returns:
                 a list with triples (src, rel, tgt)
         """
-
         logging.debug("parsing {}".format(string))
         string = string.replace(")", " )")
         string = string.replace("(", "( ")
@@ -50,6 +49,7 @@ class PenmanReader(interfaces.GraphReader):
         tmpsrc = {0: "ROOT_OF_GRAPH"}
         tmprel = {0: ":root"}
         triples = []
+        error_state = 0
         
         # collect tokens
         while True:
@@ -57,18 +57,64 @@ class PenmanReader(interfaces.GraphReader):
             if i == len(tokens):
                 break
             
-            # get current token
-            tmp_token = tokens[i]
-            if tmp_token[0] in ["\"","\'"]:
+            try:
+                # get current token
+                tmp_token = tokens[i]
+                if tmp_token[0] in ["\"","\'"]:
+                    
+                    # start of a string constant -> collect string, increment i    
+                    if tokens[i + 1] == "/":
+                        # new var + instance 
+                        #-> get var, get instance, get incoming relation, append triple
+
+                        var = tokens[i]
+                        concept = tokens[i + 2]
+                        
+                        tmpsrc[nested_level] = var
+                        
+                        triple = (var, ":instance", concept) 
+                        triples.append(triple)
+                        
+                        triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
+                        triples.append(triple)
+
+                        i += 3
+                    
+                    else:
+                        # start of a string constant -> collect string, increment i
+                        stringtok, incr = self._collect_string(tokens, i, stringsign=tmp_token[0])
+                        triple = (tmpsrc[nested_level], tmprel[nested_level], stringtok)
+                        triples.append(triple)
+                        i = incr + 1
+
+                elif tokens[i] == "(":
+                    # increase depth, nothing to collect
+                    nested_level += 1
+                    i += 1
                 
-                # start of a string constant -> collect string, increment i    
-                if tokens[i + 1] == "/":
+                elif tokens[i] == ")":
+                    # decrease depth, nothing to collect
+                    nested_level -= 1
+                    i += 1
+
+                elif tokens[i].startswith(":"):
+                    # relation -> update relation dict
+                    tmprel[nested_level] = tokens[i]
+                    i += 1
+
+                elif tokens[i + 1] == "/":
                     # new var + instance 
                     #-> get var, get instance, get incoming relation, append triple
 
                     var = tokens[i]
-                    concept = tokens[i + 2]
-                    
+                    concept = tokens[i+2]
+                     
+                    if concept[0] in ["\"", "\'"]:
+                        concept, newincr = self._collect_string(tokens, i + 2, stringsign=concept[0])
+                        i = newincr + 1
+                    else:
+                        i += 3
+
                     tmpsrc[nested_level] = var
                     
                     triple = (var, ":instance", concept) 
@@ -77,68 +123,32 @@ class PenmanReader(interfaces.GraphReader):
                     triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
                     triples.append(triple)
 
-                    i += 3
-                
                 else:
-                    # start of a string constant -> collect string, increment i
-                    stringtok, incr = self._collect_string(tokens, i, stringsign=tmp_token[0])
-                    triple = (tmpsrc[nested_level], tmprel[nested_level], stringtok)     
+                    # variable token without instance
+                    #-> get var, get incoming relation, append triple
+                    tgt = tokens[i]
+                    
+                    #adapt better to possibly redundant brackets
+                    tmp_nested_level = nested_level
+                    j = i - 1
+                    while tokens[j] == "(":
+                        tmp_nested_level -= 1
+                        j -= 1
+
+                    triple = (tmpsrc[tmp_nested_level], tmprel[tmp_nested_level], tgt) 
                     triples.append(triple)
-                    i = incr + 1
-
-            elif tokens[i] == "(":
-                # increase depth, nothing to collect
-                nested_level += 1
-                i += 1
-            
-            elif tokens[i] == ")":
-                # decrease depth, nothing to collect
-                nested_level -= 1
-                i += 1
-
-            elif tokens[i].startswith(":"):
-                # relation -> update relation dict
-                tmprel[nested_level] = tokens[i]
-                i += 1
-
-            elif tokens[i + 1] == "/":
-                # new var + instance 
-                #-> get var, get instance, get incoming relation, append triple
-
-                var = tokens[i]
-                concept = tokens[i+2]
-                 
-                if concept[0] in ["\"", "\'"]:
-                    concept, newincr = self._collect_string(tokens, i + 2, stringsign=concept[0])
-                    i = newincr + 1
-                else:
-                    i += 3
-
-                tmpsrc[nested_level] = var
-                
-                triple = (var, ":instance", concept) 
-                triples.append(triple)
-                
-                triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
-                triples.append(triple)
-
-            else:
-                # variable token without instance
-                #-> get var, get incoming relation, append triple
-                tgt = tokens[i]
-                
-                #adapt better to possibly redundant brackets
-                tmp_nested_level = nested_level
-                j = i - 1
-                while tokens[j] == "(":
-                    tmp_nested_level -= 1
-                    j -= 1
-
-                triple = (tmpsrc[tmp_nested_level], tmprel[tmp_nested_level], tgt) 
-                triples.append(triple)
-                i += 1
-        
-        logging.debug("3. result after triple extract: {}".format(triples))
+                    i += 1
+            except KeyError:
+                error_state  = 1
+                break
+        if error_state > 0:
+            logger.warning("""This graph string seems broken, and I tried fixing it, 
+                            extracting as much triples as possible, but larger graphs 
+                            of the parts may be lost. No need to worry much now, but 
+                            this exception should occur veeeeery rarely. \n\n 
+                            Here's the graph that caused this problem: {} \n\n 
+                            And here are the triples that I managed to extract: {}""".format(string, triples))
+        logging.debug("3. result after triple extract: {}".format(triples, triples))
         return triples
     
     @staticmethod
