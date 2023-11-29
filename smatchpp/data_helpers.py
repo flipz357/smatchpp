@@ -107,7 +107,7 @@ class PenmanReader(interfaces.GraphReader):
                     #-> get var, get instance, get incoming relation, append triple
 
                     var = tokens[i]
-                    concept = tokens[i+2]
+                    concept = tokens[i + 2]
                      
                     if concept[0] in ["\"", "\'"]:
                         concept, newincr = self._collect_string(tokens, i + 2, stringsign=concept[0])
