@@ -54,6 +54,8 @@ class EmbeddingConceptMatcher(interfaces.TripleMatcher):
         sc = int(string1 == string2)
         if sc:
             return sc
+        if t1[0] != t2[0]:
+            return 0.0
         if ":instance" == t1[1] == t2[1]:
             concept1 = t1[2]
             concept2 = t2[2]
