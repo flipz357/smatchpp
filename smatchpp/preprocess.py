@@ -12,22 +12,68 @@ class AMRStandardizer(interfaces.GraphStandardizer):
        This class preforms standardization of amr graphs
 
        Attributes:
-           reify_nodes (bool):                 reify nodes, e.g. (x, polarity, -) -> (x, polarity, z), (z, instance, -)
+           reify_nodes (bool):                 reify nodes, e.g. (x, polarity, -) -> (x, polarity, z), (z, instance, -).
+                                               
+                                               As deafult this is set to **False**, since it may be needed sometimes, but not 
+                                               in the standard evaluation setup.
+
            syntactic_standardization (string): None or \"dereify\", or \"reify\". e.g.,
                                                None: do nothing
                                                dereify: (z, instance, locatedAt), (z, a1, x), (z, a2, y) -> (x, location, y)
                                                reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
+                                               
+                                               As deafult this is set to **True**, since it induces some standardzation and forces
+                                               parsed amrs, if possible, in the same format as assumed by the AMR Sembank, which
+                                               derifies per default, see [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md)
+
            lower (bool):                       lower case, e.g. (x, op1, "Obama") -> (x, op1, "obama")
+                                               
+                                               As default this is set to **True**, since it is a useful standardization 
+                                               and does not change the meaning of AMR.
+
            reomve_quotes (bool):               remove quotes e.g. (x, op1, "Obama") -> (x, op1, Obama)
-           deinvert_edges (bool):              deinvert edges, e.g. (x,a-of,y) -> (y, a, x)
+
+                                               As defailt this is set to **True**, since some amrs 
+                                               have quotes with ' and other with " so it makes sense
+
+           deinvert_edges (bool):              deinvert edges, e.g. (x, a-of, y) -> (y, a, x)
+                                               
+                                               As default, this is set to **True**. Makes sense as a standardization, AMR mostly 
+                                               uses inversion only to facilitate string serialization, so relations should be deinverted.
+                                               So this makes sense for penman graphs in general, not only AMR.
+           
+           domain_to_mod (bool):               advanced AMR inversion to handle that :domain = mod-of
+                                               
+                                               As default, this is set to **True**. Makes sense as a standardization, since AMR guidelines
+                                               explicitly define :domain as the inverse of :mod-of.
+
            norm_logical_ops (bool):            if true, or and and are seen as commutative, e.g., 
                                                (x, instance, and), (x, op1, y), (x, op2, z) -> (x, instance, and), (x, op, y), (x, op, z)
-           use_concept_as_root (bool):         smatch style root, where root is not attached to a ROOT, but to a concept 
+
+                                               As default this is set to **False**. But it may be useful to set to True for some cases since it seems
+                                               useful for semantic commutative relations.
+
+           use_concept_as_root (bool):         AMR style root, where root is not attached to a ROOT, but to a concept 
                                                e.g. if true: (xvar, :root, concept) if false: (xvar, :root, root_of_graph)
+
+                                               As default, this is set to **True**. This is justified by 
+                                               [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md) 
+                                               who specifically speak about a *root concept*, so the root should express the focus and be non-anonymous
+                                               With True enabled, the two AMRs (c / car) and (d / dog) will get a score of 0.0. 
+                                               When set to False, these two AMRs will get a score of 0.5, since the root is anonymous.
+
            remove_duplicates (bool):           default=True since duplicates have no clear meaning in AMR
                                                and can lead to ambiguous evaluation with Smatch
+
+                                               As default, this is set to **False**. The meaning of duplicate triples in AMR is not clear. However,
+                                               it can also be set to True, Smatch++ allows safe scoring of duplicate triples.
+
            semantic_standardization (bool):    default=False, if True, we apply rules and heuristics to map 
                                                core roles to explicit roles
+
+                                               As default, this is set to **False**. It is an experimental way of better standardizing AMRs, 
+                                               which is not yet 100% validated. The idea is to map, e.g., the :arg2 to :instrument, 
+                                               if indicated by propbank frames.
     """
 
     def __init__(self, reify_nodes=False, syntactic_standardization=None, lower=True, relabel_vars=True, 
