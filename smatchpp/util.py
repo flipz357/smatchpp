@@ -65,13 +65,43 @@ def read_concept_groups(p="/resource/concept_groups.json"):
 
     return data
 
+def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-descr.txt",
+        url="https://amr.isi.edu/doc/propbank-amr-frames-arg-descr.txt"):
+    path = os.path.dirname(__file__)
+    fullpath = path + targetpath
+    error_state = 0
+    if os.path.isfile(fullpath):
+        return error_state
+    else:
+        logger.info("PropBank frame file not found under resource/, I'll try to download it\
+                    from {}.format(url)")
+        try:
+            import requests
+            predfile = requests.get(url).text
+            with open(fullpath, "w") as out_file:
+                out_file.write(predfile)
+            logger.info("suffessfully downloaded the predicate frame file and placed it under {}".format(fullpath))
+            error_state = 0
+        except:
+            logger.warning("Something went wrong when trying to download the predicate frame file.\
+                            You can fix this problem manually by downloading the file from: {}\
+                            and placing it as {}".format(url, fullpath))
+            error_state = 1
+    return error_state
 
 def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
     """load frame-argument rules"""
     
-    path = os.path.dirname(__file__)
+    error = maybe_download_frame_file()
+    if error:
+        logger.warning("Couldn't load the predicate file which is used to enhance fine-grained\
+                        semantic scoring. I'll use an empty dictionary instead.")
+        return {}
 
-    with open(path + p, "r") as f:
+    path = os.path.dirname(__file__)
+    fullpath = path + p
+   
+    with open(fullpath, "r") as f:
         lines = [l for l in f.read().split("\n") if l]
 
     frame_table = {}
