@@ -2,9 +2,10 @@
 
 The package allows handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of semantic AMR graphs via structural matching ('Smatch'), but in principle the package allows straightforward extension to working also with other kinds of graphs. A short overview of some features:
 
-- Simple graph reading, graph writing, different syntactic and semantic standardization options tailored to AMR
-- Alignment solvers including optimal ILP alignment, and optional graph compression
-- Evaluation scoring with bootstrap confidence intervals, micro and macro averages
+- Simple graph reading, graph writing
+- Different alignment solvers including optimal ILP alignment, and optional graph compression
+- Safe evaluation scoring with bootstrap confidence intervals, micro and macro averages
+- Standardization tailored to AMR graphs, but easy to extend for other graphs
 - AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
 
 Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
@@ -75,7 +76,6 @@ python -m smatchpp      -a <amrs1> \
 			--bootstrap \
 			--remove_duplicates
 ```
-
 
 ### Fast ILP alignment with graph compression, corpus metrics and confidence intervals
 
@@ -311,7 +311,7 @@ If we want to use the compression in the matching, simply set the argument `grap
 
 ## FAQ
 
-- *I want to process other kinds of graphs*: While tailored to AMR the package allows processing of all kinds of graphs. To evaluate graphs that are different from AMR, it can be good to remove AMR-specifc arguments (like `syntactic_standardization` in `score.sh`), other than that there should be no other things to do. Of course, if you have specific graphs it can also help to write your own standardizer (see example for AMRStandardizer in `smatchpp/preprocess.py`) and possibly create another Reader (currently it is possibly to read graphs in penman form or tsv, see readers in `smatchpp/data_helpers.py').
+- *I want to process other kinds of graphs*: While seemingly somewhat tailored to AMR, smatchpp allows processing of all kinds of graphs. To process other kinds of graphs, it can be good to remove AMR-specifc arguments (like `syntactic_standardization` in `score.sh`), other than that there shouldn't be anything extra to do. Of course, if you have specific graphs it can also help to write your own standardizer (see example for AMRStandardizer in `smatchpp/preprocess.py`) and possibly create another Reader (currently it is possibly to read graphs in penman form or tsv, see readers in `smatchpp/data_helpers.py').
 
 - *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. In this case we have three options. 1. use a heuristic by setting solver as HillClimber (unfortunately the solutions by heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#lossless-gc)). This makes evaluation much faster and still gives an optimal score (the score tends to be slightly harsher/lower). 3. you can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal (as in the hill-climber) but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
 
