@@ -141,6 +141,8 @@ class PenmanReader(interfaces.GraphReader):
             except KeyError:
                 error_state  = 1
                 break
+
+        # issue a warning if graph couldn't be read properly
         if error_state > 0:
             logger.warning("""This graph string seems broken, and I tried fixing it, 
                             extracting as much triples as possible, but larger graphs 
@@ -148,6 +150,24 @@ class PenmanReader(interfaces.GraphReader):
                             this exception should occur veeeeery rarely. \n\n 
                             Here's the graph that caused this problem: {} \n\n 
                             And here are the triples that I managed to extract: {}""".format(string, triples))
+
+        # hypothetically it could be that a graph uses a relation ":root", 
+        # but ":root" is preseverd as a special relation, so in the hypothetical
+        # case we inform the user with a warning
+        if len([t for t in triples if t[1] == ":root"]) > 1:
+            first_root = True
+            for i, triple in enumerate(triples):
+                if triple[1] == ":root":
+                    if first_root:
+                        first_root = False
+                    else:
+                        triples[i] = (triple[0], triple[1] + "_but_not_the_graph_root", triple[2])
+
+            logger.warning("""The graph contains an explicit relation \":root\", 
+                            which is normally a special implicit relation. 
+                            I have renamed all explicit \":root\" relations 
+                            to \":root_but_not_the_graph_root\".""")
+        
         logging.debug("3. result after triple extract: {}".format(triples, triples))
         return triples
     
