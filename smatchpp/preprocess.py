@@ -129,7 +129,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
             logging.debug("7. norm logical operators: {}".format(triples)) 
         if self.use_concept_as_root:
             self._concept_as_root(triples)
-            logging.debug("9. make concept to root (smatch style): {}".format(triples)) 
+            logging.debug("9. make concept to root (AMR focus style): {}".format(triples)) 
         if self.syntactic_standardization:
             triples = self.syntactic_standardizer_edge.standardize(triples)
             logging.debug("10. syntactic standardization via {}: {}".format(self.syntactic_standardization, triples)) 
@@ -219,7 +219,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         return None
 
     def _concept_as_root(self, triples):
-        """the root ist read as (x, :root, ROOT), however, Smatch style is to use
+        """the root ist read as (x, :root, ROOT), however, AMR focus style is to use
         (x, :root, concept) where concept is from (x, :instance, concept)
         """
         vc = util.get_var_concept_dict(triples)
