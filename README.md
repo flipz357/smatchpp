@@ -4,9 +4,9 @@ The package allows handy processing of graphs including graph alignment and grap
 
 - Simple graph reading, graph writing
 - Different alignment solvers including optimal ILP alignment, and optional graph compression
-- Safe evaluation scoring with bootstrap confidence intervals, micro and macro averages
+- Safe graph evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - Standardization tailored to AMR graphs, but easy to extend for other graphs
-- AMR-targeted subgraph extraction and extended scoring for spatial, temporal, causal, and more meaning aspects
+- Extended AMR-targeted subgraph extraction and scoring for temporal, causal, and more meaning aspects
 
 Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
 
@@ -150,7 +150,7 @@ Simply run
 
 The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
 
-### Example I: Smatch++ matching with some basic default<a id="ex:basicdefault"></a>
+### Example I: Smatch++ matching with some basic default<a id="ex-basicdefault"></a>
 
 This uses some basic default such as lower-casing and hill-climber.
 
@@ -171,7 +171,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example II: Smatch++ matching same as default but with ILP<a id="ex:basicdefault-ilp"></a>
+### Example II: Smatch++ matching same as default but with ILP<a id="ex-basicdefault-ilp"></a>
 
 In this example, we use ILP for optimal alignment.
 
@@ -193,7 +193,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex:basicdefault-amr"></a>
+### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex-basicdefault-amr"></a>
 
 Beyond basic defaults, we need an ILP solver for best alignment and dereification for graph standadization.
 
@@ -311,11 +311,11 @@ If we want to use the compression in the matching, simply set the argument `grap
 
 ## FAQ
 
-- *I want to process other kinds of graphs*: This is simple. See [Example II](ex:basicdefault-ilp) scores two general graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example III](ex:basicdefault-amr).
+- *I want to process other kinds of graphs*: This is simple. See [Example II](ex-basicdefault-ilp) scores two general graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example III](ex-basicdefault-amr).
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex:lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
 
-- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow graded matching. Smatch++ allows easy customization of the triple matching function, and you can easily implement your own class. For examples, see file `smtachpp/score.py`.
+- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow graded matching. Smatch++ allows easy customization of the triple matching function, and you can easily implement your own class. For examples, see file `smatchpp/score.py`.
 
 ## Citation
 
