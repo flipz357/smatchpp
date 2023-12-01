@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Example configurations for evaluation
+## Example configurations for best-practice evaluation
 
 ### Best practice: ILP alignment, dereification, corpus metrics and confidence intervals<a id="basic-eval"></a>
 
@@ -33,10 +33,10 @@ The packages can be installed with `pip ...`
 **Simply call**: 
 
 ```
-./score.sh <amrs1> <amrs2>
+./score.sh <graphs1> <graphs2>
 ``` 
 
-where `<amrs1>` and `<amrs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
+where `<graphs1>` and `<graphs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
 ```
 # first graph
@@ -150,9 +150,9 @@ Simply run
 
 The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
 
-### Example I: Smatch++ matching with some basic default<a id="ex-basicdefault"></a>
+### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
-This uses some basic default such as lower-casing and hill-climber.
+This uses a hill-climber and does not standardize the graphs in any way.
 
 ```python
 from smatchpp import Smatchpp
@@ -171,7 +171,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example II: Smatch++ matching same as default but with ILP<a id="ex-basicdefault-ilp"></a>
+### Example II: Optimal Smatch++ with ILP<a id="ex-basicdefault-ilp"></a>
 
 In this example, we use ILP for optimal alignment.
 
