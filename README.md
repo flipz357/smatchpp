@@ -66,8 +66,8 @@ x w rel
 - Graph standardization: ++
 
 ```
-python -m smatchpp      -a <amrs1> \
-			-b <amrs2> \
+python -m smatchpp      -a <graphs1> \
+			-b <graphs2> \
 			-solver hillclimber \
 			-syntactic_standardization dereify \
 			-score_dimension main \
@@ -84,8 +84,8 @@ python -m smatchpp      -a <amrs1> \
 - Graph standardization: + 
 
 ```
-python -m smatchpp      -a <amrs1> \
-			-b <amrs2> \
+python -m smatchpp      -a <graphs1> \
+			-b <graphs2> \
 			-solver ilp \
 			-syntactic_standardization dereify \
 			-score_dimension main \
@@ -103,8 +103,8 @@ python -m smatchpp      -a <amrs1> \
 - Graph standardization: +++
 
 ```
-python -m smatchpp      -a <amrs1> \
-			-b <amrs2> \
+python -m smatchpp      -a <graphs1> \
+			-b <graphs2> \
 			-solver ilp \
 			-syntactic_standardization reify \
 			-score_dimension main \
@@ -121,8 +121,8 @@ python -m smatchpp      -a <amrs1> \
 - Graph standardization: ++ 
 
 ```
-python -m smatchpp      -a <amrs1> \
-			-b <amrs2> \
+python -m smatchpp      -a <graphs1> \
+			-b <graphs2> \
 			-solver ilp \
 			-syntactic_standardization dereify \
 			-score_dimension all-multialign \
