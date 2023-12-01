@@ -63,7 +63,6 @@ class AMRStandardizer(interfaces.GraphStandardizer):
                                                When set to False, these two AMRs will get a score of 0.5, since the root is anonymous.
 
            remove_duplicates (bool):           default=True since duplicates have no clear meaning in AMR
-                                               and can lead to ambiguous evaluation with Smatch
 
                                                As default, this is set to **False**. The meaning of duplicate triples in AMR is not clear. However,
                                                it can also be set to True, Smatch++ allows safe scoring of duplicate triples.
@@ -304,7 +303,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         return None
         
 
-class AMRPairPreparer(interfaces.GraphPairPreparer):
+class BasicGraphPairPreparer(interfaces.GraphPairPreparer):
     """Class for prepairing graph pairs
 
        Some standardization may involve a graph pair, e.g., 
@@ -673,3 +672,10 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
         
         triples += new
         return None
+
+
+class DoNothingGraphStandardizer(interfaces.GraphStandardizer):
+    
+    def _standardize(self, triples):
+        return triples
+

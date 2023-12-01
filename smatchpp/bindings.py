@@ -24,12 +24,12 @@ class Smatchpp():
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:
             from smatchpp import preprocess
-            self.graph_standardizer = preprocess.AMRStandardizer()
+            self.graph_standardizer = preprocess.DoNothingGraphStandardizer()
 
         self.graph_pair_preparer = graph_pair_preparer
         if not self.graph_pair_preparer:
             from smatchpp import preprocess
-            self.graph_pair_preparer = preprocess.AMRPairPreparer()
+            self.graph_pair_preparer = preprocess.BasicGraphPairPreparer()
         
         self.triplematcher = triplematcher
         if not self.triplematcher:
@@ -49,7 +49,7 @@ class Smatchpp():
         self.graph_scorer = graph_scorer
         if not self.graph_scorer:
             from smatchpp import score
-            self.graph_scorer = score.AMRScorer(triplematcher=self.triplematcher)
+            self.graph_scorer = score.TripleScorer(triplematcher=self.triplematcher)
         
         self.subgraph_extractor = subgraph_extractor
         if not self.subgraph_extractor:

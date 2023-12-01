@@ -119,7 +119,7 @@ if __name__ == "__main__":
                                         syntactic_standardization=args.syntactic_standardization, 
                                         remove_duplicates=args.remove_duplicates)
     logger.info("2. triple standardizer loaded")
-    graph_pair_preparer = preprocess.AMRPairPreparer(lossless_graph_compression=args.lossless_graph_compression)
+    graph_pair_preparer = preprocess.BasicGraphPairPreparer(lossless_graph_compression=args.lossless_graph_compression)
     logger.info("3. graph pair processor loaded")
     triplematcher = score.IDTripleMatcher()
     logger.info("4a. triple matcher loaded")
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         logger.info("4c. sub graph extractor")
     
     
-    graph_scorer = score.AMRScorer(triplematcher=triplematcher)
+    graph_scorer = score.TripleScorer(triplematcher=triplematcher)
     logger.info("5. scorer loaded")
     logger.info("starting score calculations")
     

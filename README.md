@@ -150,7 +150,7 @@ Simply run
 
 The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
 
-### Example I: Smatch++ matching with some basic default
+### Example I: Smatch++ matching with some basic default<a id="ex:basicdefault"></a>
 
 This uses some basic default such as lower-casing and hill-climber.
 
@@ -171,7 +171,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example II: Smatch++ matching same as default but with ILP
+### Example II: Smatch++ matching same as default but with ILP<a id="ex:basicdefault-ilp"></a>
 
 In this example, we use ILP for optimal alignment.
 
@@ -193,7 +193,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example III: Best-Practice matching for a pair of AMR graphs.
+### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex:basicdefault-amr"></a>
 
 Beyond basic defaults, we need an ILP solver for best alignment and dereification for graph standadization.
 
@@ -293,13 +293,13 @@ string = graph_writer.graph2string(g)
 print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
 
-### Example VIII: Lossless pairwise graph compression<a id="lossless-gc"></a>
+### Example VIII: Lossless pairwise graph compression<a id="ex:lossless-gc"></a>
 
 Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
 
 ```python
 from smatchpp import preprocess
-pair_preparer_compressor = preprocess.AMRPairPreparer(lossless_graph_compression=True)
+pair_preparer_compressor = preprocess.BasicGraphPairPreparer(lossless_graph_compression=True)
 g1 = [("c", ":instance", "cat"), ("c2", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d"), ("c2", ":otherrel", "d")]
 g2 = [("c", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d")]
 print(len(g1), len(g2)) #5, 3
@@ -311,9 +311,9 @@ If we want to use the compression in the matching, simply set the argument `grap
 
 ## FAQ
 
-- *I want to process other kinds of graphs*: While seemingly somewhat tailored to AMR, smatchpp allows processing of all kinds of graphs. To process other kinds of graphs, it can be good to remove AMR-specifc arguments (like `syntactic_standardization` in `score.sh`), other than that there shouldn't be anything extra to do. Of course, if you have specific graphs it can also help to write your own standardizer (see example for AMRStandardizer in `smatchpp/preprocess.py`) and possibly create another Reader (currently it is possibly to read graphs in penman form or tsv, see readers in `smatchpp/data_helpers.py').
+- *I want to process other kinds of graphs*: This is simple. See [Example II](ex:basicdefault-ilp) scores two general graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example III](ex:basicdefault-amr).
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. In this case we have three options. 1. use a heuristic by setting solver as HillClimber (unfortunately the solutions by heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#lossless-gc)). This makes evaluation much faster and still gives an optimal score (the score tends to be slightly harsher/lower). 3. you can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal (as in the hill-climber) but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex:lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
 
 - *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow graded matching. Smatch++ allows easy customization of the triple matching function, and you can easily implement your own class. For examples, see file `smtachpp/score.py`.
 

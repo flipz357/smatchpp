@@ -74,7 +74,7 @@ def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-desc
         return error_state
     else:
         logger.info("PropBank frame file not found under resource/, I'll try to download it\
-                    from {}.format(url)")
+                    from {}".format(url))
         try:
             import requests
             predfile = requests.get(url).text

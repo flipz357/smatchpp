@@ -65,7 +65,7 @@ class EmbeddingConceptMatcher(interfaces.TripleMatcher):
         return sc
 
 
-class AMRScorer(interfaces.Scorer):
+class TripleScorer(interfaces.Scorer):
 
     def __init__(self, triplematcher=None):
         if not triplematcher:
