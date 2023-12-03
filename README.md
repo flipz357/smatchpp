@@ -61,11 +61,11 @@ x w rel
 
 ### Evaluating other kinds of graphs
 
-For evaluating other kinds of graphs, set the flag `-graph_type generic` in `score.sh`, to peform some minimal generic standardization.
+For evaluating other kinds of graphs, set the flag `-graph_type generic` in `score.sh`, to peform some minimal generic standardization. Or remove the flag, to perform no graph pre-processing at all.
 
 ### Using hill-climber
 
-For using a hill-climber as solver, set the flag `-solver hillclimber` in `score.sh`
+For using a hill-climber as solver, set the flag `-solver hillclimber` in `score.sh`. **Warning**: Using a hill-climber is not advisable and will yield Smatch scores that are not verifiable and are likely false.
 
 ### Fast ILP alignment with graph compression
 
