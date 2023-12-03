@@ -4,7 +4,7 @@ The package allows handy processing of graphs including graph alignment and grap
 
 - Simple graph reading, graph writing
 - Different alignment solvers including optimal ILP alignment, and optional graph compression
-- Safe graph evaluation scoring with bootstrap confidence intervals, micro and macro averages
+- Evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - Standardization tailored to AMR graphs, easy to extend for other graphs
 - Fine-grained AMR aspect scoring (NER, cause, time,...), easy to extend for other graphs
 
