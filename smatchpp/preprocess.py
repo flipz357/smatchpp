@@ -3,98 +3,106 @@ from collections import defaultdict
 import logging
 from smatchpp import util
 from smatchpp import interfaces
+from smatchpp import graph_transforms
 
 logger = logging.getLogger("__main__")
 
+class DoNothingStandardizer(interfaces.GraphStandardizer):
+    
+    @staticmethod
+    def _standardize(triples):
+        return triples
+
+class GenericStandardizer(interfaces.GraphStandardizer):
+    """Class for graph standardization
+
+       This class performs default standardization of generic graphs
+       
+       1. Lower Casing
+       ------------
+       We lower case everything, e.g. (x, op1, "Obama") -> (x, op1, "obama"). 
+       We presume that lower-uppercasing doesn't change the meaning.
+       
+       2. Remove Quotes
+       -------------
+       We remove quotes e.g. (x, op1, "Obama") -> (x, op1, Obama). This often makes sense since some graphs
+       have quotes with ' and other with ", and we presume it makes no difference
+       
+       3. Reindex nodes
+       -------------
+       We relabel variable names / node indeces. It is a useful standardization for all graphs. It prevents
+       that there are node labels that are the same as node indexes.
+
+       4. Deinvert edges
+       --------------
+       We deinvert edges, e.g. (x, a-of, y) -> (y, a, x). Makes sense as a standardization, Penman uses inversion 
+       only to facilitate string serialization, so relations should be deinverted.
+       So this makes sense for penman graphs in general.
+    """
+
+    def __init__(): 
+        return None
+    
+    def _standardize(self, triples):
+        """Triple standardization according to parameters specified in init"""
+
+        triples = deepcopy(triples)
+        logging.debug("standardizing triples") 
+        logging.debug("This is the input graph: {}".format(triples)) 
+        
+        triples = graph_transforms.lower_all_labels(triples) 
+        triples = graph_transforms.remove_quotes_from_triples(triples)
+        graph_transforms.relabel_vars(triples)
+        graph_transforms.deinvert_e(triples)
+        
+        return triples
+     
 class AMRStandardizer(interfaces.GraphStandardizer):
     """Class for graph standardization
 
-       This class preforms standardization of amr graphs
+        1. Lower Casing
+       ----------------
+       see GenericStandardizer
+       
+       2. Remove Quotes
+       ----------------
+       see GenericStandardizer
+       
+       3. Reindex nodes
+       ----------------
+       see GenericStandardizer
+       
+       4. Domain2Mod
+       -------------
+       Specific AMR inversion to handle that AMR views :domain = mod-of. 
+       Makes sense as a standardization, since AMR guidelines 
+       explicitly define :domain as the inverse of :mod-of.
 
-       Attributes:
-           reify_nodes (bool):                 reify nodes, e.g. (x, polarity, -) -> (x, polarity, z), (z, instance, -).
-                                               
-                                               As deafult this is set to **False**, since it may be needed sometimes, but not 
-                                               in the standard evaluation setup.
+       5. Deinvert edges
+       -----------------
+       see GenericStandardizer
 
-           syntactic_standardization (string): None or \"dereify\", or \"reify\". e.g.,
-                                               None: do nothing
-                                               dereify: (z, instance, locatedAt), (z, a1, x), (z, a2, y) -> (x, location, y)
-                                               reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
-                                               
-                                               As deafult this is set to **True**, since it induces some standardzation and forces
-                                               parsed amrs, if possible, in the same format as assumed by the AMR Sembank, which
-                                               derifies per default, see [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md)
+       6. Use Concept as Root
+       ----------------------
+       This is justified by [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md) 
+       who specifically speak about a *root concept*, so the root should express the focus and be non-anonymous
+       With this, the two AMRs (c / car) and (d / dog) will get a score of 0.0. 
+       On the other hand two AMRs would get a score of 0.5, since the root would anonymous (which may be less desired).
 
-           lower (bool):                       lower case, e.g. (x, op1, "Obama") -> (x, op1, "obama")
-                                               
-                                               As default this is set to **True**, since it is a useful standardization 
-                                               and does not change the meaning of AMR.
+       7. Dereify edges
+       ----------------
+       It induces some standardzation and forces parsed amrs, if possible, 
+       in the same format as assumed by the AMR Sembank, which derifies per default, 
+       see [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md)
 
-           reomve_quotes (bool):               remove quotes e.g. (x, op1, "Obama") -> (x, op1, Obama)
-
-                                               As defailt this is set to **True**, since some amrs 
-                                               have quotes with ' and other with " so it makes sense
-
-           deinvert_edges (bool):              deinvert edges, e.g. (x, a-of, y) -> (y, a, x)
-                                               
-                                               As default, this is set to **True**. Makes sense as a standardization, AMR mostly 
-                                               uses inversion only to facilitate string serialization, so relations should be deinverted.
-                                               So this makes sense for penman graphs in general, not only AMR.
-           
-           domain_to_mod (bool):               advanced AMR inversion to handle that :domain = mod-of
-                                               
-                                               As default, this is set to **True**. Makes sense as a standardization, since AMR guidelines
-                                               explicitly define :domain as the inverse of :mod-of.
-
-           norm_logical_ops (bool):            if true, or and and are seen as commutative, e.g., 
-                                               (x, instance, and), (x, op1, y), (x, op2, z) -> (x, instance, and), (x, op, y), (x, op, z)
-
-                                               As default this is set to **False**. But it may be useful to set to True for some cases since it seems
-                                               useful for semantic commutative relations.
-
-           use_concept_as_root (bool):         AMR style root, where root is not attached to a ROOT, but to a concept 
-                                               e.g. if true: (xvar, :root, concept) if false: (xvar, :root, root_of_graph)
-
-                                               As default, this is set to **True**. This is justified by 
-                                               [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md) 
-                                               who specifically speak about a *root concept*, so the root should express the focus and be non-anonymous
-                                               With True enabled, the two AMRs (c / car) and (d / dog) will get a score of 0.0. 
-                                               When set to False, these two AMRs will get a score of 0.5, since the root is anonymous.
-
-           remove_duplicates (bool):           default=True since duplicates have no clear meaning in AMR
-
-                                               As default, this is set to **False**. The meaning of duplicate triples in AMR is not clear. However,
-                                               it can also be set to True, Smatch++ allows safe scoring of duplicate triples.
-
-           semantic_standardization (bool):    default=False, if True, we apply rules and heuristics to map 
-                                               core roles to explicit roles
-
-                                               As default, this is set to **False**. It is an experimental way of better standardizing AMRs, 
-                                               which is not yet 100% validated. The idea is to map, e.g., the :arg2 to :instrument, 
-                                               if indicated by propbank frames.
+       8. Remove Duplicates
+       --------------------
+       The meaning of duplicate triples in AMR is not clear, therefore we remove them.
     """
 
-    def __init__(self, reify_nodes=False, syntactic_standardization=None, lower=True, relabel_vars=True, 
-                 remove_quote=True, deinvert_edges=True, domain_to_mod=True, norm_logical_ops=False, 
-                 use_concept_as_root=True, remove_duplicates=True, semantic_standardization=False):
+    def __init__(self): 
         
-        assert syntactic_standardization in [None, "dereify", "reify"] 
-
-        self.lower = lower
-        self.relabel_vars = relabel_vars
-        self.reify_nodes = reify_nodes
-        self.syntactic_standardization = syntactic_standardization
-        self._maybe_prepare_syntactic_standardization()
-        
-        self.domain_to_mod = domain_to_mod
-        self.deinvert_edges = deinvert_edges
-        self.remove_quote = remove_quote
-        self.norm_logical_ops = norm_logical_ops
-        self.use_concept_as_root = use_concept_as_root
-        self.remove_duplicates = remove_duplicates
-        self.semantic_standardization = semantic_standardization
-        self._maybe_prepare_semantic_standardization()
+        self.dereifier = graph_transforms.RuleBasedSyntacticAMRTransformer(mode="dereify")
 
         return None
 
@@ -105,8 +113,20 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         logging.debug("standardizing triples") 
         logging.debug("1. input: {}".format(triples)) 
         
+        triples = graph_transforms.lower_all_labels(triples) 
+        triples = graph_transforms.remove_quotes_from_triples(triples)
+        graph_transforms.relabel_vars(triples)
+        graph_transforms.domain2mod(triples)
+        graph_transforms.deinvert_e(triples)
+        graph_transforms.concept_as_root(triples)
+        triples = self.dereifier.transform(triples)
+        triples = graph_transforms.remove_duplicates(triples)
+        return triples
+
+        """
         if self.lower:
-            triples = [(s.lower(), r.lower(), t.lower()) for (s, r, t) in triples]
+            #triples = [(s.lower(), r.lower(), t.lower()) for (s, r, t) in triples]
+            triples = self._lower_all_labels(triples) 
             logging.debug("2. lower cased: {}".format(triples)) 
         if self.remove_quote:
             triples = [util.remove_quotes_from_triple(t) for t in triples]
@@ -129,8 +149,8 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         if self.use_concept_as_root:
             self._concept_as_root(triples)
             logging.debug("9. make concept to root (AMR focus style): {}".format(triples)) 
-        if self.syntactic_standardization:
-            triples = self.syntactic_standardizer_edge.standardize(triples)
+        if self.edge_de_reification:
+            triples = self.edge_dereifier.standardize(triples)
             logging.debug("10. syntactic standardization via {}: {}".format(self.syntactic_standardization, triples)) 
         if self.semantic_standardization:
             triples = self.semantic_standardizer.standardize(triples) 
@@ -139,7 +159,8 @@ class AMRStandardizer(interfaces.GraphStandardizer):
             triples = list(set(triples))
             logging.debug("12. removed duplicate triples: {}".format(triples)) 
         return triples
-    
+        """
+
     @staticmethod
     def domain2mod(triples):
         for i, triple in enumerate(triples):
@@ -161,60 +182,16 @@ class AMRStandardizer(interfaces.GraphStandardizer):
             self.semantic_standardizer = SemanticAMRStandardizer()
         return None
     
-    def _maybe_prepare_syntactic_standardization(self):
+    def _maybe_prepare_edge_dereification_standardization(self):
         """Syntactic standardization happens according to rules 
             which are defined in a reification rule table in resources/...
 
             This parses the file into applicable rules
         """
-        if self.syntactic_standardization:
-            self.syntactic_standardizer_edge = SyntacticAMRStandardizerEdge(
-                                                        mode=self.syntactic_standardization, 
-                                                        lower=self.lower)
-        if self.reify_nodes:
-            self.syntactic_standardizer_node = SyntacticAMRStandardizerNode()
-        return None
-
-    def _relabel_vars(self, triples):
-        """standardize variable names"""
-        
-        v2c = util.get_var_concept_dict(triples)
-        constants = util.get_constant_set(triples)
-
-        # standardize and make variable names simpler "(xyds / cat)" -> "(c / cat)"
-        # just for optics and better alignment interpretation
-        v2v = {}
-        vnew_idx = {}
-        for v in v2c:
-            concept = v2c[v]
-            vnew = concept[0]
-            if vnew not in vnew_idx:
-                v2v[v] = vnew
-                vnew_idx[vnew] = 1
-            else:
-                v2v[v] = vnew + str(vnew_idx[vnew])
-                vnew_idx[vnew] += 1
-        
-        # take care that there are no variable names that are same as concepts
-        # some parsers and the reference does this, can lead to bugs
-        # so we will change "(i / i)" -> "(ix / i)"
-        for v in v2v:
-            vnew = v2v[v]
-            while vnew in constants:
-                vnew += "x"
-            v2v[v] = vnew
-
-        # now we can map to new variables
-        for i in range(len(triples)):
-            src = triples[i][0]
-            rel = triples[i][1]
-            tgt = triples[i][2]
-            if src in v2v:
-                src = v2v[src]
-            if tgt in v2v:
-                if rel != ":instance":
-                    tgt = v2v[tgt]
-            triples[i] = (src, triples[i][1], tgt)
+        if self.edge_de_reification:
+            self.edge_dereifier = EdgeDeReifier(
+                                                mode=self.edge_de_reification, 
+                                                lower=self.lower)
         return None
 
     def _concept_as_root(self, triples):
@@ -227,58 +204,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
                 newtriple = (tr[2], ":root", vc[tr[2]])
                 triples[i] = newtriple
         return None
-
-    def _reify_n(self, triples):
-        """Reify constant nodes.
-            
-           constant nodes are targets with no outgoing edge (leaves) 
-           that don't have an incoming :instance edge.
-
-           E.g., (x, :polarity, -) ---> (x, :polarity, y), (y, :instance, -)
-        """
-
-        collect_ids = set()
-        for i, tr in enumerate(triples):
-            target = tr[2]
-            incoming_instance = False
-            for tr2 in triples:
-                if tr2[1] == ":instance" and tr2[0] == target:
-                    incoming_instance = True
-                if tr2[1] == ":instance" and tr2[2] == target:
-                    incoming_instance = True
-            if not incoming_instance:
-                collect_ids.add(i)
-        newvarkey = "rfattribute_"
-        idx = 0
-        for cid in collect_ids:
-            varname = newvarkey + str(idx)
-            triples.append((triples[cid][0], triples[cid][1], varname))
-            triples.append((varname, ":instance", triples[cid][2]))
-            idx += 1
-        for i in reversed(sorted(list(collect_ids))):
-            del triples[i]
-        return None
-
-    def _deinvert_e(self, triples):
-        """ Deinvert edges (s, r-of, t) --> (t, r, s)
-
-        Args:
-            triples: triples
-
-        Returns:
-            None
-            
-        """
-        
-        for i in range(len(triples)):
-            s, r, t = triples[i]
-            r = r.split("-of")
-            if len(r) > 1:
-                r = r[0]
-                triples[i] = (t, r, s)
-        
-        return None
-     
+ 
     @staticmethod
     def _norm_logical_ops(triples):
         """Norm logical operators
@@ -495,7 +421,7 @@ class SemanticAMRStandardizer(interfaces.GraphStandardizer):
                 out.append(triples[i])
         return out
 
-class SyntacticAMRStandardizerNode(interfaces.GraphStandardizer):
+class NodeReifier(interfaces.GraphStandardizer):
 
     def __init__(self):
         return None
@@ -534,10 +460,12 @@ class SyntacticAMRStandardizerNode(interfaces.GraphStandardizer):
             idx += 1
         for i in reversed(sorted(list(collect_ids))):
             del triples[i]
+        
+        logging.debug("I reified nodes: {}".format(triples)) 
         return triples
 
 
-class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
+class EdgeDeReifier(interfaces.GraphStandardizer):
 
     def __init__(self, mode="dereify", lower=True):
         
@@ -672,10 +600,4 @@ class SyntacticAMRStandardizerEdge(interfaces.GraphStandardizer):
         
         triples += new
         return None
-
-
-class DoNothingGraphStandardizer(interfaces.GraphStandardizer):
-    
-    def _standardize(self, triples):
-        return triples
 

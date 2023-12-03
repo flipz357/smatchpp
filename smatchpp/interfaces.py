@@ -2,10 +2,27 @@ from collections import Counter
 
 class GraphStandardizer:
     
-
     def standardize(self, triples):
         self._check_args(triples)
         triples = self._standardize(triples)
+        self._check_result(triples)
+        return triples
+    
+    @staticmethod
+    def _check_args(triples):
+        if not isinstance(triples, list):
+            raise ValueError("invalid input, must be a list")
+
+    @staticmethod
+    def _check_result(triples):
+        if not isinstance(triples, list):
+            raise ValueError("invalid output, must return list")
+
+class GraphTransformer:
+    
+    def transform(self, triples):
+        self._check_args(triples)
+        triples = self._transform(triples)
         self._check_result(triples)
         return triples
     

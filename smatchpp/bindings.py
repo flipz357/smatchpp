@@ -52,9 +52,6 @@ class Smatchpp():
             self.graph_scorer = score.TripleScorer(triplematcher=self.triplematcher)
         
         self.subgraph_extractor = subgraph_extractor
-        if not self.subgraph_extractor:
-            from smatchpp import subgraph_extraction
-            self.subgraph_extractor = subgraph_extraction.SubGraphExtractor(add_instance=True)
 
         self.printer = printer
         if not self.printer:

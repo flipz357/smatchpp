@@ -5,15 +5,6 @@ from collections import defaultdict
 
 logger = logging.getLogger("__main__")
 
-def remove_quotes_from_triple(triple):
-
-    f = lambda x: x.replace("\"", "").replace("'", "")
-
-    triple = (f(triple[0]), f(triple[1]), f(triple[2]))
-
-    return triple
-
-
 def read_reify_table(p="/resource/reify_table.txt", lower=False):
     """load reification rules"""
     
@@ -263,6 +254,3 @@ def _n_outgoing(triples, node):
         if tr[0] == node:
             n += 1
     return n
- 
-
-

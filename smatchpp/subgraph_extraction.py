@@ -1,6 +1,7 @@
 import re
 from collections import defaultdict
 from smatchpp import util
+from smatchpp import interfaces
 
 def subgraph_instance(triples):
     triples = [t for t in triples if t[1] == ":instance"]

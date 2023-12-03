@@ -79,7 +79,8 @@ def build_arg_parser():
     parser.add_argument('--remove_duplicates'
             , action='store_true'
             , help='enable for removing duplicate triples, which makes sense for most cases')
-     
+    
+    """
     parser.add_argument('-syntactic_standardization'
             , default=None
             , nargs='?'
@@ -87,6 +88,7 @@ def build_arg_parser():
             , help='edge standardization: None, reification, or dereification \
                     E.g.: location(x, y) <-> instance(z, location) and arg1(z, x) and arg2(z,y)\
                     Here, <- is derieification, and -> reification')
+    """    
     
     parser.add_argument('-output_format'
             , default='text'
@@ -110,10 +112,11 @@ if __name__ == "__main__":
     from smatchpp import solvers
     from smatchpp import preprocess
     from smatchpp import align
-    from smatchpp import subgraph_extraction
+    #from smatchpp import subgraph_extraction
     from smatchpp import score
     from smatchpp import eval_statistics
-  
+    from smatchpp import model_factory 
+    
     amrs = data_helpers.read_amr_strings_from_file(args.a)
     amrs2 = data_helpers.read_amr_strings_from_file(args.b)
     
@@ -122,7 +125,8 @@ if __name__ == "__main__":
     logger.info("loading processing modules ...")
     graph_reader = data_helpers.get_reader(args.input_format)
     logger.info("1. Penman reader loaded")
-    graph_standardizer = model_factory.PreprocessorFactory.get_preprocessor(args.graph_type)
+    print(args.graph_type)
+    graph_standardizer = model_factory.StandardizerFactory.get_standardizer(args.graph_type)
     """
     graph_standardizer = preprocess.AMRStandardizer(
                                         syntactic_standardization=args.syntactic_standardization, 
