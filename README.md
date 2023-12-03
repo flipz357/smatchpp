@@ -12,7 +12,7 @@ Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip i
 
 ## Requirements
 
-For the most basic version, there shouldn't be a need to install additional modules. However, when using ILP optimal solving and bootstrapping, we require
+For the most basic version, there shouldn't be a need to install additional modules. However, when using ILP optimal solving and bootstrapping for evaluation (highly recommended!), we require
 
 ```
 mip (tested: 1.13.0)
