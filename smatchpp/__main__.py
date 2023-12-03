@@ -38,6 +38,13 @@ def build_arg_parser():
             , choices=["tsv, penman"]
             , help='score type')
     
+    parser.add_argument('-graph_type'
+            , type=str
+            , default=None
+            , nargs='?'
+            , choices=[None, "amr"]
+            , help='graph type to load specific processing')
+    
     parser.add_argument('-score_dimension'
             , type=str
             , default="main"
@@ -115,9 +122,12 @@ if __name__ == "__main__":
     logger.info("loading processing modules ...")
     graph_reader = data_helpers.get_reader(args.input_format)
     logger.info("1. Penman reader loaded")
+    graph_standardizer = model_factory.PreprocessorFactory.get_preprocessor(args.graph_type)
+    """
     graph_standardizer = preprocess.AMRStandardizer(
                                         syntactic_standardization=args.syntactic_standardization, 
                                         remove_duplicates=args.remove_duplicates)
+    """
     logger.info("2. triple standardizer loaded")
     graph_pair_preparer = preprocess.BasicGraphPairPreparer(lossless_graph_compression=args.lossless_graph_compression)
     logger.info("3. graph pair processor loaded")
@@ -130,7 +140,8 @@ if __name__ == "__main__":
 
     subgraph_extractor = None
     if "all" in args.score_dimension:
-        subgraph_extractor = subgraph_extraction.SubGraphExtractor(add_instance=True)
+        #subgraph_extractor = subgraph_extraction.SubGraphExtractor(add_instance=True)
+        subgraph_extractor = model_factory.SubgraphExtractorFactory.get_extractor(args.graph_type)
         logger.info("4c. sub graph extractor")
     
     

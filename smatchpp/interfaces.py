@@ -48,9 +48,16 @@ class GraphPairPreparer:
 
 class TripleMatcher:
     
-
     def triplematch(self, triple1, triple2):
         return self._triplematch(triple1, triple2)
+
+
+class SubGraphExtractor:
+
+    def all_subgraphs_by_name(self, triples):
+        # should return a dictionary that maps strings onto sets with triples, i.e., subgraphs
+        name_subgraph_dict = self._all_subgraphs_by_name(triples)
+        return name_subgraph_dict
 
 
 class GraphReader:

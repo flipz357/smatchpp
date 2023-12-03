@@ -74,7 +74,7 @@ def get_additional_instances(triples, triples_all):
     return additional_instance
 
 
-class SubGraphExtractor():
+class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 
     def __init__(self, add_instance=True, semantic_standardization=True, add_preds=True):
          
@@ -89,7 +89,7 @@ class SubGraphExtractor():
         self.concept_groups = util.read_concept_groups()
         self.amr_aspects = util.read_amr_aspects()
 
-    def all_subgraphs_by_name(self, triples):
+    def _all_subgraphs_by_name(self, triples):
         name_subgraph = {}
         
         # full graph
