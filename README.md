@@ -5,8 +5,8 @@ The package allows handy processing of graphs including graph alignment and grap
 - Simple graph reading, graph writing
 - Different alignment solvers including optimal ILP alignment, and optional graph compression
 - Safe graph evaluation scoring with bootstrap confidence intervals, micro and macro averages
-- Standardization tailored to AMR graphs, but easy to extend for other graphs
-- Extended AMR-targeted subgraph extraction and scoring for temporal, causal, and more meaning aspects
+- Standardization tailored to AMR graphs, easy to extend for other graphs
+- Fine-grained AMR aspect scoring (NER, cause, time,...), easy to extend for other graphs
 
 Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
 
@@ -24,11 +24,9 @@ The packages can be installed with `pip ...`
 
 ## Example configurations for best-practice evaluation
 
-### Best practice: ILP alignment, dereification, corpus metrics and confidence intervals<a id="basic-eval"></a>
+### Best practice for AMR evaluation<a id="basic-eval"></a>
 
-- Efficiency: + 
-- Optimality: +++
-- Graph standardization: ++ 
+This evaluation setup has optimal ILP alignmnent, calculates micro and macro corpus metrics and confidence intervals. It also applies AMR graph standardization.
 
 **Simply call**: 
 
@@ -59,80 +57,25 @@ x w rel
 ...
 ```
 
-### Hill-climber alignment, dereification, corpus metrics and confidence intervals
+## Other interesting configurations
 
-- Efficiency: ++ 
-- Optimality: -
-- Graph standardization: ++
+### Evaluating other kinds of graphs
 
-```
-python -m smatchpp      -a <graphs1> \
-			-b <graphs2> \
-			-solver hillclimber \
-			-syntactic_standardization dereify \
-			-score_dimension main \
-			-score_type micromacro \
-			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates
-```
+For evaluating other kinds of graphs, set the flag `-graph_type generic` in `score.sh`, to peform some minimal generic standardization.
 
-### Fast ILP alignment with graph compression, corpus metrics and confidence intervals
+### Using hill-climber
 
-- Efficiency: ++ 
-- Optimality: +++
-- Graph standardization: + 
+For using a hill-climber as solver, set the flag `-solver hillclimber` in `score.sh`
 
-```
-python -m smatchpp      -a <graphs1> \
-			-b <graphs2> \
-			-solver ilp \
-			-syntactic_standardization dereify \
-			-score_dimension main \
-			-score_type micromacro \
-			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates \
-			--lossless_graph_compression
-```
+### Fast ILP alignment with graph compression
 
-### ILP with reification, corpus metrics and confidence intervals
+For using a graph compression to make evaluation much faster, add the flag `--lossless_graphi_compression` in `score.sh`
 
-- Efficiency: -
-- Optimality: +++
-- Graph standardization: +++
+### Fine-grained aspect scoring
 
-```
-python -m smatchpp      -a <graphs1> \
-			-b <graphs2> \
-			-solver ilp \
-			-syntactic_standardization reify \
-			-score_dimension main \
-			-score_type micromacro \
-			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates \
-```
+Here we want to measure performance on differnt types of subgraphs (e.g., NER, cause, etc.). This is currently only available when `-graph_type amr`. For perforing fine-grained for other graph types, you need to define your custom subgraph extraction.
 
-### ILP alignment, corpus sub-aspect metrics and confidence intervals
-
-- Efficiency: + 
-- Optimality: +++
-- Graph standardization: ++ 
-
-```
-python -m smatchpp      -a <graphs1> \
-			-b <graphs2> \
-			-solver ilp \
-			-syntactic_standardization dereify \
-			-score_dimension all-multialign \
-			-score_type micromacro \
-			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates \
-```
-
-### Other configurations
+### Visit other options of evaluation
 
 See
 
