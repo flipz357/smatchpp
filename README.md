@@ -265,12 +265,12 @@ print(measure.score_pair(s1, s2)) # {'main': {'F1': 75.0, 'Precision': 75.0, 'Re
 
 # design a custom standardizer class (just needs to have a _standardize function)
 from smatchpp import interfaces
-class ToUnlabeled(interfaces.GraphStandardizer):
+class Unlabeler(interfaces.GraphStandardizer):
     def _standardize(self, triples):
         return [(s, ":rel", t) for s, _, t in triples]
 
 # init object and re-score
-my_standardizer = ToUnlabeled()
+my_standardizer = Unlabeler()
 custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
