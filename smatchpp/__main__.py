@@ -123,7 +123,7 @@ if __name__ == "__main__":
     assert len(amrs) == len(amrs2)
 
     logger.info("loading processing modules ...")
-    graph_reader = data_helpers.get_reader(args.input_format)
+    graph_reader = model_factory.GraphReaderFactory.get_reader(args.input_format)
     logger.info("1. Penman reader loaded")
     print(args.graph_type)
     graph_standardizer = model_factory.StandardizerFactory.get_standardizer(args.graph_type)

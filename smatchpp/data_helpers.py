@@ -200,17 +200,6 @@ class TSVReader(interfaces.GraphReader):
         triples = [(triple[0], triple[2], triple[1]) for triple in triples]
 
         return triples
-    
-
-def get_reader(reader_name):
-
-    if reader_name == "penman":
-        return PenmanReader()
-
-    if reader_name == "tsv":
-        return TSVReader()
-    
-    raise NameError("reader name not known, available: penman, tsv")
 
 
 class PenmanWriter(interfaces.GraphWriter):
@@ -220,6 +209,14 @@ class PenmanWriter(interfaces.GraphWriter):
         self.root_relation = root_relation
 
     def _graph2string(self, triples):
+        """Prepeates and then calls recursive function to 
+           build a string version / serialization of a DAG ("Penman")
+
+        Args:
+            triples: the graph
+        Returns:
+            a string that contains a graph serialization in the Penman style
+        """
         
         # preparation, maybe remove explicit root triplet
         v2c = util.get_var_concept_dict(triples)
@@ -238,18 +235,30 @@ class PenmanWriter(interfaces.GraphWriter):
     
     @staticmethod
     def _rel_sort(triples):
+        """sort all edges alphabetically according to edge labels"""
         triples = [t for t in triples if t[1] != ":instance"]
         triples = list(sorted(triples, key=lambda t:t[1]))
         return triples
 
     def _gather(self, triples, node, v2c, printed_triples):
+        """Recursive function to build a string version / serialization of a DAG ("Penman")
+
+        Args:
+            triples: the graph
+            node: the current node
+            v2c: mapping from variables to concepts
+            printed_triples: the triples that have already been treated
+
+        Returns:
+            a string that contains a graph serialization in the Penman style
+        """
         
         # get outgoing nodes and relations
-        childs = util.get_childs(triples, node)
+        childs = self._get_triples_where_node_is_child(triples, node)
         childs = self._rel_sort(childs)
 
         #get incoming nodes and relations (that can be inverted with -of) 
-        possible_childs = util.get_possible_childs(triples, node)
+        possible_childs = self._get_triples_where_node_could_be_made_child(triples, node)
         possible_childs = self._rel_sort(possible_childs)
         
         # temporary string
@@ -314,3 +323,43 @@ class PenmanWriter(interfaces.GraphWriter):
                 tmpstring += " " + tmprel + " " + tmptarget + self._gather(triples, tmptarget, v2c, printed_triples)
         
         return tmpstring 
+    
+    
+    @staticmethod
+    def get_childs(triples, node):
+        """Get all triples where node is the source
+
+        Args:
+            triples: the graph
+            node: the node
+
+        Returns:
+            list with triples
+        """
+        childs = []
+        for tr in triples:
+            if tr[0] == node:
+                childs.append(tr)
+        return childs
+
+    
+    @staticmethod
+    def get_possible_childs(triples, node):
+        """Get all triples where node is the target
+
+        These triples are incoming relations, but could be converted
+        in linearization to outgoing relations, via "-of"
+
+        Args:
+            triples: the graph
+            node: the node
+
+        Returns:
+            list with triples that could be inverted to make the source a child of node
+        """
+        childs = []
+        for tr in triples:
+            if tr[2] == node:
+                childs.append(tr)
+        return childs
+

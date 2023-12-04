@@ -56,6 +56,7 @@ def read_concept_groups(p="/resource/concept_groups.json"):
 
     return data
 
+
 def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-descr.txt",
         url="https://amr.isi.edu/doc/propbank-amr-frames-arg-descr.txt"):
     path = os.path.dirname(__file__)
@@ -80,6 +81,7 @@ def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-desc
         error_state = 1
     
     return error_state
+
 
 def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
     """load frame-argument rules"""
@@ -225,23 +227,16 @@ def alignmat_compressed(alignmat):
     return alignmat
 
 
-def get_childs(triples, node):
-    childs = []
-    for tr in triples:
-        if tr[0] == node:
-            childs.append(tr)
-    return childs
-
-
-def get_possible_childs(triples, node):
-    childs = []
-    for tr in triples:
-        if tr[2] == node:
-            childs.append(tr)
-    return childs
-
-
 def n_incoming(triples, node):
+    """Counts incoming edges
+
+    Args:
+        triples: the graph
+        node: the node
+
+    Returns:
+        number of incoming edges into node
+    """
     n = 0
     for tr in triples:
         if tr[2] == node:
@@ -250,6 +245,15 @@ def n_incoming(triples, node):
 
 
 def n_outgoing(triples, node):
+    """Counts outgoing edges
+
+    Args:
+        triples: the graph
+        node: the node
+
+    Returns:
+        number of outgoing edges from node
+    """
     n = 0
     for tr in triples:
         if tr[0] == node:
