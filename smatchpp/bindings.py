@@ -24,7 +24,7 @@ class Smatchpp():
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:
             from smatchpp import preprocess
-            self.graph_standardizer = preprocess.DoNothingGraphStandardizer()
+            self.graph_standardizer = preprocess.DoNothingStandardizer()
 
         self.graph_pair_preparer = graph_pair_preparer
         if not self.graph_pair_preparer:

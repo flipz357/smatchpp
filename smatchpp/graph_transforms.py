@@ -194,7 +194,7 @@ class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer):
         return None
 
     def _transform(self, triples):
-
+        logger.debug("Semantic AMR transformer, INPUT: {}".format(triples))
         vc = util.get_var_concept_dict(triples)
         news = {}
         for name in self.amr_aspects:
@@ -213,6 +213,7 @@ class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer):
                 out.append(news[i])
             else:
                 out.append(triples[i])
+        logger.debug("Semantic AMR transformer, OUTPUT: {}".format(triples))
         return out
 
 class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer):
@@ -238,6 +239,7 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer):
         return None
 
     def _transform(self, triples):
+        logger.debug("Syntactic AMR transformer with mode={}, INPUT: {}".format(self.mode, triples))
         if not self.mode:
             return triples
         triples = list(triples)
@@ -245,6 +247,7 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer):
             self._dereify_graph(triples)
         elif self.mode == "reify":
             self._reify_graph(triples)
+        logger.debug("Syntactic AMR transformer with mode={}, OUTPUT: {}".format(self.mode, triples))
         return triples
 
     def _reify_graph(self, triples):

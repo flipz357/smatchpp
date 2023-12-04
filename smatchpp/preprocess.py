@@ -14,9 +14,9 @@ class DoNothingStandardizer(interfaces.GraphStandardizer):
         return triples
 
 class GenericStandardizer(interfaces.GraphStandardizer):
-    """Class for graph standardization
+    """Class for generic graph standardization
 
-       This class performs default standardization of generic graphs
+       We apply the following steps
        
        1. Lower Casing
        ------------
@@ -58,7 +58,9 @@ class GenericStandardizer(interfaces.GraphStandardizer):
         return triples
      
 class AMRStandardizer(interfaces.GraphStandardizer):
-    """Class for graph standardization
+    """Class for default AMR graph standardization.
+
+       We apply the following steps:
 
         1. Lower Casing
        ----------------

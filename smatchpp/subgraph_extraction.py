@@ -83,8 +83,8 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         self.add_instance = add_instance
         self.semantic_standardization = semantic_standardization
         if self.semantic_standardization:
-            from smatchpp.preprocess import SemanticAMRStandardizer
-        self.semantic_standardizer = SemanticAMRStandardizer()
+            from smatchpp.graph_transforms import RuleBasedSemanticAMRTransformer
+        self.semantic_standardizer = RuleBasedSemanticAMRTransformer()
         self.add_preds = add_preds
         self.reify_rules = util.read_reify_table()
         self.concept_groups = util.read_concept_groups()
@@ -102,7 +102,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         tmptriples = name_subgraph["main without wiki"]
         
         if self.semantic_standardization:
-            tmptriples = self.semantic_standardizer.standardize(triples)
+            tmptriples = self.semantic_standardizer.transform(triples)
             name_subgraph["main (semantically standardized)"] = tmptriples
         for name, subgraph in self._iter_name_subgraph(tmptriples):
             name_subgraph[name] = subgraph

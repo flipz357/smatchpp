@@ -157,7 +157,7 @@ According to best practice, here we want to compute "micro Smatch" for a parser 
 
 ```python
 from smatchpp import Smatchpp, solvers, preprocess, eval_statistics
-graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="dereify")
+graph_standardizer = preprocess.AMRStandardizer()
 printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=True, output_format="json")
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, printer=printer)
@@ -169,15 +169,17 @@ print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision'
 
 If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
-### Example V: Standardize and extract subgraphs
+### Example V: Standardize and extract subgraphs for AMR
 
 ```python
-from smatchpp import Smatchpp
-measure = Smatchpp()
+from smatchpp import preprocess, subgraph_extraction, data_helpers
+reader = data_helpers.PenmanReader()
+standardizer = preprocess.AMRStandardizer()
+subgraph_extractor = subgraph_extraction.AMRSubGraphExtractor()
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
-g = measure.graph_reader.string2graph(string_graph)
-g = measure.graph_standardizer.standardize(g)
-name_subgraph_dict = measure.subgraph_extractor.all_subgraphs_by_name(g)
+g = reader.string2graph(string_graph)
+g = standardizer.standardize(g)
+name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
 
 # get subgraph for "instrument"
 print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
@@ -187,13 +189,12 @@ Note that the result is the same as when we mention the `instrument` edge explic
 Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer (here without subgraph extraction), which explicates core-roles, if possible:
 
 ```python
-from smatchpp import data_helpers, preprocess
+from smatchpp import data_helpers, graph_transforms
 graph_reader = data_helpers.PenmanReader()
-graph_writer = data_helpers.PenmanWriter()
-graph_standardizer = preprocess.AMRStandardizer(semantic_standardization=True)
+graph_transformer = graph_transforms.RuleBasedSemanticAMRTransformer()
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = graph_reader.string2graph(string_graph)
-g = graph_standardizer.standardize(g)
+g = graph_transformer.transform(g)
 print(g) # [('c', ':instrument', 'm'), ('c', ':instance', 'control-01'), ('c1', ':instance', 'computer'), ('m', ':instance', 'mouse'), ('c', ':arg1', 'c1'), ('c', ':root', 'control-01')]
 ```
 
@@ -204,7 +205,6 @@ In this example, we retrieve an alignment between graph nodes.
 ```python
 from smatchpp import Smatchpp
 measure = Smatchpp()
-measure.graph_standardizer.relabel_vars = False
 s1 = "(x / test)"
 s2 = "(y / test)"
 g1 = measure.graph_reader.string2graph(s1)
@@ -220,18 +220,18 @@ print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/b
 
 Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we showed the process from scratch).
 
-### Example VII: Read, standardize and write graph
+### Example VII: Read, reify and write graph
 
 In this example, we read a basic graph from a string, apply reification standardization, and write the reified graph to a string.
 
 ```python
-from smatchpp import data_helpers, preprocess
+from smatchpp import data_helpers, graph_transforms
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="reify")
+reifier = graph_transforms.RuleBasedSyntacticAMRTransformer(mode="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
-g = graph_standardizer.standardize(g)
+g = reifier.transform(g)
 string = graph_writer.graph2string(g)
 print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
@@ -251,6 +251,29 @@ print(len(g1), len(g2)) #4, 2
 ```
 
 If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
+
+### Example IX: Plug in custom standardizer in the matching
+
+To customize SMATCH++ in any ways should be easy. Here, in this example, we want to plug in a custom graph processing to make graphs unlabeled:
+
+```python
+from smatchpp import Smatchpp
+measure = Smatchpp()
+s1 = "(x / y :abc (w / z))"
+s2 = "(x / y :cde (w / z))"
+print(measure.score_pair(s1, s2)) # {'main': {'F1': 75.0, 'Precision': 75.0, 'Recall': 75.0}}
+
+# design a custom standardizer class (just needs to have a _standardize function)
+from smatchpp import interfaces
+class ToUnlabeled(interfaces.GraphStandardizer):
+    def _standardize(self, triples):
+        return [(s, ":rel", t) for s, _, t in triples]
+
+# init object:
+my_standardizer = ToUnlabeled()
+custom_measure = Smatchpp(graph_standardizer=my_standardizer)
+print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+```
 
 ## FAQ
 
