@@ -1,4 +1,3 @@
-from copy import deepcopy
 from collections import defaultdict
 import logging
 from smatchpp import util
@@ -40,13 +39,14 @@ class GenericStandardizer(interfaces.GraphStandardizer):
        So this makes sense for penman graphs in general.
     """
 
-    def __init__(): 
+    def __init__(self): 
         return None
     
-    def _standardize(self, triples):
+    @staticmethod
+    def _standardize(triples):
         """Triple standardization according to parameters specified in init"""
 
-        triples = deepcopy(triples)
+        triples = list(triples)
         logging.debug("standardizing triples") 
         logging.debug("This is the input graph: {}".format(triples)) 
         
@@ -111,7 +111,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
     def _standardize(self, triples):
         """Triple standardization according to parameters specified in init"""
 
-        triples = deepcopy(triples)
+        triples = list(triples)
         logging.debug("standardizing triples") 
         logging.debug("1. input: {}".format(triples)) 
         

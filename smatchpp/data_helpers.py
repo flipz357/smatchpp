@@ -168,7 +168,7 @@ class PenmanReader(interfaces.GraphReader):
                             I have renamed all explicit \":root\" relations 
                             to \":root_but_not_the_graph_root\".""")
         
-        logging.debug("3. result after triple extract: {}".format(triples, triples))
+        logging.debug("3. result after triple extraction: {}".format(triples))
         return triples
     
     @staticmethod
@@ -245,11 +245,11 @@ class PenmanWriter(interfaces.GraphWriter):
     def _gather(self, triples, node, v2c, printed_triples):
         
         # get outgoing nodes and relations
-        childs = util._get_childs(triples, node)
+        childs = util.get_childs(triples, node)
         childs = self._rel_sort(childs)
 
         #get incoming nodes and relations (that can be inverted with -of) 
-        possible_childs = util._get_possible_childs(triples, node)
+        possible_childs = util.get_possible_childs(triples, node)
         possible_childs = self._rel_sort(possible_childs)
         
         # temporary string
@@ -292,7 +292,7 @@ class PenmanWriter(interfaces.GraphWriter):
                 continue
 
             # maybe it's a leaf then it makes no sense to invert
-            if util._n_outgoing(triples, triple[2]) == 0:
+            if util.n_outgoing(triples, triple[2]) == 0:
                 continue
             printed_triples.add(triple)
 

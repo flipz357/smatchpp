@@ -1,5 +1,3 @@
-from copy import deepcopy
-from collections import defaultdict
 import logging
 from smatchpp import util
 from smatchpp import interfaces

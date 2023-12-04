@@ -63,21 +63,22 @@ def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-desc
     error_state = 0
     if os.path.isfile(fullpath):
         return error_state
-    else:
-        logger.info("PropBank frame file not found under resource/, I'll try to download it\
-                    from {}".format(url))
-        try:
-            import requests
-            predfile = requests.get(url).text
-            with open(fullpath, "w") as out_file:
-                out_file.write(predfile)
-            logger.info("suffessfully downloaded the predicate frame file and placed it under {}".format(fullpath))
-            error_state = 0
-        except:
-            logger.warning("Something went wrong when trying to download the predicate frame file.\
-                            You can fix this problem manually by downloading the file from: {}\
-                            and placing it as {}".format(url, fullpath))
-            error_state = 1
+    
+    logger.info("PropBank frame file not found under resource/, I'll try to download it\
+                from {}".format(url))
+    try:
+        import requests
+        predfile = requests.get(url).text
+        with open(fullpath, "w") as out_file:
+            out_file.write(predfile)
+        logger.info("suffessfully downloaded the predicate frame file and placed it under {}".format(fullpath))
+        error_state = 0
+    except:
+        logger.warning("Something went wrong when trying to download the predicate frame file.\
+                        You can fix this problem manually by downloading the file from: {}\
+                        and placing it as {}".format(url, fullpath))
+        error_state = 1
+    
     return error_state
 
 def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
@@ -224,7 +225,7 @@ def alignmat_compressed(alignmat):
     return alignmat
 
 
-def _get_childs(triples, node):
+def get_childs(triples, node):
     childs = []
     for tr in triples:
         if tr[0] == node:
@@ -232,7 +233,7 @@ def _get_childs(triples, node):
     return childs
 
 
-def _get_possible_childs(triples, node):
+def get_possible_childs(triples, node):
     childs = []
     for tr in triples:
         if tr[2] == node:
@@ -240,7 +241,7 @@ def _get_possible_childs(triples, node):
     return childs
 
 
-def _n_incoming(triples, node):
+def n_incoming(triples, node):
     n = 0
     for tr in triples:
         if tr[2] == node:
@@ -248,7 +249,7 @@ def _n_incoming(triples, node):
     return n
 
 
-def _n_outgoing(triples, node):
+def n_outgoing(triples, node):
     n = 0
     for tr in triples:
         if tr[0] == node:

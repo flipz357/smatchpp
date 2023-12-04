@@ -38,8 +38,8 @@ def get_preds(triples, node):
         if node != tr[2]:
             continue
         inode = tr[0]
-        inc = util._n_incoming(triples, inode)
-        outg = util._n_outgoing(triples, inode)
+        inc = util.n_incoming(triples, inode)
+        outg = util.n_outgoing(triples, inode)
         if inc == 0 and outg == 1:
             preds.append(tr)
     return preds
