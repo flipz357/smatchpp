@@ -252,7 +252,7 @@ print(len(g1), len(g2)) #4, 2
 
 If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
 
-### Example IX: Plug in custom standardizer in the matching
+### Example IX: Plug in custom standardizer in the matching<a id="ex-custom-standardizer"></a>
 
 To customize SMATCH++ in any ways should be easy. Here, in this example, we want to plug in a custom graph processing to make graphs unlabeled:
 
@@ -269,7 +269,7 @@ class ToUnlabeled(interfaces.GraphStandardizer):
     def _standardize(self, triples):
         return [(s, ":rel", t) for s, _, t in triples]
 
-# init object:
+# init object and re-score
 my_standardizer = ToUnlabeled()
 custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
@@ -277,7 +277,7 @@ print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 1
 
 ## FAQ
 
-- *I want to process other kinds of graphs*: This is simple. See [Example II](#ex-basicdefault-ilp) scores two general graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example III](#ex-basicdefault-amr).
+- *I want to process other kinds of graphs*: This is simple. See [Example II](#ex-basicdefault-ilp) scores two generic graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
 
 - *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
 
