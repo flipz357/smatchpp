@@ -142,7 +142,7 @@ Beyond basic defaults, we need an ILP solver for best alignment and dereificatio
 
 ```python
 from smatchpp import Smatchpp, solvers, preprocess
-graph_standardizer = preprocess.AMRStandardizer(syntactic_standardization="dereify")
+graph_standardizer = preprocess.AMRStandardizer()
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer)
 score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") # equivalent AMR graphs 

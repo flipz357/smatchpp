@@ -29,7 +29,7 @@ class StandardizerFactory:
         elif uri == "amr":
             return preprocess.AMRStandardizer()
         elif uri == "generic":
-            returnpreprocess.GenericStandardizer()
+            return preprocess.GenericStandardizer()
         
         raise NotImplementedError("Preprocessor for uri {} not implemented".format(uri))
 

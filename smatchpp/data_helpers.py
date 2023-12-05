@@ -326,7 +326,7 @@ class PenmanWriter(interfaces.GraphWriter):
     
     
     @staticmethod
-    def get_childs(triples, node):
+    def _get_triples_where_node_is_child(triples, node):
         """Get all triples where node is the source
 
         Args:
@@ -344,7 +344,7 @@ class PenmanWriter(interfaces.GraphWriter):
 
     
     @staticmethod
-    def get_possible_childs(triples, node):
+    def _get_triples_where_node_could_be_made_child(triples, node):
         """Get all triples where node is the target
 
         These triples are incoming relations, but could be converted
