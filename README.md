@@ -69,19 +69,19 @@ Here are some interesting examples:
 
 ### Evaluating other kinds of graphs
 
-For evaluating other kinds of graphs, set the flag `-graph_type generic` in `score.sh`, to peform some minimal generic standardization. Or remove the flag, to perform no graph pre-processing at all.
+For evaluating other kinds of graphs, use `-graph_type generic` to peform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
 
 ### Using hill-climber (⚠️)
 
-For using a hill-climber as solver, set the flag `-solver hillclimber` in `score.sh`. ⚠️**Warning**⚠️: Using a hill-climber is not advisable and will yield Smatch scores that are not verifiable and are likely false.
+For using a hill-climber as solver, use `-solver hillclimber`. ⚠️**Warning**⚠️: Using a hill-climber is not advisable and will yield Smatch scores that are not verifiable and are likely false.
 
 ### Fast ILP alignment with graph compression
 
-For using a graph compression to make evaluation much faster, add the flag `--lossless_graph_compression` in `score.sh`
+For using a graph compression to make evaluation much faster, use `--lossless_graph_compression`.
 
 ### Fine-grained aspect scoring
 
-Here we want to measure similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, set the flag `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
+Here we want to measure similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
 
 ## Python package<a id="pip-install"></a>
 
