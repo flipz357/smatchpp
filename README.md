@@ -138,7 +138,7 @@ print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0,
 
 ### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex-basicdefault-amr"></a>
 
-Beyond basic defaults, we need an ILP solver for best alignment and dereification for graph standadization.
+Beyond basic defaults, we need an ILP solver for best alignment and perform AMR-focused pre-processing.
 
 ```python
 from smatchpp import Smatchpp, solvers, preprocess
