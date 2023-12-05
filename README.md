@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Example configurations for best-practice evaluation
+## Example configurations
 
 ### Best practice for AMR evaluation<a id="basic-eval"></a>
 
@@ -69,7 +69,7 @@ Here are some interesting examples:
 
 ### Evaluating other kinds of graphs
 
-For evaluating other kinds of graphs, use `-graph_type generic` to peform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
+For evaluating other kinds of graphs, use `-graph_type generic` to perform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
 
 ### Using hill-climber (⚠️)
 
