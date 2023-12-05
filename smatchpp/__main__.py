@@ -124,8 +124,7 @@ if __name__ == "__main__":
 
     logger.info("loading processing modules ...")
     graph_reader = model_factory.GraphReaderFactory.get_reader(args.input_format)
-    logger.info("1. Penman reader loaded")
-    print(args.graph_type)
+    logger.info("1. Graph reader loaded")
     graph_standardizer = model_factory.StandardizerFactory.get_standardizer(args.graph_type)
     """
     graph_standardizer = preprocess.AMRStandardizer(
