@@ -1,12 +1,12 @@
 # SMATCH++
 
-The package allows handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of semantic graphs via structural matching ('Smatch'). But SMATCH++ allows easy extension to working also with other kinds of graphs. A short overview of some features:
+Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy extension to working also with other kinds of graphs. A short overview of some features:
 
 - Simple graph reading, graph writing, graph processing
 - Different alignment solvers including optimal ILP alignment, and optional graph compression
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
-- Standardization tailored to AMR graphs, easy to extend for other graphs
-- Fine-grained AMR aspect scoring (NER, cause, time,...), easy to extend for other graphs
+- Standardization for different graph types such as AMR, Fine-grained evaluation
+- Easy to extend
 
 Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use Smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
 
@@ -83,7 +83,7 @@ See
 python -m smatchpp --help
 ``` 
 
-## Pip install<a id="pip-install"></a>
+## Python package<a id="pip-install"></a>
 
 ### Pip installation
 
@@ -91,7 +91,7 @@ Simply run
 
 `pip install smatchpp`
 
-The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. Some examples are in the following,
+The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. For other and more custom operations, specific modules can be loaded. Some examples are in the following,
 
 ### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
