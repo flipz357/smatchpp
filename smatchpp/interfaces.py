@@ -80,21 +80,8 @@ class SubGraphExtractor:
 class GraphReader:
 
     def string2graph(self, string):
-        self._check_args(string)
         triples = self._string2graph(string)
-        self._check_result(triples)
         return triples
-
-    @staticmethod
-    def _check_args(string):
-        if not isinstance(string, str):
-            raise ValueError("invalid input, must be a string")
-
-    @staticmethod
-    def _check_result(triples):
-        if not isinstance(triples, list):
-            raise ValueError("invalid output, must return list")    
-
 
 class GraphWriter:
 

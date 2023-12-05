@@ -275,6 +275,24 @@ custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
+### Example X: Feeding graph directly without string parsing
+
+Again, there's different ways to achieve this, like building you own pipeline. However, simplest would be to implement a dummy reader:
+
+```python
+from smatchpp import Smatchpp, interfaces
+test_graph1 = [("ROOT", ":root", "x"), ("x", ":instance", "test")] # string: (x / test)
+test_graph2 = [("ROOT", ":root", "y"), ("y", ":instance", "test")] # string: (y / test)
+
+class DummyReader(interfaces.GraphReader):
+    def _string2graph(self, input):
+        return input
+
+dummy_reader = DummyReader()
+Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+```
+
+
 ## FAQ
 
 - *I want to process other kinds of graphs*: This is simple. See [Example II](#ex-basicdefault-ilp) scores two generic graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).

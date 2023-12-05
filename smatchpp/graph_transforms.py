@@ -173,7 +173,7 @@ def reify_n(triples):
     return triples
          
 
-class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer):
+class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
 
     def __init__(self):
 
@@ -214,7 +214,10 @@ class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer):
         logger.debug("Semantic AMR transformer, OUTPUT: {}".format(triples))
         return out
 
-class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer):
+    def _standardize(self, triples):
+        return self._transform(triples)
+
+class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
     """Class for edge de- or reification, which is defined for AMR in dictionaries
        
        Attributes:
@@ -363,3 +366,6 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer):
         
         triples += new
         return None
+    
+    def _standardize(self, triples):
+        return self._transform(triples)
