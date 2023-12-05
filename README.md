@@ -73,7 +73,7 @@ For using a graph compression to make evaluation much faster, add the flag `--lo
 
 ### Fine-grained aspect scoring
 
-Here we want to measure performance on differnt types of subgraphs (e.g., NER, cause, etc.). This is currently only available when `-graph_type amr`. For perforing fine-grained for other graph types, you need to define your custom subgraph extraction.
+Here we want to measure performance on differnt types of subgraphs (e.g., NER, cause, etc.). This is currently only available when `-graph_type amr`. For perforing fine-grained for other graph types, you need to define your custom subgraph extraction. To yield fine-grained score set the flag `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates the alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs.
 
 ### Visit other options of evaluation
 
