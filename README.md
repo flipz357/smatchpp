@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Example configurations
+## Introduction and Examples of Command line access
 
 ### Best practice for AMR evaluation<a id="basic-eval"></a>
 
@@ -34,7 +34,20 @@ This evaluation setup has optimal ILP alignmnent, calculates micro and macro cor
 ./score.sh <graphs1> <graphs2>
 ``` 
 
-where `<graphs1>` and `<graphs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
+or more explicitly call:
+
+```
+python -m smatchpp      -a <graphs1> \
+                        -b <graphs2> \
+                        -solver ilp \
+                        -graph_type amr \
+                        -score_dimension main \
+                        -score_type micromacro \
+                        -log_level 20 \
+                        --bootstrap
+```
+
+Here, `<graphs1>` and `<graphs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
 ```
 # first graph
@@ -77,11 +90,11 @@ For using a hill-climber as solver, use `-solver hillclimber`. ⚠️**Warning**
 
 ### Fast ILP alignment with graph compression
 
-For using a graph compression to make evaluation much faster, use `--lossless_graph_compression`.
+For using a graph compression to make evaluation much faster, use `--lossless_graph_compression` (and `-solver ilp`).
 
 ### Fine-grained aspect scoring
 
-Here we want to measure similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
+Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
 
 ## Python package<a id="pip-install"></a>
 

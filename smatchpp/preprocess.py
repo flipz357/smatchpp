@@ -49,7 +49,6 @@ class GenericStandardizer(interfaces.GraphStandardizer):
         triples = list(triples)
         logging.debug("standardizing triples") 
         logging.debug("This is the input graph: {}".format(triples)) 
-        
         triples = graph_transforms.lower_all_labels(triples) 
         triples = graph_transforms.remove_quotes_from_triples(triples)
         graph_transforms.relabel_vars(triples)
