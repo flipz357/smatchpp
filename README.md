@@ -57,7 +57,15 @@ x w rel
 ...
 ```
 
-## Other interesting configurations
+## Other configurations
+
+All options can be viewed with:
+
+```
+python -m smatchpp --help
+``` 
+
+Here are some interesting examples:
 
 ### Evaluating other kinds of graphs
 
@@ -73,15 +81,7 @@ For using a graph compression to make evaluation much faster, add the flag `--lo
 
 ### Fine-grained aspect scoring
 
-Here we want to measure similarity on different types of subgraphs (e.g., NER, cause, etc.). This is currently only available when `-graph_type amr`, for other graph types, you need to define your custom subgraph extraction. To do fine-grained score set the flag `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs.
-
-### Visit other options of evaluation
-
-See
-
-```
-python -m smatchpp --help
-``` 
+Here we want to measure similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, set the flag `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
 
 ## Python package<a id="pip-install"></a>
 
