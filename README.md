@@ -100,11 +100,11 @@ Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To
 
 ### Pip installation
 
-Simply run 
+To install SMATCH++ as a python package, simply run 
 
 `pip install smatchpp`
 
-The main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. For other and more custom operations, specific modules can be loaded. Some examples are in the following,
+A main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. For other and more custom operations, specific modules can be loaded. Some examples are in the following,
 
 ### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
@@ -310,9 +310,9 @@ Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'mai
 
 - *I want to process other custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a (possibly) sub-optimal solution (might be still better than hill-climbing and it has an upper-bound). Perhaps, 2. is most suitable as it can offer best solution quality.
 
-- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow graded matching. Smatch++ allows easy customization of the triple matching function, and you can easily implement your own class. For examples, see file `smatchpp/score.py`.
+- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. Smatch++ allows easy customization of the triple matching function, and you can extend to implement your own class.
 
 ## Citation
 
