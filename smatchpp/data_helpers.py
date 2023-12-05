@@ -5,16 +5,16 @@ from smatchpp import util
 logger = logging.getLogger("__main__")
 
 
-def read_amr_strings_from_file(filepath):
+def read_graphstrings_from_file(filepath):
 
     with open(filepath, "r") as f:
-        amrs_meta = f.read().split("\n\n")
+        stringgraphs_meta = f.read().split("\n\n")
 
-    amrs = ["\n".join([l for l in am.split("\n") if not l.startswith("# ::")]) for am in amrs_meta]
-    if not amrs[-1]:
+    stringgraphs = ["\n".join([l for l in sg.split("\n") if not l.startswith("# ::")]) for sg in stringgraphs_meta]
+    if not stringgraphs[-1]:
         logger.debug("removing last line which is empty")
-        amrs = amrs[:-1]
-    return amrs
+        stringgraphs = stringgraphs[:-1]
+    return stringgraphs
 
 
 class PenmanReader(interfaces.GraphReader):

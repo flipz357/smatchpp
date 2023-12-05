@@ -4,17 +4,17 @@ import time
 def build_arg_parser():
 
     parser = argparse.ArgumentParser(
-            description='amr')
+            description='SMATCH++ command line description')
 
     parser.add_argument('-a'
             , type=str
             , required=True
-            , help='file path to first SemBank')
+            , help='file path to first file with graphs (called "candidate" in parsing evaluation)')
 
     parser.add_argument('-b'
             , type=str
             , required=True
-            , help='file path to second SemBank')
+            , help='file path to second file with graphs (called "reference" in parsing evaluation)')
 
     parser.add_argument('-log_level'
             , type=int
@@ -42,7 +42,7 @@ def build_arg_parser():
             , type=str
             , default=None
             , nargs='?'
-            , choices=[None, "amr"]
+            , choices=[None, "generic", "amr"]
             , help='graph type to load specific processing')
     
     parser.add_argument('-score_dimension'
@@ -79,17 +79,7 @@ def build_arg_parser():
     parser.add_argument('--remove_duplicates'
             , action='store_true'
             , help='enable for removing duplicate triples, which makes sense for most cases')
-    
-    """
-    parser.add_argument('-syntactic_standardization'
-            , default=None
-            , nargs='?'
-            , choices=["reify", "dereify"]
-            , help='edge standardization: None, reification, or dereification \
-                    E.g.: location(x, y) <-> instance(z, location) and arg1(z, x) and arg2(z,y)\
-                    Here, <- is derieification, and -> reification')
-    """    
-    
+     
     parser.add_argument('-output_format'
             , default='text'
             , nargs='?'
@@ -105,7 +95,7 @@ if __name__ == "__main__":
 
     args = build_arg_parser().parse_args()
     logger = log_helper.set_get_logger("smatchpp-logger", args.log_level)
-    logger.info("loading amrs from files {} and {}".format(
+    logger.info("loading graphs from files {} and {}".format(
         args.a, args.b))
     
     from smatchpp import data_helpers
@@ -117,33 +107,33 @@ if __name__ == "__main__":
     from smatchpp import eval_statistics
     from smatchpp import model_factory 
     
-    amrs = data_helpers.read_amr_strings_from_file(args.a)
-    amrs2 = data_helpers.read_amr_strings_from_file(args.b)
+    graphs = data_helpers.read_graphstrings_from_file(args.a)
+    graphs2 = data_helpers.read_graphstrings_from_file(args.b)
     
-    assert len(amrs) == len(amrs2)
+    assert len(graphs) == len(graphs2)
 
     logger.info("loading processing modules ...")
     graph_reader = model_factory.GraphReaderFactory.get_reader(args.input_format)
     logger.info("1. Graph reader loaded")
+    
     graph_standardizer = model_factory.StandardizerFactory.get_standardizer(args.graph_type)
-    """
-    graph_standardizer = preprocess.AMRStandardizer(
-                                        syntactic_standardization=args.syntactic_standardization, 
-                                        remove_duplicates=args.remove_duplicates)
-    """
     logger.info("2. triple standardizer loaded")
+    
     graph_pair_preparer = preprocess.BasicGraphPairPreparer(lossless_graph_compression=args.lossless_graph_compression)
     logger.info("3. graph pair processor loaded")
+    
     triplematcher = score.IDTripleMatcher()
     logger.info("4a. triple matcher loaded")
+    
     alignmentsolver = solvers.get_solver(args.solver)
     logger.info("4b. alignment solver loaded")
+    
     graph_aligner = align.GraphAligner(triplematcher, alignmentsolver) 
     logger.info("4c. graph aligner loaded")
 
     subgraph_extractor = None
+    
     if "all" in args.score_dimension:
-        #subgraph_extractor = subgraph_extraction.SubGraphExtractor(add_instance=True)
         subgraph_extractor = model_factory.SubgraphExtractorFactory.get_extractor(args.graph_type)
         logger.info("4c. sub graph extractor")
     
@@ -173,7 +163,7 @@ if __name__ == "__main__":
 
     if args.score_type == "micromacro":
         
-        match_dict, status = SMATCHPP.process_corpus(amrs, amrs2)
+        match_dict, status = SMATCHPP.process_corpus(graphs, graphs2)
         
         #get micro scores
         printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=args.bootstrap, output_format=args.output_format)
@@ -200,11 +190,11 @@ if __name__ == "__main__":
             printer.print_all(final_result_dict_macro)
 
     elif args.score_type == "pairwise":
-        final_result_list, status = SMATCHPP.score_corpus(amrs, amrs2)
+        final_result_list, status = SMATCHPP.score_corpus(graphs, graphs2)
         for singlepair in final_result_list:
             SMATCHPP.printer.print_all(singlepair, jsonindent=0)
     else:
-        final_result_dic, status = SMATCHPP.score_corpus(amrs, amrs2)
+        final_result_dic, status = SMATCHPP.score_corpus(graphs, graphs2)
         SMATCHPP.printer.print_all(final_result_dic)
     
 

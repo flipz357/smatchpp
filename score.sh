@@ -3,9 +3,8 @@
 python -m smatchpp      -a $1 \
 			-b $2 \
 			-solver ilp \
-			-syntactic_standardization dereify \
+			-graph_type amr \
 			-score_dimension main \
 			-score_type micromacro \
 			-log_level 20 \
-			--bootstrap \
-			--remove_duplicates
+			--bootstrap 

@@ -69,7 +69,7 @@ For using a hill-climber as solver, set the flag `-solver hillclimber` in `score
 
 ### Fast ILP alignment with graph compression
 
-For using a graph compression to make evaluation much faster, add the flag `--lossless_graphi_compression` in `score.sh`
+For using a graph compression to make evaluation much faster, add the flag `--lossless_graph_compression` in `score.sh`
 
 ### Fine-grained aspect scoring
 
@@ -275,7 +275,7 @@ custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example X: Feeding graph directly without string parsing
+### Example X: Feeding graph directly without string reading
 
 Again, there's different ways to achieve this, like building you own pipeline. However, simplest would be to implement a dummy reader:
 

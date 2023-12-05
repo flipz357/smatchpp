@@ -116,13 +116,13 @@ class Smatchpp():
         return match, status, alignment
     
     
-    def process_corpus(self, amrs, amrs2):
+    def process_corpus(self, graphs, graphs2):
         
         status = []
         match_dict = {}
         seconds = time.time() 
-        for i, a in enumerate(amrs):
-            match, tmpstatus, _ = self.process_pair(a, amrs2[i])
+        for i, g in enumerate(graphs):
+            match, tmpstatus, _ = self.process_pair(g, graphs2[i])
             status.append(tmpstatus)
             util.append_dict(match_dict, match)
             if (i + 1) % 100 == 0:
@@ -131,16 +131,16 @@ class Smatchpp():
         return match_dict, status
 
     
-    def score_corpus(self, amrs, amrs2):
+    def score_corpus(self, graphs, graphs2):
         
-        match_dict, status = self.process_corpus(amrs, amrs2)
+        match_dict, status = self.process_corpus(graphs, graphs2)
         
         final_result = None
         
         # pairwise statistic
         if self.printer.score_type is None:
             final_result = []
-            for i in range(len(amrs)):
+            for i in range(len(graphs)):
                 match_dict_tmp = {k: [match_dict[k][i]] for k in match_dict.keys()}
                 result = self.printer.get_final_result(match_dict_tmp)
                 final_result.append(result)
@@ -152,8 +152,8 @@ class Smatchpp():
     
 
     # for convenience
-    def score_pair(self, amr1, amr2):
-        score, status = self.score_corpus([amr1], [amr2])
+    def score_pair(self, graph, graph2):
+        score, status = self.score_corpus([graph], [graph2])
         # confidence intervals don't make sense for a single pair
         for score_dim in score:
             for score_type in score[score_dim]:
