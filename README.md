@@ -1,6 +1,6 @@
 # SMATCH++
 
-Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy extension to working also with other kinds of graphs. A short overview of some features:
+Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy customization. A short overview of some features:
 
 - Simple graph reading, graph writing, graph processing
 - Different alignment solvers including optimal ILP alignment, and optional graph compression
