@@ -295,7 +295,7 @@ Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'mai
 
 ## FAQ
 
-- *I want to process other kinds of graphs*: This is simple. See [Example II](#ex-basicdefault-ilp) scores two generic graphs. Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
+- *I want to process other custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
 
 - *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is fundamentally an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it can get stuck). 2. Use ILP with `--lossless_graph_compression` as argument from console (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. You can play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a solution that may be not optimal but also has a useful upper-bound to understand solution quality. Maybe, in case of large graphs option 2. is most suitable as it can offer best solution quality.
 
