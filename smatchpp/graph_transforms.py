@@ -93,7 +93,8 @@ def deinvert_e(triples):
             iters += 1
         if iters % 2 != 0:
             triples[i] = (t, relation, s)
-    
+        else:
+            triples[i] = (s, relation, t)
     logging.debug("I deinverted edges: {}".format(triples))  
     return None
  
