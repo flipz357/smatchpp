@@ -4,9 +4,11 @@ from smatchpp import interfaces
 
 logger = logging.getLogger("__main__")
 
+
 def remove_duplicates(triples):
     triples = list(set(triples))
     return triples
+
 
 def lower_all_labels(triples):
     triples = [(s.lower(), r.lower(), t.lower()) for (s, r, t) in triples]
@@ -22,7 +24,8 @@ def remove_quotes_from_triples(triples):
     for triple in triples:
         triple = (f(triple[0]), f(triple[1]), f(triple[2]))
         newtriples.append(triple)
-    logging.debug("I removed quotes: {}".format(triples))
+    
+    logging.debug("I removed quotes: {}".format(newtriples))
     return newtriples
 
 
@@ -83,11 +86,13 @@ def deinvert_e(triples):
     """
     
     for i in range(len(triples)):
-        s, r, t = triples[i]
-        r = r.split("-of")
-        if len(r) > 1:
-            r = r[0]
-            triples[i] = (t, r, s)
+        s, relation, t = triples[i]
+        iters = 0
+        while relation.endswith("-of"):
+            relation = relation[:-3]
+            iters += 1
+        if iters % 2 != 0:
+            triples[i] = (t, relation, s)
     
     logging.debug("I deinverted edges: {}".format(triples))  
     return None
@@ -104,14 +109,22 @@ def domain2mod(triples):
 
 
 def concept_as_root(triples):
-    """the root ist read as (x, :root, ROOT), however, AMR focus style is to use
-    (x, :root, concept) where concept is from (x, :instance, concept)
+    """the root of a graph is usually (ROOT_OF_GRAPH, :root, x), however, 
+    AMR focus style is to use (x, :root, concept) where concept is 
+    from (x, :instance, concept)
+
+    This better reflects the AMR guidelines who view "the root concept" as the focus
+    of a text"
     """
     vc = util.get_var_concept_dict(triples)
     for i, tr in enumerate(triples):
         if tr[1] == ":root":
             newtriple = (tr[2], ":root", vc[tr[2]])
             triples[i] = newtriple
+            logging.debug("""I set the root triple from ('{}', '{}', '{}') to {}
+                   to better reflect AMR guidelines where the root
+                   concept is seen as "focus" """.format(tr[0], tr[1], tr[2], newtriple))
+            break
     return None
 
 
