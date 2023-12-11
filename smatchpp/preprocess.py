@@ -77,7 +77,7 @@ class AMRStandardizer(interfaces.GraphStandardizer):
        -------------
        Specific AMR inversion to handle that AMR views :domain = mod-of. 
        Makes sense as a standardization, since AMR guidelines 
-       explicitly define :domain as the inverse of :mod-of.
+       explicitly define :domain as the inverse of :mod.
 
        5. Deinvert edges
        -----------------
