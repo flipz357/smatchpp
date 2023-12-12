@@ -6,5 +6,4 @@ python -m smatchpp      -a $1 \
 			-graph_type amr \
 			-score_dimension main \
 			-score_type micromacro \
-			-log_level 20 \
 			--bootstrap 

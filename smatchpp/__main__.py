@@ -19,7 +19,7 @@ def build_arg_parser():
     parser.add_argument('-log_level'
             , type=int
             , nargs='?'
-            , default=40
+            , default=20
             , choices=list(range(0, 60, 10))
             , help='logging level (int), see\
                     https://docs.python.org/3/library/logging.html#logging-levels')

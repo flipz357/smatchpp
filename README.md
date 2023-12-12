@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Introduction and Examples of Command line access
+## Command line examples
 
 ### Best practice for AMR evaluation<a id="basic-eval"></a>
 
@@ -43,7 +43,6 @@ python -m smatchpp      -a <graphs1> \
                         -graph_type amr \
                         -score_dimension main \
                         -score_type micromacro \
-                        -log_level 20 \
                         --bootstrap
 ```
 
