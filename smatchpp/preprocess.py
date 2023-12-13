@@ -222,7 +222,7 @@ class BasicGraphPairPreparer(interfaces.GraphPairPreparer):
                 # yes? -> overwrite variable with concept
                 src = var_concept[src]
         
-            if rel not in [":instance", ":root"] and var_concept.get(tgt) in single_ref:
+            if rel != ":instance" and var_concept.get(tgt) in single_ref:
                 # same as above but for target variable
                 tgt = var_concept[tgt]
             
@@ -256,14 +256,26 @@ class BasicGraphPairPreparer(interfaces.GraphPairPreparer):
         # gather concepts that are maximally mentioned once in each graph
         single_ref = set()
         for c in set(concept_count1.keys()).union(set(concept_count2.keys())):
+            
+            # get counts of concept mentions in each graph
             co1 = concept_count1[c]
             co2 = concept_count2[c]
+            
+            # prevent empty graph 1
+            if co1 == len(triples1):
+                continue
+            
+            # prevent empty graph 2
+            if co2 == len(triples2):
+                continue
 
-            # either graph as only one mention of a concept
+            # either graph has only one mention of a concept, so we will 
+            # be able set the node label as the node index
             if co1 + co2 == 1:
                 single_ref.add(c)
 
-            # both graphs have exactly one mention of the concept
+            # both graphs have exactly one mention of the concept, so again
+            # we will be able to set the node label as the node index
             elif co1 == co2 == 1:
                 single_ref.add(c)
         
