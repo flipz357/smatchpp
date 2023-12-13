@@ -363,3 +363,14 @@ class PenmanWriter(interfaces.GraphWriter):
                 childs.append(tr)
         return childs
 
+
+class TSVWriter(interfaces.GraphWriter):
+    
+    @staticmethod
+    def _graph2string(triples):
+        
+        string = "\n".join(["\t".join((t[0], t[2], t[1])) for t in triples])
+        triples = string.split("\n")
+        
+        return string
+
