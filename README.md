@@ -304,6 +304,25 @@ dummy_reader = DummyReader()
 Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
+### Example XI: Sub-graph isomorphism test
+
+We want to know if g1 is a subgraph of g2. We note: this is a i) binary value ii) using lossless `graph_compression` does not change the result, we iii) should ignore the `:root` relation that is implicit in Penman. So:
+
+```python
+from smatchpp import Smatchpp, preprocess, data_helpers
+
+reader = data_helpers.PenmanReader(explicate_root=False) # ignore root
+standardizer = preprocess.GenericStandardizer() # use AMRStandardizer for AMR
+pair_preparer_compressor = preprocess.BasicGraphPairPreparer(lossless_graph_compression=True)
+
+# now we can construct our measure and classifier, and run a few examples
+measure = Smatchpp(graph_reader=reader, graph_standardizer=standardizer, graph_pair_preparer=pair_preparer_compressor)
+classifier = lambda x, y: measure.score_pair(x,y)["main"]["Precision"] == 100 # criterion for subgraph isomorphism
+print(classifier("(t / test :rel (d / dog))", "(t / test :rel (d / dog))")) # True
+print(classifier("(d / dog)", "(t / test :rel (d / dog)")) # True
+print(classifier("(t / dog :rel (d / test))", "(d / test :rel (t / dog))")) # False
+print(classifier("(t / dog :rel-of (d / test))", "(d / test :rel (t / dog))")) # True
+```
 
 ## FAQ
 

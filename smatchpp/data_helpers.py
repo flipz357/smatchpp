@@ -19,7 +19,8 @@ def read_graphstrings_from_file(filepath):
 
 class PenmanReader(interfaces.GraphReader):
 
-    def __init__(self):
+    def __init__(self, explicate_root=True):
+        self.explicate_root = explicate_root 
         return None
 
     def _string2graph(self, string):
@@ -168,6 +169,9 @@ class PenmanReader(interfaces.GraphReader):
                             I have renamed all explicit \":root\" relations 
                             to \":root_but_not_the_graph_root\".""")
         
+        if self.explicate_root == False:
+            triples = [triple for triple in triples if triple[1] != ":root"]
+
         logging.debug("3. result after triple extraction: {}".format(triples))
         return triples
     
