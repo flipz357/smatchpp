@@ -8,7 +8,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
 - Standardization for different graph types such as AMR, Fine-grained evaluation
 - Easy to extend
 
-Jump directly to [parser evaluation best practices](#basic-eval) or [pip install](#pip-install) to use Smatch++ and its options simply from within your python program.
+Jump directly to [command line examples](#command-line) or [pip install](#pip-install) to use Smatch++ and its options simply from within your python program.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Command line examples
+## Command line examples<a id="command-line"></a>
 
 ### Best practice for AMR evaluation<a id="basic-eval"></a>
 
