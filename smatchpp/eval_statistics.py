@@ -162,11 +162,12 @@ class ResultPrinter:
             # that two graphs in a pair are both empty, in that case
             # we only need the pairs where either both or one graph is not an empty graph
             if score_dim != "main":
-                match_data = [m for m in match_data if sum(m) > 0.0]
+                #match_data = [m for m in match_data if sum(m) > 0.0]
                 # except if result printer is called over a single pairs we do not need to do anything
-                if not (len(match_data) == 1 and sum(match_data) == 0):
-                    match_data = [m for m in match_data if sum(m) > 0.0]
-            
+                # print(score_dim, match_data)
+                # if not len(match_data) == 1:
+                #    match_data = [m for m in match_data if sum(m) > 0.0]
+                print(match_data, score_dim) 
             # if score type micro or pair
             if self.score_type in ["micro", None]:
                 match_data_reduced = np.sum(match_data, axis=0)

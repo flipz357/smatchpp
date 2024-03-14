@@ -4,7 +4,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "CAUSE": 
@@ -13,7 +14,18 @@
 	 "associated_concept": ["cause"],
 	 "search_in_frame_descr": [" cause ", " cause of "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ":cause"
+	 "map_to": ":cause",
+	 "add_predicates": 1
+ 	 },
+
+"CONCEPT": 
+ 	{
+	 "associated_rel": [":instance"],
+	 "associated_concept": [],
+	 "search_in_frame_descr": [],
+	 "subgraph_extraction_range": 0,
+	 "map_to": ":instance",
+	 "add_predicates": 0
  	 },
 
 "FOCUS": 
@@ -22,7 +34,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 },
 
 "INSTRUMENT": 
@@ -31,7 +44,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [" instrument ", " instrumental "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ":instrument"
+	 "map_to": ":instrument",
+	 "add_predicates": 1
  	 }, 
 
 "LOCATION (spatial)":
@@ -40,7 +54,8 @@
 	 "associated_concept": ["location"],
 	 "search_in_frame_descr": [" location ", " path ", " destination ", " direction "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
 	 },
 
 "MATHS": 
@@ -49,7 +64,8 @@
 	 "associated_concept": ["math"],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 	 
 "NER": 
@@ -58,7 +74,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "PATIENT": 
@@ -67,7 +84,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "POLARITY": 
@@ -76,7 +94,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "POSSESSION": 
@@ -85,7 +104,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [" owner ", " possession "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "PURPOSE": 
@@ -94,7 +114,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [" purpose "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ":purpose"
+	 "map_to": ":purpose",
+	 "add_predicates": 1
  	 }, 
 
 "QUANTIFIER": 
@@ -103,7 +124,8 @@
 	 "associated_concept": ["quantities"],
 	 "search_in_frame_descr": [" quantity ", " amount "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ":quant"
+	 "map_to": ":quant",
+	 "add_predicates": 1
  	 }, 
 
 "SRL-core": 
@@ -112,7 +134,8 @@
 	 "associated_concept": [],
 	 "search_in_frame_descr": [],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }, 
 
 "TIME (temporal)": 
@@ -121,6 +144,7 @@
 	 "associated_concept": ["dates"],
 	 "search_in_frame_descr": [" time "],
 	 "subgraph_extraction_range": 2,
-	 "map_to": ""
+	 "map_to": "",
+	 "add_predicates": 1
  	 }
 }	 

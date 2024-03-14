@@ -3,16 +3,30 @@ from collections import defaultdict
 from smatchpp import util
 from smatchpp import interfaces
 
+
 def subgraph_instance(triples):
     triples = [t for t in triples if t[1] == ":instance"]
     return triples
 
+
 def subgraph_predicate(triples):
     triples = subgraph_instance(triples)
+    # "predicate" here means that a predicate x is sense disambiguated, 
+    # usually (e.g., AMR) denoted as e.g., x-1, or x-99, etc.
     triples = [t for t in triples if re.match(r".*-[0-9]+", t[2].lower())]
     return triples
 
+
 def unlabel_edges(triples):
+    """Remove edge labels
+
+    Args:
+        triples: input triples, e.g., [(x, :arg0, y), (y, :arg2, z)]
+
+    Returns:
+        graph/triples where every edge label is the same, e.g.
+        output triples, e.g., [(x, :rel, y), (y, :rel, z)]
+    """
     out = []
     for t in triples:
         if t[1] != ":instance":
@@ -21,7 +35,18 @@ def unlabel_edges(triples):
             out.append(t)
     return out
     
+
 def unlabel_nodes(triples):
+    """Unlabels nodes
+
+    Args:
+        triples: input triples with node labels, 
+                 e.g. [(x, :instance, car), (y, :instance, person)]
+
+    Returns:
+        graph/triples where node labels are the same, 
+        e.g. [(x, :instance, concept), (y :instance, concept)]
+    """
     out = []
     for t in triples:
         if t[1] == ":instance":
@@ -29,21 +54,7 @@ def unlabel_nodes(triples):
         else:
             out.append(t)
     return out
-
-
-def get_preds(triples, node):
-    triples = [t for t in triples if t[1] != ":instance"]
-    preds = []
-    for tr in triples:
-        if node != tr[2]:
-            continue
-        inode = tr[0]
-        inc = util.n_incoming(triples, inode)
-        outg = util.n_outgoing(triples, inode)
-        if inc == 0 and outg == 1:
-            preds.append(tr)
-    return preds
-    
+ 
 
 def subgraph_reentrancies(triples):
     out = []
@@ -59,27 +70,45 @@ def subgraph_reentrancies(triples):
 
 
 def get_additional_instances(triples, triples_all):
+    
     additional_instance = []
     var_concept_dict = util.get_var_concept_dict(triples_all)
     tvars = set()
+
     for (s, _, t) in triples:
         if s in var_concept_dict:
             tvars.add(s)
         if t in var_concept_dict:
             tvars.add(t)
+    
     for var in tvars:
         itriple = (var, ":instance", var_concept_dict[var])
-        if itriple not in additional_instance:
+        if itriple not in triples:
             additional_instance.append(itriple)
 
     return additional_instance
 
 
+def get_all_preds_of_a_node(triples, node):
+    triples = [t for t in triples if t[1] != ":instance"]
+    preds = []
+    for tr in triples:
+        if node != tr[2]:
+            continue
+        if tr[1] == ":root":
+            continue
+        inode = tr[2]
+        inc = util.n_incoming(triples, inode)
+        outg = util.n_outgoing(triples, inode)
+        if inc == 0 and outg == 1:
+            preds.append(tr)
+    return preds
+
+
 class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 
     def __init__(self, add_instance=True, semantic_standardization=True, add_preds=True):
-         
-         
+             
         self.add_instance = add_instance
         self.semantic_standardization = semantic_standardization
         if self.semantic_standardization:
@@ -111,13 +140,14 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         name_subgraph["REENTRANCIES"] = subgraph_reentrancies(tmptriples)
         
         exclude = ["main", "main without wiki", "wiki", "main (semantically standardized)"]
+        
         for name in name_subgraph:
             if name in exclude:
                 continue
             sg = name_subgraph[name]
             sg = self.clean_extend_subgraph(sg, tmptriples, name)
             name_subgraph[name] = sg
-         
+        
         return name_subgraph
 
     def _iter_name_subgraph(self, triples):
@@ -150,10 +180,17 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
-        
+        if name == "CONCEPT": 
+            print(sgtriples)
         sgtriples = self._maybe_add_subtree(sgtriples, triples_all, name)
+        if name == "CONCEPT": 
+            print(sgtriples)
         sgtriples = self._maybe_add_preds(sgtriples, triples_all)
+        if name == "CONCEPT": 
+            print(sgtriples, "a")
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
+        if name == "CONCEPT": 
+            print(sgtriples, "b")
         sgtriples = list(set(sgtriples))
 
         return sgtriples
@@ -163,15 +200,14 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
             return triples
         out = []
         for tr in triples:
-            out += get_preds(triples_all, tr[0]) 
-            out += get_preds(triples_all, tr[2])
+            out += get_all_preds_of_a_node(triples_all, tr[0]) 
+            out += get_all_preds_of_a_node(triples_all, tr[2])
         out = triples + out
         return out
  
     def _maybe_add_instance(self, triples, triples_all):
         if not self.add_instance:
             return triples
-        out = []
         ai = get_additional_instances(triples, triples_all)
         out = triples + ai
         return out
