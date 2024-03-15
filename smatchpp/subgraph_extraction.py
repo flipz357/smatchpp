@@ -108,15 +108,36 @@ def get_all_preds_of_a_node(triples, node):
 class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 
     def __init__(self, add_instance=True, semantic_standardization=True, add_preds=True):
-             
+        """Sets up a kind of complex AMR subgraph extractor. 
+           The idea is to extract subgraphs from an AMR that are tied to linguistic aspects.
+           E.g., a subgraph that captures the polarity structure of an AMR, a subgraph that
+           captures the agents in an AMR, a subgraph that captures the coreference structure
+           and so on.
+
+           NOTE: this subgraph extractor makes only sense for AMR, write your own extractor for other
+                 type of graph.
+
+        Args:
+            add_instance: if True adds the node labels of variables/nodes contained in a subgraph,
+                          which is equivalent to adding :instance triples for all variables
+                          in a subgraph. E.g., if the subgraph is [(x, :polarity, -)], and in the
+                          supergraph the label of x is "good": (x, :instance, good, we might
+                          return the subgraph [(x, :polarity, -), (x, :instance, good)]
+            semantic_standardization: if True, this tries to standardize a graph by mapping all
+                                      core-roles to non-core roles if available, e.g., :arg4 could map to
+                                      :instrument if it is containted like this in PropBank definition
+            add_preds: if True add all predicates of variables/nodes in the subgraph. A predicate is 
+                       a node that has NO incoming edge itselg, and only one outgoing edge into a 
+                       variable from the subgraph
+        """
         self.add_instance = add_instance
         self.semantic_standardization = semantic_standardization
         if self.semantic_standardization:
             from smatchpp.graph_transforms import RuleBasedSemanticAMRTransformer
         self.semantic_standardizer = RuleBasedSemanticAMRTransformer()
         self.add_preds = add_preds
-        self.reify_rules = util.read_reify_table()
-        self.concept_groups = util.read_concept_groups()
+        self.reify_rules = util.read_amr_reify_table()
+        self.concept_groups = util.read_amr_concept_groups()
         self.amr_aspects = util.read_amr_aspects()
 
     def _all_subgraphs_by_name(self, triples):

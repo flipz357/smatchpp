@@ -5,7 +5,7 @@ from collections import defaultdict
 
 logger = logging.getLogger("__main__")
 
-def read_reify_table(p="/resource/reify_table.txt", lower=False):
+def read_amr_reify_table(p="/resource/amr/reify_table.txt", lower=False):
     """load reification rules"""
     
     path = os.path.dirname(__file__)
@@ -35,7 +35,7 @@ def read_reify_table(p="/resource/reify_table.txt", lower=False):
     return rel_rule, rel_rule_inverse
 
 
-def read_amr_aspects(p="/resource/amr_aspects.json"):
+def read_amr_aspects(p="/resource/amr/graph_aspects.json"):
     """load reification rules"""
     
     path = os.path.dirname(__file__)
@@ -46,7 +46,7 @@ def read_amr_aspects(p="/resource/amr_aspects.json"):
     return data
 
 
-def read_concept_groups(p="/resource/concept_groups.json"):
+def read_amr_concept_groups(p="/resource/amr/concept_groups.json"):
     """load reification rules"""
     
     path = os.path.dirname(__file__)
