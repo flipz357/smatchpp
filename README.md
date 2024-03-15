@@ -8,7 +8,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
 - Standardization for different graph types such as AMR, Fine-grained evaluation
 - Easy to extend
 
-Jump directly to [parser evaluation best practices](#basic-eval) or (new) [pip install](#pip-install) to use Smatch++ and its options simply from within your python program. The following text also gives an overview over some options of Smatch++. 
+Jump directly to [command line examples](#command-line) or [pip install](#pip-install) to use Smatch++ and its options simply from within your python program.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ numpy (tested: 1.20.1)
 
 The packages can be installed with `pip ...`
 
-## Command line examples
+## Command line examples<a id="command-line"></a>
 
 ### Best practice for AMR evaluation<a id="basic-eval"></a>
 
@@ -93,7 +93,7 @@ For using a graph compression to make evaluation much faster, use `--lossless_gr
 
 ### Fine-grained aspect scoring
 
-Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
+Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension all-onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
 
 ## Python package<a id="pip-install"></a>
 
