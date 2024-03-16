@@ -57,7 +57,7 @@ def read_amr_concept_groups(p="/resource/amr/concept_groups.json"):
     return data
 
 
-def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-descr.txt",
+def maybe_download_amr_frame_file(targetpath="/resource/propbank-amr-frames-arg-descr.txt",
         url="https://amr.isi.edu/doc/propbank-amr-frames-arg-descr.txt"):
     path = os.path.dirname(__file__)
     fullpath = path + targetpath
@@ -86,7 +86,7 @@ def maybe_download_frame_file(targetpath="/resource/propbank-amr-frames-arg-desc
 def read_frame_table(p="/resource/propbank-amr-frames-arg-descr.txt", lower=True):
     """load frame-argument rules"""
     
-    error = maybe_download_frame_file()
+    error = maybe_download_amr_frame_file()
     if error:
         logger.warning("Couldn't load the predicate file which is used to enhance fine-grained\
                         semantic scoring. I'll use an empty dictionary instead.")

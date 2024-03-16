@@ -150,7 +150,6 @@ class Smatchpp():
             final_result = self.printer.get_final_result(match_dict) 
         return final_result, status
     
-
     # for convenience
     def score_pair(self, graph, graph2):
         score, status = self.score_corpus([graph], [graph2])

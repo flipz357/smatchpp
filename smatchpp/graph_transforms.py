@@ -250,7 +250,7 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer, interfaces.G
         self._load_rules()
     
     def _load_rules(self):
-        self.reify_rules, self.reify_rules_inverse = util.read_reify_table(lower=self.lower)
+        self.reify_rules, self.reify_rules_inverse = util.read_amr_reify_table(lower=self.lower)
         return None
 
     def _transform(self, triples):

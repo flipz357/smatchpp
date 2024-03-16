@@ -165,9 +165,9 @@ class ResultPrinter:
                 #match_data = [m for m in match_data if sum(m) > 0.0]
                 # except if result printer is called over a single pairs we do not need to do anything
                 # print(score_dim, match_data)
-                # if not len(match_data) == 1:
-                #    match_data = [m for m in match_data if sum(m) > 0.0]
-                print(match_data, score_dim) 
+                if not len(match_data) == 1:
+                    match_data = [m for m in match_data if sum(m) > 0.0]
+                # print(match_data, score_dim) 
             # if score type micro or pair
             if self.score_type in ["micro", None]:
                 match_data_reduced = np.sum(match_data, axis=0)

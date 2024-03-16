@@ -9,9 +9,9 @@ def subgraph_instance(triples):
     return triples
 
 
-def subgraph_predicate(triples):
+def subgraph_lexicalized(triples):
     triples = subgraph_instance(triples)
-    # "predicate" here means that a predicate x is sense disambiguated, 
+    # "lexicalized" here means that a predicate x is sense disambiguated, 
     # usually (e.g., AMR) denoted as e.g., x-1, or x-99, etc.
     triples = [t for t in triples if re.match(r".*-[0-9]+", t[2].lower())]
     return triples
@@ -57,32 +57,39 @@ def unlabel_nodes(triples):
  
 
 def subgraph_reentrancies(triples):
+    """Returns all triples where the target has more than one incoming edge
+
+    Args:
+        triples: input graph
+
+    Returns:
+        all triples where the target has more than one incoming edge
+    """
     out = []
-    inc_rels = defaultdict(int)
     var_concept_dict = util.get_var_concept_dict(triples)
-    for (s, r, t) in triples:
-        if t in var_concept_dict:
-            inc_rels[t] += 1
     for (s, r, t) in [ t for t in triples if t[1] != ":instance"]:
-        if t in var_concept_dict and inc_rels[t] > 1:
+        if t in var_concept_dict and util.n_incoming(triples, t) > 1:
             out.append((s, r, t))
     return out
 
 
 def get_additional_instances(triples, triples_all):
-    
-    additional_instance = []
-    var_concept_dict = util.get_var_concept_dict(triples_all)
-    tvars = set()
+    """Given a graph, if there is a node without a node label (in the subgraph), 
+       try to find the node label (in the supergraph) and add it.
 
-    for (s, _, t) in triples:
-        if s in var_concept_dict:
-            tvars.add(s)
-        if t in var_concept_dict:
-            tvars.add(t)
+    Args:
+        triples: subgraph
+        triples_all: supergraph
+
+    Returns:
+        possibly extended subgraphs with node labels added
+    """
+    additional_instance = []
+    var_concept_dict_sub = util.get_var_concept_dict(triples)
+    var_concept_dict_sup = util.get_var_concept_dict(triples_all)
     
-    for var in tvars:
-        itriple = (var, ":instance", var_concept_dict[var])
+    for var in var_concept_dict_sub:
+        itriple = (var, ":instance", var_concept_dict_sup[var])
         if itriple not in triples:
             additional_instance.append(itriple)
 
@@ -90,6 +97,16 @@ def get_additional_instances(triples, triples_all):
 
 
 def get_all_preds_of_a_node(triples, node):
+    """Get predicates of a node n. A predicate is a node that has 0 
+       incoming edges and only one outgoing edge (into n)
+
+    Args:
+        triples: input graph
+        node: node 
+
+    Returns:
+        input graph possibly extended with predicates
+    """
     triples = [t for t in triples if t[1] != ":instance"]
     preds = []
     for tr in triples:
@@ -97,7 +114,7 @@ def get_all_preds_of_a_node(triples, node):
             continue
         if tr[1] == ":root":
             continue
-        inode = tr[2]
+        inode = tr[0]
         inc = util.n_incoming(triples, inode)
         outg = util.n_outgoing(triples, inode)
         if inc == 0 and outg == 1:
@@ -201,23 +218,18 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
-        if name == "CONCEPT": 
-            print(sgtriples)
+        
         sgtriples = self._maybe_add_subtree(sgtriples, triples_all, name)
-        if name == "CONCEPT": 
-            print(sgtriples)
         sgtriples = self._maybe_add_preds(sgtriples, triples_all)
-        if name == "CONCEPT": 
-            print(sgtriples, "a")
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
-        if name == "CONCEPT": 
-            print(sgtriples, "b")
         sgtriples = list(set(sgtriples))
 
         return sgtriples
 
     def _maybe_add_preds(self, triples, triples_all):
         if not self.add_preds:
+            return triples
+        if self.amr_aspects["CONCEPT"]["add_predicates"] == 0:
             return triples
         out = []
         for tr in triples:
