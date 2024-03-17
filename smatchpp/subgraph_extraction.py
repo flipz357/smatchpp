@@ -85,14 +85,17 @@ def get_additional_instances(triples, triples_all):
         possibly extended subgraphs with node labels added
     """
     additional_instance = []
-    var_concept_dict_sub = util.get_var_concept_dict(triples)
     var_concept_dict_sup = util.get_var_concept_dict(triples_all)
-    
-    for var in var_concept_dict_sub:
-        itriple = (var, ":instance", var_concept_dict_sup[var])
+    sg_vars = []
+    for (s, r, t) in triples:
+        if s in var_concept_dict_sup:
+            sg_vars.append(s)
+        if t in var_concept_dict_sup:
+            sg_vars.append(t)
+    for sv in sg_vars:
+        itriple = (sv, ":instance", var_concept_dict_sup[sv])
         if itriple not in triples:
             additional_instance.append(itriple)
-
     return additional_instance
 
 
@@ -185,7 +188,6 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
             sg = name_subgraph[name]
             sg = self.clean_extend_subgraph(sg, tmptriples, name)
             name_subgraph[name] = sg
-        
         return name_subgraph
 
     def _iter_name_subgraph(self, triples):
