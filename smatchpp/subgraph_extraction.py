@@ -1,5 +1,7 @@
 import re
 from collections import defaultdict
+import logging
+logger = logging.getLogger("__main__")
 from smatchpp import util
 from smatchpp import interfaces
 
@@ -188,6 +190,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
             sg = name_subgraph[name]
             sg = self.clean_extend_subgraph(sg, tmptriples, name)
             name_subgraph[name] = sg
+            logger.debug("subgraph of type {}:\n{}".format(name, sg))
         return name_subgraph
 
     def _iter_name_subgraph(self, triples):

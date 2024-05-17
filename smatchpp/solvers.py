@@ -1,7 +1,7 @@
 import time
 import logging
-from random import shuffle
 logger = logging.getLogger("__main__")
+from random import shuffle
 import numpy as np
 import sys
 from collections import Counter
@@ -21,8 +21,7 @@ def get_solver(identifier_string):
     
     if identifier_string == "rilp":
         return RILPHC()
-    
- 
+     
     raise NotImplementedError(
             "please implement the solver you spcified: \"{}\"".format(identifier_string))
 

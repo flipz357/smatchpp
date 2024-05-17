@@ -11,7 +11,7 @@
 		"aliases": ["city", "city-district", "county", "state", "province", "territory", "country", "local-region", "country-region", "world-region", "continent", "ocean", "sea", "lake", "river", "gulf", "bay", "strait", "canal", "peninsula", "mountain", "volcano", "valley", "canyon", "island", "desert", "forest moon", "planet", "star", "constellation"]},
 	
 	"facility": 
-		{"relation_pointer": "INSERT", 
+		{"relation_pointer": "", 
 		"aliases": ["airport", "station", "port", "tunnel", "bridge", "road", "railway-line", "canal", "building", "theater", "museum", "palace", "hotel", "worship-place", "market", "sports-facility", "park", "zoo", "amusement-park"]},
 	
 	"event": 
