@@ -38,6 +38,8 @@ class PenmanReader(interfaces.GraphReader):
                 a list with triples (src, rel, tgt)
         """
         logging.debug("parsing {}".format(string))
+        string = self.__protect_brackets_inside_quotes(string)
+        logging.debug("Protect brackets inside quotes {}".format(string))
         string = string.replace(")", " )")
         string = string.replace("(", "( ")
         logging.debug("1. brackets replaced {}".format(string))
@@ -61,7 +63,8 @@ class PenmanReader(interfaces.GraphReader):
             try:
                 # get current token
                 tmp_token = tokens[i]
-                if tmp_token[0] in ["\"","\'"]:
+                
+                if tmp_token[0] in ["\"", "\'"]:
                     
                     # start of a string constant -> collect string, increment i    
                     if tokens[i + 1] == "/":
@@ -83,7 +86,7 @@ class PenmanReader(interfaces.GraphReader):
                     
                     else:
                         # start of a string constant -> collect string, increment i
-                        stringtok, incr = self._collect_string(tokens, i, stringsign=tmp_token[0])
+                        stringtok, incr = self.__collect_string(tokens, i, stringsign=tmp_token[0])
                         triple = (tmpsrc[nested_level], tmprel[nested_level], stringtok)
                         triples.append(triple)
                         i = incr + 1
@@ -111,7 +114,7 @@ class PenmanReader(interfaces.GraphReader):
                     concept = tokens[i + 2]
                      
                     if concept[0] in ["\"", "\'"]:
-                        concept, newincr = self._collect_string(tokens, i + 2, stringsign=concept[0])
+                        concept, newincr = self.__collect_string(tokens, i + 2, stringsign=concept[0])
                         i = newincr + 1
                     else:
                         i += 3
@@ -123,7 +126,6 @@ class PenmanReader(interfaces.GraphReader):
                     
                     triple = (tmpsrc[nested_level - 1], tmprel[nested_level - 1], var) 
                     triples.append(triple)
-
                 else:
                     # variable token without instance
                     #-> get var, get incoming relation, append triple
@@ -167,16 +169,18 @@ class PenmanReader(interfaces.GraphReader):
             logger.warning("""The graph contains an explicit relation \":root\", 
                             which is normally a special implicit relation. 
                             I have renamed all explicit \":root\" relations 
-                            to \":root_but_not_the_graph_root\".""")
-        
+                            to \":root_but_not_the_graph_root\". Here's the graph 
+                            that caused the problem {}""".format(string))
+            print(triples)
         if self.explicate_root == False:
             triples = [triple for triple in triples if triple[1] != ":root"]
 
+        triples = self.__unprotect_brackets_inside_quotes(triples)
         logging.debug("3. result after triple extraction: {}".format(triples))
         return triples
     
     @staticmethod
-    def _collect_string(tokens, start, stringsign="\""):
+    def __collect_string(tokens, start, stringsign="\""):
         
         attr = tokens[start]
         if attr[-1] == stringsign and len(attr) > 1:
@@ -192,6 +196,49 @@ class PenmanReader(interfaces.GraphReader):
                 return attr, newi
          
         return tokens[start], start
+    
+    @staticmethod
+    def __protect_brackets_inside_quotes(string):
+        newstring = []
+        in_double_quote = False
+        in_single_quote = False
+        for i, char in enumerate(string):
+            if char == "\"":
+                if not in_double_quote and string[i:].count("\"") == 1:
+                    newstring.append(char)
+                    continue
+                in_double_quote = not in_double_quote
+                newstring.append(char)
+                continue
+            if char == "\'":
+                if not in_double_quote and string[i:].count("\'") == 1:
+                    newstring.append(char)
+                    continue
+                if not in_double_quote:
+                    in_single_quote = not in_single_quote
+                newstring.append(char)
+                continue
+            if in_double_quote == in_single_quote == False:
+                newstring.append(char)
+                continue
+            if char == "(":
+                newstring.append("<ENCLOSED_LBR>")
+                continue
+            if char == ")":
+                newstring.append("<ENCLOSED_RBR>")
+                continue
+            newstring.append(char)
+        return "".join(newstring)
+    
+    @staticmethod
+    def __unprotect_brackets_inside_quotes(triples):
+        newtriples = []
+        def f(s):
+            s = s.replace("<ENCLOSED_LBR>", "(").replace("<ENCLOSED_RBR>", ")")
+            return s
+        newtriples = [(f(src), rel, f(tgt)) for src, rel, tgt in triples]
+        return newtriples
+
 
 
 class TSVReader(interfaces.GraphReader):
@@ -203,6 +250,29 @@ class TSVReader(interfaces.GraphReader):
         triples = [tuple(triple.split()) for triple in triples]
         triples = [(triple[0], triple[2], triple[1]) for triple in triples]
 
+        return triples
+
+
+class GoodmamiPenmanReader(interfaces.GraphReader):
+    
+    def __init__(self):
+        try:
+            import penman as gmpm
+            self.gmpm = gmpm
+        except ModuleNotFoundError:
+            print("please install goodmami's penman reader\
+                    to use this reader class: https://github.com/goodmami/penman")
+    
+    def _string2graph(self, string):
+        
+        triples = self.__read_with_gmpm(string)
+        return triples
+    
+    def __read_with_gmpm(self, string):
+        g = self.gmpm.decode(string)
+        triples = g.triples
+        r = ("ROOT_OF_GRAPH", ":root", triples[0][0])
+        triples = [r] + list(triples)
         return triples
 
 
