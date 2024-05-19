@@ -254,12 +254,13 @@ class TSVReader(interfaces.GraphReader):
 
 class GoodmamiPenmanReader(interfaces.GraphReader):
     
-    def __init__(self):
+    def __init__(self, explicate_root=True):
         try:
             import penman as gmpm
             self.gmpm = gmpm
         except ModuleNotFoundError:
             print("please install goodmami's penman reader to use this class: https://github.com/goodmami/penman")
+        self.explicate_root = explicate_root
     
     def _string2graph(self, string):
         triples = self.__read_with_gmpm(string)
@@ -269,7 +270,8 @@ class GoodmamiPenmanReader(interfaces.GraphReader):
         g = self.gmpm.decode(string)
         triples = g.triples
         r = ("ROOT_OF_GRAPH", ":root", triples[0][0])
-        triples = [r] + list(triples)
+        if self.explicate_root:
+            triples = [r] + list(triples)
         return triples
 
 
