@@ -1,8 +1,7 @@
 import logging
+logger = logging.getLogger("__main__")
 from smatchpp import interfaces
 from smatchpp import util
-
-logger = logging.getLogger("__main__")
 
 
 def read_graphstrings_from_file(filepath):
@@ -237,7 +236,6 @@ class PenmanReader(interfaces.GraphReader):
             return s
         newtriples = [(f(src), rel, f(tgt)) for src, rel, tgt in triples]
         return newtriples
-
 
 
 class TSVReader(interfaces.GraphReader):
