@@ -259,11 +259,9 @@ class GoodmamiPenmanReader(interfaces.GraphReader):
             import penman as gmpm
             self.gmpm = gmpm
         except ModuleNotFoundError:
-            print("please install goodmami's penman reader\
-                    to use this reader class: https://github.com/goodmami/penman")
+            print("please install goodmami's penman reader to use this class: https://github.com/goodmami/penman")
     
     def _string2graph(self, string):
-        
         triples = self.__read_with_gmpm(string)
         return triples
     
