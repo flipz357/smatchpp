@@ -171,7 +171,6 @@ class PenmanReader(interfaces.GraphReader):
                             I have renamed all explicit \":root\" relations 
                             to \":root_but_not_the_graph_root\". Here's the graph 
                             that caused the problem {}""".format(string))
-            print(triples)
         if self.explicate_root == False:
             triples = [triple for triple in triples if triple[1] != ":root"]
 
