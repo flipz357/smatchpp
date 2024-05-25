@@ -1,11 +1,12 @@
 # SMATCH++
 
-Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy customization. A short overview of some features:
+Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy extension for custom purposes. A short overview of some features:
 
-- Simple graph reading, graph writing, graph processing, graph matching
-- Different solvers including optimal ILP, and optional graph compression
+- Simple graph reading, graph processing, graph matching
+- Alignment solvers including optimal ILP
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
-- Standardization for different graph types such as AMR, Fine-grained evaluation
+- Standardization for different graph types such as AMR
+- Fine-grained evaluation, graph compression for fast ILP
 - Easy to extend
 
 Jump directly to [command line examples](#command-line) or [pip install](#pip-install) to use Smatch++ and its options simply from within your python program.
@@ -69,7 +70,7 @@ x w rel
 ...
 ```
 
-## Other configurations
+### Other options
 
 All options can be viewed with:
 
