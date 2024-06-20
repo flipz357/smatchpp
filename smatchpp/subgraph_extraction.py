@@ -129,7 +129,7 @@ def get_all_preds_of_a_node(triples, node):
 
 class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 
-    def __init__(self, add_instance=True, semantic_standardization=True, add_preds=True):
+    def __init__(self, add_instance=True, semantic_standardization=True):
         """Sets up a kind of complex AMR subgraph extractor. 
            The idea is to extract subgraphs from an AMR that are tied to linguistic aspects.
            E.g., a subgraph that captures the polarity structure of an AMR, a subgraph that
@@ -147,35 +147,28 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
                           return the subgraph [(x, :polarity, -), (x, :instance, good)]
             semantic_standardization: if True, this tries to standardize a graph by mapping all
                                       core-roles to non-core roles if available, e.g., :arg4 could map to
-                                      :instrument if it is containted like this in PropBank definition
-            add_preds: if True add all predicates of variables/nodes in the subgraph. A predicate is 
-                       a node that has NO incoming edge itselg, and only one outgoing edge into a 
-                       variable from the subgraph
+                                      :instrument if PropBank definition associates it with instrument
         """
         self.add_instance = add_instance
         self.semantic_standardization = semantic_standardization
         if self.semantic_standardization:
             from smatchpp.graph_transforms import RuleBasedSemanticAMRTransformer
         self.semantic_standardizer = RuleBasedSemanticAMRTransformer()
-        self.add_preds = add_preds
         self.reify_rules = util.read_amr_reify_table()
         self.concept_groups = util.read_amr_concept_groups()
-        self.amr_aspects = util.read_amr_aspects()
+        self.graph_aspects = util.read_amr_aspects()
 
     def _all_subgraphs_by_name(self, triples):
         name_subgraph = {}
         
         # full graph
         name_subgraph["main"] = triples 
-        name_subgraph["main without wiki"] = [t for t in triples if t[1] != ":wiki"]
         name_subgraph["wiki"] = self._maybe_add_instance([t for t in triples if t[1] == ":wiki"], triples)
         
-        # remove wiki from all subgraphs that will be extracted
-        tmptriples = name_subgraph["main without wiki"]
         
         if self.semantic_standardization:
             tmptriples = self.semantic_standardizer.transform(triples)
-            name_subgraph["main (semantically standardized)"] = tmptriples
+        
         for name, subgraph in self._iter_name_subgraph(tmptriples):
             name_subgraph[name] = subgraph
         
@@ -195,17 +188,17 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 
     def _iter_name_subgraph(self, triples):
         
-        for name in self.amr_aspects:
+        for name in self.graph_aspects:
             yield self._get_subgraph_by_name(name, triples)
 
     def _get_subgraph_by_name(self, name, triples):
 
-        rules = self.amr_aspects[name]
+        rules = self.graph_aspects[name]
         associated_rels = rules["associated_rel"]
         sgtriples = [t for t in triples if t[1] in associated_rels]
         
-        if rules["associated_concept"] and rules["associated_concept"][0] in self.concept_groups:
-            concept_group = self.concept_groups[rules["associated_concept"][0]]["aliases"]
+        if rules["associated_concept_group"] and rules["associated_concept_group"] in self.concept_groups:
+            concept_group = self.concept_groups[rules["associated_concept_group"]]["aliases"]
             vs = [t[0] for t in triples if t[2] in concept_group] 
             sgtriples += [t for t in triples if t[0] in vs or t[2] in vs] 
         
@@ -224,17 +217,19 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
         
-        sgtriples = self._maybe_add_subtree(sgtriples, triples_all, name)
-        sgtriples = self._maybe_add_preds(sgtriples, triples_all)
+        sgtriples = self._maybe_add_context(sgtriples, triples_all, name)
+        sgtriples = self._maybe_add_preds(sgtriples, triples_all, name)
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
         sgtriples = list(set(sgtriples))
-
+        logger.debug("name: {} -> sugraph: {}".format(name, sgtriples))
+        if name == "INSTRUMENT":
+            print(sgtriples)
         return sgtriples
 
-    def _maybe_add_preds(self, triples, triples_all):
-        if not self.add_preds:
+    def _maybe_add_preds(self, triples, triples_all, name):
+        if name not in self.graph_aspects:
             return triples
-        if self.amr_aspects["CONCEPT"]["add_predicates"] == 0:
+        if self.graph_aspects[name]["add_predicates"] == 0:
             return triples
         out = []
         for tr in triples:
@@ -242,7 +237,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
             out += get_all_preds_of_a_node(triples_all, tr[2])
         out = triples + out
         return out
- 
+     
     def _maybe_add_instance(self, triples, triples_all):
         if not self.add_instance:
             return triples
@@ -250,12 +245,17 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         out = triples + ai
         return out
     
-    def _maybe_add_subtree(self, triples, triples_all, name):
+    def _maybe_add_context(self, triples, triples_all, name):
         
         out = list(triples)
-        if name not in self.amr_aspects:
+        if name not in self.graph_aspects:
             return out
-        subtree_context_depth = self.amr_aspects[name].get("subgraph_extraction_range")
+        parent_additions = []
+        if self.graph_aspects[name].get("add_parent") == 1:
+            for (s, r, t) in triples:
+                ps = [t for t in triples_all if t[2] == s]
+                parent_additions += [elm for elm in ps if elm not in triples]
+        subtree_context_depth = self.graph_aspects[name].get("subgraph_extraction_range")
         subtree_context_depth = int(subtree_context_depth)
         
         if subtree_context_depth != 0:    
@@ -280,4 +280,5 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
                 depth += 1
 
         out = list(set(out))
+        out += parent_additions
         return out

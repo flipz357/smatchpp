@@ -1,22 +1,39 @@
 {
 	"animate": 
 		{"relation_pointer": "", 
-	 	"aliases": ["person", "family", "animal", "language", "nationality", "ethnic-group", "regional-group", "religious-group", "political-movement"]}, 
+	 	"aliases": ["person", "family", "animal", "language", "nationality", "ethnic-group", "regional-group", "religious-group", "political-movement"]},
+
+	"cause":
+                {"relation_pointer": ":cause",
+		"aliases": ["cause-01"]},	
 	
-	"organization": 
+	"dates": 	
+		{"relation_pointer": ":time", 
+		"aliases": ["date-entity", "date-interval"]},
+	
+	"event": 
 		{"relation_pointer": "", 
-		"aliases": ["company", "government-organization", "military", "criminal-organization", "political-party", "market-sector", "school", "university", "research-institute", "team", "league"]},	
-	"location": 
-		{"relation_pointer": ":location", 
-		"aliases": ["city", "city-district", "county", "state", "province", "territory", "country", "local-region", "country-region", "world-region", "continent", "ocean", "sea", "lake", "river", "gulf", "bay", "strait", "canal", "peninsula", "mountain", "volcano", "valley", "canyon", "island", "desert", "forest moon", "planet", "star", "constellation"]},
+		"aliases": ["incident", "natural-disaster", "earthquake", "war", "conference", "game", "festival"]},
 	
 	"facility": 
 		{"relation_pointer": "", 
 		"aliases": ["airport", "station", "port", "tunnel", "bridge", "road", "railway-line", "canal", "building", "theater", "museum", "palace", "hotel", "worship-place", "market", "sports-facility", "park", "zoo", "amusement-park"]},
 	
-	"event": 
+	"locations": 
+		{"relation_pointer": ":location", 
+		"aliases": ["city", "city-district", "county", "state", "province", "territory", "country", "local-region", "country-region", "world-region", "continent", "ocean", "sea", "lake", "river", "gulf", "bay", "strait", "canal", "peninsula", "mountain", "volcano", "valley", "canyon", "island", "desert", "forest moon", "planet", "star", "constellation"]},
+	
+	"math": 
+		{"relation_pointer": ":quant", 
+		"aliases": ["sum-of", "product-of"]},
+	
+	"molecular-physical-entity": 
 		{"relation_pointer": "", 
-		"aliases": ["incident", "natural-disaster", "earthquake", "war", "conference", "game", "festival"]},
+		"aliases": ["small-molecule", "protein", "protein-family", "protein-segment", "amino-acid", "macro-molecular-complex", "enzyme", "nucleic-acid", "pathway", "gene", "dna-sequence", "cell", "cell-line", "species", "taxon", "disease", "medical-condition"]},
+	
+	"organization": 
+		{"relation_pointer": "", 
+		"aliases": ["company", "government-organization", "military", "criminal-organization", "political-party", "market-sector", "school", "university", "research-institute", "team", "league"]},		
 	
 	"product": 
 		{"relation_pointer": "", 
@@ -25,24 +42,16 @@
 	"publication": 
 		{"relation_pointer": "", 
 		"aliases": ["book", "newspaper", "magazine", "journal"]},
+		
+	"quantities": 
+		{"relation_pointer": ":quant", 
+		"aliases": ["monetary-quantity", "distance-quantity", "area-quantity", "volume-quantity", "temporal-quantity", "frequency-quantity", "speed-quantity", "acceleration-quantity", "mass-quantity", "force-quantity", "pressure-quantity", "energy-quantity", "power-quantity", "voltage-quantity (zap!)", "charge-quantity", "potential-quantity", "resistance-quantity", "inductance-quantity", "magnetic-field-quantity", "magnetic-flux-quantity", "radiation-quantity", "concentration-quantity", "temperature-quantity", "score-quantity", "fuel-consumption-quantity", "seismic-quantity"]},
+
+	"questions":
+                {"relation_pointer": "",
+		"aliases": ["amr-unknown"]},
 	
 	"technical": 
 		{"relation_pointer": "", 
-		"aliases": ["award", "law", "court-decision", "treaty", "music-key", "musical-note", "food-dish", "writing-script", "variable", "program"]},
-	
-	"molecular-physical-entity": 
-		{"relation_pointer": "", 
-		"aliases": ["small-molecule", "protein", "protein-family", "protein-segment", "amino-acid", "macro-molecular-complex", "enzyme", "nucleic-acid", "pathway", "gene", "dna-sequence", "cell", "cell-line", "species", "taxon", "disease", "medical-condition"]},
-	
-	"math": 
-		{"relation_pointer": ":quant", 
-		"aliases": ["sum-of", "product-of"]},
-	
-	"dates": 	
-		{"relation_pointer": ":time", 
-		"aliases": ["date-entity", "date-interval"]},
-	
-	"quantities": 
-		{"relation_pointer": ":quant", 
-		"aliases": ["monetary-quantity", "distance-quantity", "area-quantity", "volume-quantity", "temporal-quantity", "frequency-quantity", "speed-quantity", "acceleration-quantity", "mass-quantity", "force-quantity", "pressure-quantity", "energy-quantity", "power-quantity", "voltage-quantity (zap!)", "charge-quantity", "potential-quantity", "resistance-quantity", "inductance-quantity", "magnetic-field-quantity", "magnetic-flux-quantity", "radiation-quantity", "concentration-quantity", "temperature-quantity", "score-quantity", "fuel-consumption-quantity", "seismic-quantity"]}}
-
+		"aliases": ["award", "law", "court-decision", "treaty", "music-key", "musical-note", "food-dish", "writing-script", "variable", "program"]}
+	}	

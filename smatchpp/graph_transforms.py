@@ -231,8 +231,9 @@ class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer, interfaces.Gr
     def _standardize(self, triples):
         return self._transform(triples)
 
-class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
-    """Class for edge de- or reification, which is defined for AMR in dictionaries
+class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
+    """Class for edge de- or reification, which is defined in dictionaries. Example dictionaries are
+        given for amr in resource/amr/reify_table.txt
        
        Attributes:
             mode (string):                Use either:
@@ -241,20 +242,16 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer, interfaces.G
                                           reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
     """ 
 
-    def __init__(self, mode="dereify", lower=True):
+    def __init__(self, reify_rules, reify_rules_inverse, mode="dereify"):
         
         assert mode in [None, "dereify", "reify"]
 
         self.mode = mode
-        self.lower = lower
-        self._load_rules()
-    
-    def _load_rules(self):
-        self.reify_rules, self.reify_rules_inverse = util.read_amr_reify_table(lower=self.lower)
+        self.reify_rules, self.reify_rules_inverse = reify_rules, reify_rules_inverse
         return None
 
     def _transform(self, triples):
-        logger.debug("Syntactic AMR transformer with mode={}, INPUT: {}".format(self.mode, triples))
+        logger.debug("Syntactic Rule Based Graph transformer with mode={}, INPUT: {}".format(self.mode, triples))
         if not self.mode:
             return triples
         triples = list(triples)
@@ -262,7 +259,7 @@ class RuleBasedSyntacticAMRTransformer(interfaces.GraphTransformer, interfaces.G
             self._dereify_graph(triples)
         elif self.mode == "reify":
             self._reify_graph(triples)
-        logger.debug("Syntactic AMR transformer with mode={}, OUTPUT: {}".format(self.mode, triples))
+        logger.debug("Syntactic Rule Based transformer with mode={}, OUTPUT: {}".format(self.mode, triples))
         return triples
 
     def _reify_graph(self, triples):

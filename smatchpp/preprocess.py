@@ -103,7 +103,8 @@ class AMRStandardizer(interfaces.GraphStandardizer):
 
     def __init__(self): 
         
-        self.dereifier = graph_transforms.RuleBasedSyntacticAMRTransformer(mode="dereify")
+        reify_rules, reify_rules_inverse = util.read_amr_reify_table(p="/resource/amr/reify_table.txt", lower=True)
+        self.dereifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, reify_rules_inverse, mode="dereify")
 
         return None
 

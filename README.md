@@ -238,10 +238,11 @@ Note that the alignment is a by-product of the matching and can be also retrieve
 In this example, we read a basic graph from a string, apply reification standardization, and write the reified graph to a string.
 
 ```python
-from smatchpp import data_helpers, graph_transforms
+from smatchpp import data_helpers, graph_transforms, util
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-reifier = graph_transforms.RuleBasedSyntacticAMRTransformer(mode="reify")
+reify_rules, reify_rules_inverse = util.read_amr_reify_table()
+reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, reify_rules_inverse, mode="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
 g = reifier.transform(g)

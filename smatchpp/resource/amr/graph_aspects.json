@@ -1,150 +1,187 @@
 {"AGENT": 
  	{
 	 "associated_rel": [":arg0"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "CAUSE": 
  	{
 	 "associated_rel": [":cause"],
-	 "associated_concept": ["cause"],
+	 "associated_concept_group": "cause",
 	 "search_in_frame_descr": [" cause ", " cause of "],
-	 "subgraph_extraction_range": 2,
 	 "map_to": ":cause",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 },
 
 "CONCEPT": 
  	{
 	 "associated_rel": [":instance"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
+	 "map_to": "",
 	 "subgraph_extraction_range": 0,
-	 "map_to": ":instance",
+	 "add_parent": 0,
 	 "add_predicates": 0
  	 },
 
 "FOCUS": 
  	{
 	 "associated_rel": [":root"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 },
 
 "INSTRUMENT": 
  	{
 	 "associated_rel": [":instrument"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [" instrument ", " instrumental "],
-	 "subgraph_extraction_range": 2,
 	 "map_to": ":instrument",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "LOCATION (spatial)":
 	{
 	 "associated_rel": [":location", ":path", ":destination", ":direction"],
-	 "associated_concept": ["location"],
+	 "associated_concept_group": "locations",
 	 "search_in_frame_descr": [" location ", " path ", " destination ", " direction "],
+	 "map_to": ":location",
 	 "subgraph_extraction_range": 2,
-	 "map_to": "",
+	 "add_parent": 0,
 	 "add_predicates": 1
 	 },
 
 "MATHS": 
  	{
 	 "associated_rel": [],
-	 "associated_concept": ["math"],
+	 "associated_concept_group": "math",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 	 
 "NER": 
  	{
 	 "associated_rel": [":name"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "PATIENT": 
  	{
 	 "associated_rel": [":arg1", ":arg2", ":arg3", ":arg4", ":arg5", ":arg6", ":arg7", ":arg8", ":arg9"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "POLARITY": 
  	{
 	 "associated_rel": [":polarity"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "POSSESSION": 
  	{
 	 "associated_rel": [":poss"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [" owner ", " possession "],
+	 "map_to": ":poss",
 	 "subgraph_extraction_range": 2,
-	 "map_to": "",
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "PURPOSE": 
  	{
 	 "associated_rel": [":purpose"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [" purpose "],
-	 "subgraph_extraction_range": 2,
 	 "map_to": ":purpose",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "QUANTIFIER": 
  	{
 	 "associated_rel": [":quant"],
-	 "associated_concept": ["quantities"],
+	 "associated_concept_group": "quantities",
 	 "search_in_frame_descr": [" quantity ", " amount "],
-	 "subgraph_extraction_range": 2,
 	 "map_to": ":quant",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
+	 "add_predicates": 1
+ 	 }, 
+
+"QUESTION": 
+ 	{
+	 "associated_rel": [],
+	 "associated_concept_group": "questions",
+	 "search_in_frame_descr": [" question ", " query "],
+	 "map_to": "",
+	 "subgraph_extraction_range": 0,
+	 "add_parent": 1,
 	 "add_predicates": 1
  	 }, 
 
 "SRL-core": 
  	{
 	 "associated_rel": [":arg0", ":arg1", ":arg2", ":arg3", ":arg4", ":arg5", ":arg6", ":arg7", ":arg8", ":arg9"],
-	 "associated_concept": [],
+	 "associated_concept_group": "",
 	 "search_in_frame_descr": [],
-	 "subgraph_extraction_range": 2,
 	 "map_to": "",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }, 
 
 "TIME (temporal)": 
  	{
 	 "associated_rel": [":time", ":duration", ":frequency"],
-	 "associated_concept": ["dates"],
+	 "associated_concept_group": "dates",
 	 "search_in_frame_descr": [" time "],
+	 "map_to": ":time",
 	 "subgraph_extraction_range": 2,
-	 "map_to": "",
+	 "add_parent": 0,
+	 "add_predicates": 1
+ 	 },
+	 
+"TOPIC": 
+ 	{
+	 "associated_rel": [":topic"],
+	 "associated_concept_group": "",
+	 "search_in_frame_descr": [" topic "],
+	 "map_to": ":topic",
+	 "subgraph_extraction_range": 2,
+	 "add_parent": 0,
 	 "add_predicates": 1
  	 }
-}	 
+} 
