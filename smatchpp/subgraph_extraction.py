@@ -205,9 +205,9 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
 	# check for reified rel nodes, collect related variable    
         for associated_rel in associated_rels:
             vars_of_reified_concept = []
-            if associated_rel in self.reify_rules[0]:
+            if associated_rel in self.reify_rules:
                 for (s, r, t) in triples:
-                    if r == ":instance" and t == self.reify_rules[0][associated_rel][0]:
+                    if r == ":instance" and t == self.reify_rules[associated_rel][0]:
                         vars_of_reified_concept.append(s)
                 for (s, r, t) in triples:
                     if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
@@ -222,8 +222,6 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
         sgtriples = list(set(sgtriples))
         logger.debug("name: {} -> sugraph: {}".format(name, sgtriples))
-        if name == "INSTRUMENT":
-            print(sgtriples)
         return sgtriples
 
     def _maybe_add_preds(self, triples, triples_all, name):

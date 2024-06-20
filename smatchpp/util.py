@@ -29,10 +29,7 @@ def read_amr_reify_table(p="/resource/amr/reify_table.txt", lower=False):
                 elm2 = elm2.strip()
                 if elm not in rel_rule:
                     rel_rule[elm] = [elm2, spl[2], spl[3]]
-                if elm2 not in rel_rule_inverse:
-                    rel_rule_inverse[elm2] = [elm, spl[2], spl[3]]
-    
-    return rel_rule, rel_rule_inverse
+    return rel_rule
 
 
 def read_amr_aspects(p="/resource/amr/graph_aspects.json"):

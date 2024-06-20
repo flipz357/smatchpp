@@ -242,13 +242,15 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
                                           reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
     """ 
 
-    def __init__(self, reify_rules, reify_rules_inverse, mode="dereify"):
+    def __init__(self, reify_rules, mode="dereify"):
         
         assert mode in [None, "dereify", "reify"]
 
         self.mode = mode
-        self.reify_rules, self.reify_rules_inverse = reify_rules, reify_rules_inverse
+        self.reify_rules = reify_rules
+        self.reify_rules_inverse = {v[0]:[k, v[1], v[2]] for k, v in self.reify_rules.items()}
         return None
+    
 
     def _transform(self, triples):
         logger.debug("Syntactic Rule Based Graph transformer with mode={}, INPUT: {}".format(self.mode, triples))
