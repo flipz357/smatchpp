@@ -1,0 +1,29 @@
+{
+	"animate": ["person", "family", "animal", "language", "nationality", "ethnic-group", "regional-group", "religious-group", "political-movement"],
+
+	"cause": ["cause-01"],	
+	
+	"dates": ["date-entity", "date-interval"],
+	
+	"event": ["incident", "natural-disaster", "earthquake", "war", "conference", "game", "festival"],
+	
+	"facility": ["airport", "station", "port", "tunnel", "bridge", "road", "railway-line", "canal", "building", "theater", "museum", "palace", "hotel", "worship-place", "market", "sports-facility", "park", "zoo", "amusement-park"],
+	
+	"locations": ["city", "city-district", "county", "state", "province", "territory", "country", "local-region", "country-region", "world-region", "continent", "ocean", "sea", "lake", "river", "gulf", "bay", "strait", "canal", "peninsula", "mountain", "volcano", "valley", "canyon", "island", "desert", "forest moon", "planet", "star", "constellation"],
+	
+	"math": ["sum-of", "product-of"],
+	
+	"molecular-physical-entity": ["small-molecule", "protein", "protein-family", "protein-segment", "amino-acid", "macro-molecular-complex", "enzyme", "nucleic-acid", "pathway", "gene", "dna-sequence", "cell", "cell-line", "species", "taxon", "disease", "medical-condition"],
+	
+	"organization": ["company", "government-organization", "military", "criminal-organization", "political-party", "market-sector", "school", "university", "research-institute", "team", "league"],
+
+	"product": ["vehicle", "ship", "aircraft", "aircraft-type", "spaceship", "car-make", "work-of-art", "picture", "music", "show", "broadcast-program"],
+	
+	"publication": ["book", "newspaper", "magazine", "journal"],
+		
+	"quantities": ["monetary-quantity", "distance-quantity", "area-quantity", "volume-quantity", "temporal-quantity", "frequency-quantity", "speed-quantity", "acceleration-quantity", "mass-quantity", "force-quantity", "pressure-quantity", "energy-quantity", "power-quantity", "voltage-quantity (zap!)", "charge-quantity", "potential-quantity", "resistance-quantity", "inductance-quantity", "magnetic-field-quantity", "magnetic-flux-quantity", "radiation-quantity", "concentration-quantity", "temperature-quantity", "score-quantity", "fuel-consumption-quantity", "seismic-quantity"],
+
+	"questions": ["amr-unknown"],
+	
+	"technical": ["award", "law", "court-decision", "treaty", "music-key", "musical-note", "food-dish", "writing-script", "variable", "program"]
+	}	

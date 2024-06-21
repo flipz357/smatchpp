@@ -234,7 +234,7 @@ class ResultPrinter:
     @staticmethod
     def _nice_format2(dic):
         strings = []
-        dic["===> MAIN (\"Smatch\") <==="] = dic.pop("main")
+        #dic["===> MAIN (\"Smatch\") <==="] = dic.pop("main")
         for score_dim in dic:
             fpr = np.array([dic[score_dim]["F1"]["result"], dic[score_dim]["Precision"]["result"], dic[score_dim]["Recall"]["result"]])
             fpr = [score_dim + " " * (max(len(st) for st in dic) - len(score_dim))] + list(fpr)

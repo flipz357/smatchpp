@@ -69,7 +69,7 @@ class TripleMatcher:
         return self._triplematch(triple1, triple2)
 
 
-class SubGraphExtractor:
+class SubgraphExtractor:
 
     def all_subgraphs_by_name(self, triples):
         # should return a dictionary that maps strings onto sets with triples, i.e., subgraphs

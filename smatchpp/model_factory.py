@@ -27,7 +27,8 @@ class StandardizerFactory:
         if not uri:
             return preprocess.DoNothingStandardizer()
         elif uri == "amr":
-            return preprocess.AMRStandardizer()
+            from smatchpp.formalism.amr import amrtools
+            return amrtools.AMRStandardizer()
         elif uri == "generic":
             return preprocess.GenericStandardizer()
         
@@ -52,7 +53,8 @@ class SubgraphExtractorFactory:
         """
 
         if uri == "amr":
-            return subgraph_extraction.AMRSubGraphExtractor(add_instance=True)
+            from smatchpp.formalism.amr import amrtools
+            return amrtools.AMRSubgraphExtractor()
         
         raise NotImplementedError("Subgraph extraction for graph type {} not implemented".format(uri))
 

@@ -127,17 +127,12 @@ def get_all_preds_of_a_node(triples, node):
     return preds
 
 
-class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
+class BasicSubgraphExtractor(interfaces.SubgraphExtractor):
 
-    def __init__(self, add_instance=True, semantic_standardization=True):
-        """Sets up a kind of complex AMR subgraph extractor. 
-           The idea is to extract subgraphs from an AMR that are tied to linguistic aspects.
-           E.g., a subgraph that captures the polarity structure of an AMR, a subgraph that
-           captures the agents in an AMR, a subgraph that captures the coreference structure
-           and so on.
-
-           NOTE: this subgraph extractor makes only sense for AMR, write your own extractor for other
-                 type of graph.
+    def __init__(self, add_instance=True, graph_aspects=None, concept_groups=None):
+        """Sets up a subgraph extractor. 
+           The idea is to extract subgraphs from a graph according to certain aspects.
+           
 
         Args:
             add_instance: if True adds the node labels of variables/nodes contained in a subgraph,
@@ -145,35 +140,42 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
                           in a subgraph. E.g., if the subgraph is [(x, :polarity, -)], and in the
                           supergraph the label of x is "good": (x, :instance, good, we might
                           return the subgraph [(x, :polarity, -), (x, :instance, good)]
-            semantic_standardization: if True, this tries to standardize a graph by mapping all
-                                      core-roles to non-core roles if available, e.g., :arg4 could map to
-                                      :instrument if PropBank definition associates it with instrument
+            graph_aspects (dict): specifies the target aspects with a dictionary
+                                  E.g. {"LOCATION (spatial)":
+                                        {
+                                            "associated_rel": [":location", ":path", ":destination", ":direction"],
+                                            "associated_concept_group": "locations",
+                                            "subgraph_extraction_range": 2,
+                                            "add_parent": 0,
+                                            "add_predicates": 1
+                                        },
+            concept_groups (dict): specifies a (non-exhaustive) clustering of node labels, from graph_aspects 
+                            to associated node labels 
+                            e.g. {"locations": ["city", "place", "village"]},
+                            "organization": ["government-organization", "company"]} means that
+                            means that node labels in the graph aspect of "organization" are selected for the
+                            subgraph of "organization"
         """
         self.add_instance = add_instance
-        self.semantic_standardization = semantic_standardization
-        if self.semantic_standardization:
-            from smatchpp.graph_transforms import RuleBasedSemanticAMRTransformer
-        self.semantic_standardizer = RuleBasedSemanticAMRTransformer()
-        self.reify_rules = util.read_amr_reify_table()
-        self.concept_groups = util.read_amr_concept_groups()
-        self.graph_aspects = util.read_amr_aspects()
+        self.concept_groups = concept_groups
+        self.graph_aspects = graph_aspects
 
     def _all_subgraphs_by_name(self, triples):
         name_subgraph = {}
         
         # full graph
+        """
         name_subgraph["main"] = triples 
         name_subgraph["wiki"] = self._maybe_add_instance([t for t in triples if t[1] == ":wiki"], triples)
         
-        
         if self.semantic_standardization:
             tmptriples = self.semantic_standardizer.transform(triples)
-        
-        for name, subgraph in self._iter_name_subgraph(tmptriples):
+        """
+        for name, subgraph in self._iter_name_subgraph(triples):
             name_subgraph[name] = subgraph
         
         # more complex aspects
-        name_subgraph["REENTRANCIES"] = subgraph_reentrancies(tmptriples)
+        name_subgraph["REENTRANCIES"] = subgraph_reentrancies(triples)
         
         exclude = ["main", "main without wiki", "wiki", "main (semantically standardized)"]
         
@@ -181,7 +183,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
             if name in exclude:
                 continue
             sg = name_subgraph[name]
-            sg = self.clean_extend_subgraph(sg, tmptriples, name)
+            sg = self.clean_extend_subgraph(sg, triples, name)
             name_subgraph[name] = sg
             logger.debug("subgraph of type {}:\n{}".format(name, sg))
         return name_subgraph
@@ -198,10 +200,11 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         sgtriples = [t for t in triples if t[1] in associated_rels]
         
         if rules["associated_concept_group"] and rules["associated_concept_group"] in self.concept_groups:
-            concept_group = self.concept_groups[rules["associated_concept_group"]]["aliases"]
+            concept_group = self.concept_groups[rules["associated_concept_group"]]
             vs = [t[0] for t in triples if t[2] in concept_group] 
             sgtriples += [t for t in triples if t[0] in vs or t[2] in vs] 
         
+        """
 	# check for reified rel nodes, collect related variable    
         for associated_rel in associated_rels:
             vars_of_reified_concept = []
@@ -212,7 +215,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
                 for (s, r, t) in triples:
                     if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
                         sgtriples.append((s, r, t))
-        
+        """
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
@@ -222,6 +225,7 @@ class AMRSubGraphExtractor(interfaces.SubGraphExtractor):
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
         sgtriples = list(set(sgtriples))
         logger.debug("name: {} -> sugraph: {}".format(name, sgtriples))
+        #print(name, sgtriples, triples_all)
         return sgtriples
 
     def _maybe_add_preds(self, triples, triples_all, name):

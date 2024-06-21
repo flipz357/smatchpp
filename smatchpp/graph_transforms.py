@@ -187,59 +187,53 @@ def reify_n(triples):
     return triples
          
 
-class RuleBasedSemanticAMRTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
+class SyntacticEdgeRelabelingTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
+    """Class for node-label conditioned edge relabeling, which is defined in dictionaries. 
+       
+       Attributes:
+            rules (dict): A dict that specifices the reification. E.g.
+                                {"NodeLabel": {":arg4": ":newRel"}} would mean that an edge
+                                (x, :arg4, y) is transformed to
+                                (x, arg4, y) iff the node label of x is NodeLabel
+    """ 
 
-    def __init__(self):
+    def __init__(self, rules):
 
-        self._load_rules()
+        self.rules = rules
     
-    def _load_rules(self):
-        """Semantic standardization happens according to rules 
-            and heuristic defined in resources/amr_aspects.json 
-            and resources/propbank_amr_frames_args_descr.txt
-
-            This parses the two files into applicable rules
-        """
-        self.amr_aspects = util.read_amr_aspects()
-        frame_table = util.read_frame_table()
-        self.inverted_frame_table = util.invert_frame_table(frame_table, self.amr_aspects)
-        return None
-
     def _transform(self, triples):
-        logger.debug("Semantic AMR transformer, INPUT: {}".format(triples))
-        vc = util.get_var_concept_dict(triples)
-        news = {}
-        for name in self.amr_aspects:
-            map_to = self.amr_aspects[name].get("map_to")
-            if not map_to:
-                continue
-            associated_frame_rels = self.inverted_frame_table[name]
-            for (frame, rel) in associated_frame_rels:
-                for i in range(len(triples)):
-                    s, r, t = triples[i]
-                    if r == rel and (s == frame or vc.get(s) == frame):
-                        news[i] = (s, map_to, t)
+        logger.debug("Edge relabel Graph transformer, INPUT: {}".format(triples))
+        vc = util.get_var_concept_dict(triples) 
         out = []
-        for i in range(len(triples)):
-            if i in news:
-                out.append(news[i])
-            else:
-                out.append(triples[i])
-        logger.debug("Semantic AMR transformer, OUTPUT: {}".format(triples))
+        for i, triple in enumerate(triples):
+            s, r, t = triple
+            slabel = vc.get(s)
+            rule = self.rules.get(slabel)
+            if rule and r in rule:
+                out.append((s, rule[r], t))
+                continue
+            out.append(triple)
+        logger.debug("Edge relabel Graph transformer, OUTPUT: {}".format(triples))
+    
         return out
 
     def _standardize(self, triples):
         return self._transform(triples)
 
 class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfaces.GraphStandardizer):
-    """Class for edge de- or reification, which is defined in dictionaries. Example dictionaries are
-        given for amr in resource/amr/reify_table.txt
+    """Class for edge de- or reification, which is defined in dictionaries. De/Reification is an 
+       equivalency preserving but structure-changing transformation based on rules
        
        Attributes:
-            mode (string):                Use either:
-                                          None: Nothing will be done
-                                          dereify: (z, instance, locatedAt), (z, a1, x), (z, a2, y) -> (x, location, y)
-                                          reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
+            reify_rules (dict): A dictionary that specifices the reification. E.g.
+                                {":rel": ["NodeLabel", ":arg1", ":arg2"]} would mean that an edge
+                                (x, :rel, y) is transformed to
+                                (z, :instance, NodeLabel)
+                                (z, :arg1, x), (z, arg2, y)
+            mode (string):      Use either:
+                                None: Nothing will be done
+                                dereify: (z, instance, locatedAt), (z, a1, x), (z, a2, y) -> (x, location, y)
+                                reify: (x, location, y) -> (z, instance, locatedAt), (z, a1, x), (z, a2, y)
     """ 
 
     def __init__(self, reify_rules, mode="dereify"):
@@ -251,13 +245,13 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
         self.reify_rules_inverse = {v[0]:[k, v[1], v[2]] for k, v in self.reify_rules.items()}
         return None
     
-
     def _transform(self, triples):
         logger.debug("Syntactic Rule Based Graph transformer with mode={}, INPUT: {}".format(self.mode, triples))
         if not self.mode:
             return triples
         triples = list(triples)
         if self.mode == "dereify":
+            copy = list(triples)
             self._dereify_graph(triples)
         elif self.mode == "reify":
             self._reify_graph(triples)
@@ -293,15 +287,10 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
 
         """
         
-        concept = None
-        
-        # get index of the instance tripile of the variable
-        for i, tr in enumerate(triples):
-            if tr[0] == variable and tr[1] == ":instance":
-                concept = tr[2]
-                ci = i
-                break
-        
+        concept = util.get_var_concept_dict(triples).get(variable)
+        if not concept:
+            return False
+         
         # continue only if the instance is a concept that can trigger a dereification
         if concept not in self.reify_rules_inverse:
             return False
@@ -312,30 +301,46 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
                 return False
         
         # now we search for outgoing relations that match the description
-        foundx = 0
-        foundxv = None
-        foundxi = None
-        foundy = 0
-        foundyv = None
-        foundyi = None
-        foundother = 0
+        check = self.__can_we_derify(variable, concept, triples)
+        return check
+
+    def __can_we_derify(self, variable, concept, triples):
+        """We know that concept can be dereified, now we check if the context
+           allows this operation"""
+        
+        # get index of the instance triple of the variable
         for i, tr in enumerate(triples):
+            if tr[0] == variable and tr[1] == ":instance":
+                concept_triple_index = i
+                break
+        
+        nx_outgoing, xv, xv_triple_index = 0, None, None
+        ny_outgoing, yv, yv_triple_index = 0, None, None
+        foundother = 0
+        rule = self.reify_rules_inverse[concept]
+        
+        for i, tr in enumerate(triples):
+            # get the source
             if tr[0] == variable and tr[1] != ":instance":
-                if tr[1] == self.reify_rules_inverse[concept][1]:
-                    foundx += 1
-                    foundxv = tr[2]
-                    foundxi = i
-                elif tr[1] == self.reify_rules_inverse[concept][2]:
-                    foundy += 1
-                    foundyv = tr[2] 
-                    foundyi = i
+                # check type of outgoing arguments, must fit the inverse reification rule
+                # we count them too, their number (in the end) must be exactly 2
+                if tr[1] == rule[1]:
+                    nx_outgoing += 1
+                    xv = tr[2]
+                    xv_triple_index = i
+                elif tr[1] == rule[2]:
+                    ny_outgoing += 1
+                    yv = tr[2] 
+                    yv_triple_index = i
                 else:
                     foundother += 1
         
         # we can dereify if there are two outgoing relations that meet the description, but not more
-        if foundx == foundy == 1 and foundother == 0:
-            return (foundxv, foundyv, foundxi, foundyi, ci, self.reify_rules_inverse[concept][0])
-        
+        if nx_outgoing == ny_outgoing == 1 and not foundother:
+            #return (xv, yv, xv_triple_index, yv_triple_index, concept_triple_index, rule[0])
+            newrelation = (xv, rule[0], yv) # (new src, new rel, new tgt)
+            delete_indeces = (xv_triple_index, yv_triple_index, concept_triple_index)
+            return newrelation, delete_indeces 
         # we cannot dereify
         return False
 
@@ -363,15 +368,14 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
             # e.g., src is x; tgt is z, rel is :location
             # del_i are indices of triples that can be removed 
             # i.e., the non-dereified structure
-            src, tgt, deli1, deli2, deli3, rel = rule
+            newrelation, delete_indeces = rule
 
-            # remember non-dereified structure
-            delis.append(deli1)
-            delis.append(deli2)
-            delis.append(deli3)
+            # if there are not exactly three triples that we remove, there is something wrong
+            assert len(delete_indeces) == 3
 
             # add dereified structure
-            new.append((src, rel, tgt))
+            new.append(newrelation)
+            delis += delete_indeces
         
         # remove non-dereified structures
         for index in sorted(delis, reverse=True):
@@ -379,6 +383,6 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
         
         triples += new
         return None
-    
+
     def _standardize(self, triples):
         return self._transform(triples)
