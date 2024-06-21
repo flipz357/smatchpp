@@ -83,8 +83,7 @@ class Smatchpp():
             logger.debug("graph pair fully prepared,\n\nG1: {}\n\nG2: {}\n\nVar G1: {}\n\nVar G2: {}".format(g1, g2, v1, v2))
             alignment, varindex, status = self.graph_aligner.align(g1, g2, v1, v2)
             match = {}
-            alignments = {}
-            
+            alignments = {} 
             name_subgraph1 = self.subgraph_extractor.all_subgraphs_by_name(g1)
             name_subgraph2 = self.subgraph_extractor.all_subgraphs_by_name(g2)
             for name in name_subgraph1:
