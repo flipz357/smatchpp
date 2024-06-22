@@ -1,7 +1,4 @@
 import logging
-import os
-import json
-from collections import defaultdict
 
 logger = logging.getLogger("__main__")
 

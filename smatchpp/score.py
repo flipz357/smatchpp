@@ -77,8 +77,9 @@ class TripleScorer(interfaces.Scorer):
     def _safe_get_align(alignmat, src):
         target = alignmat[src]
         return target
-
-    def _map_triples(self, triples, alignmat, varindex, identifier="bb_"):
+    
+    @staticmethod
+    def _map_triples(triples, alignmat, varindex, identifier="bb_"):
         """This function overwrites variables in one graph with variables 
             from another graph given an alignment. The goal is then that the graphs
             can be matched in a transparent and controlled way. 

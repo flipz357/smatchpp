@@ -38,7 +38,6 @@ class GraphTransformer:
 
 class GraphPairPreparer:
     
-
     def prepare_get_vars(self, triples1, triples2):
         self._check_args(triples1, triples2)
         triples1, triples2, v1, v2 = self._prepare_get_vars(triples1, triples2)

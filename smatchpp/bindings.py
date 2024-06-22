@@ -23,8 +23,8 @@ class Smatchpp():
         
         self.graph_standardizer = graph_standardizer
         if not self.graph_standardizer:
-            from smatchpp import preprocess
-            self.graph_standardizer = preprocess.DoNothingStandardizer()
+            from smatchpp.formalism.generic import tools as generictools
+            self.graph_standardizer = generictools.DoNothingStandardizer()
 
         self.graph_pair_preparer = graph_pair_preparer
         if not self.graph_pair_preparer:

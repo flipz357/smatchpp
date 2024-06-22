@@ -17,7 +17,6 @@ def read_amr_reify_table(p="/resource/reify_table.txt", lower=False):
         lines = [l for l in f.read().split("\n") if l if not l.startswith("#")]
 
     rel_rule = {}
-    rel_rule_inverse = {}
 
     for line in lines:
         if lower:

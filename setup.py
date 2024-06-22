@@ -7,15 +7,17 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='smatchpp',
-    version='1.5.2',    
+    version='1.6.0',    
     description='A Python package for graph processing',
     url='https://github.com/flipz357/smatchpp',
     author='Juri Opitz',
     author_email='opitz.sci@gmail.com',
     license='GPLv3',
-    packages=['smatchpp'],
+    packages=['smatchpp',
+              'smatchpp.formalism.amr',
+              'smatchpp.formalism.generic'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     python_requires=">=3.5",
     classifiers=["License :: OSI Approved :: GNU General Public License v3 (GPLv3)"],
-    package_data={'smatchpp': ['resource/*']})
+    package_data={'smatchpp': ['formalism/amr/resource/*']})

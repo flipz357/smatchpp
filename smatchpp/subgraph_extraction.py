@@ -1,5 +1,4 @@
 import re
-from collections import defaultdict
 import logging
 logger = logging.getLogger("__main__")
 from smatchpp import util
@@ -89,7 +88,7 @@ def get_additional_instances(triples, triples_all):
     additional_instance = []
     var_concept_dict_sup = util.get_var_concept_dict(triples_all)
     sg_vars = []
-    for (s, r, t) in triples:
+    for (s, _, t) in triples:
         if s in var_concept_dict_sup:
             sg_vars.append(s)
         if t in var_concept_dict_sup:
@@ -163,14 +162,6 @@ class BasicSubgraphExtractor(interfaces.SubgraphExtractor):
     def _all_subgraphs_by_name(self, triples):
         name_subgraph = {}
         
-        # full graph
-        """
-        name_subgraph["main"] = triples 
-        name_subgraph["wiki"] = self._maybe_add_instance([t for t in triples if t[1] == ":wiki"], triples)
-        
-        if self.semantic_standardization:
-            tmptriples = self.semantic_standardizer.transform(triples)
-        """
         for name, subgraph in self._iter_name_subgraph(triples):
             name_subgraph[name] = subgraph
         
@@ -204,18 +195,6 @@ class BasicSubgraphExtractor(interfaces.SubgraphExtractor):
             vs = [t[0] for t in triples if t[2] in concept_group] 
             sgtriples += [t for t in triples if t[0] in vs or t[2] in vs] 
         
-        """
-	# check for reified rel nodes, collect related variable    
-        for associated_rel in associated_rels:
-            vars_of_reified_concept = []
-            if associated_rel in self.reify_rules:
-                for (s, r, t) in triples:
-                    if r == ":instance" and t == self.reify_rules[associated_rel][0]:
-                        vars_of_reified_concept.append(s)
-                for (s, r, t) in triples:
-                    if (t in vars_of_reified_concept or s in vars_of_reified_concept) and r != ":instance":
-                        sgtriples.append((s, r, t))
-        """
         return name, sgtriples 
     
     def clean_extend_subgraph(self, sgtriples, triples_all, name):
@@ -225,7 +204,6 @@ class BasicSubgraphExtractor(interfaces.SubgraphExtractor):
         sgtriples = self._maybe_add_instance(sgtriples, triples_all)
         sgtriples = list(set(sgtriples))
         logger.debug("name: {} -> sugraph: {}".format(name, sgtriples))
-        #print(name, sgtriples, triples_all)
         return sgtriples
 
     def _maybe_add_preds(self, triples, triples_all, name):
@@ -254,7 +232,7 @@ class BasicSubgraphExtractor(interfaces.SubgraphExtractor):
             return out
         parent_additions = []
         if self.graph_aspects[name].get("add_parent") == 1:
-            for (s, r, t) in triples:
+            for (s, _, t) in triples:
                 ps = [t for t in triples_all if t[2] == s]
                 parent_additions += [elm for elm in ps if elm not in triples]
         subtree_context_depth = self.graph_aspects[name].get("subgraph_extraction_range")

@@ -1,11 +1,7 @@
-from smatchpp import preprocess
-from smatchpp import subgraph_extraction
 from smatchpp import data_helpers
 import logging
 
-
 logger = logging.getLogger("__main__")
-
 
 class StandardizerFactory:
 
@@ -25,12 +21,14 @@ class StandardizerFactory:
         """
         
         if not uri:
-            return preprocess.DoNothingStandardizer()
-        elif uri == "amr":
-            from smatchpp.formalism.amr import amrtools
+            from smatchpp.formalism.generic import tools as generictools
+            return generictools.DoNothingStandardizer()
+        if uri == "amr":
+            from smatchpp.formalism.amr import tools as amrtools
             return amrtools.AMRStandardizer()
-        elif uri == "generic":
-            return preprocess.GenericStandardizer()
+        if uri == "generic":
+            from smatchpp.formalism.generic import tools as generictools
+            return generictools.GenericStandardizer()
         
         raise NotImplementedError("Preprocessor for uri {} not implemented".format(uri))
 
@@ -53,7 +51,7 @@ class SubgraphExtractorFactory:
         """
 
         if uri == "amr":
-            from smatchpp.formalism.amr import amrtools
+            from smatchpp.formalism.amr import tools as amrtools
             return amrtools.AMRSubgraphExtractor()
         
         raise NotImplementedError("Subgraph extraction for graph type {} not implemented".format(uri))

@@ -205,7 +205,7 @@ class SyntacticEdgeRelabelingTransformer(interfaces.GraphTransformer, interfaces
         logger.debug("Edge relabel Graph transformer, INPUT: {}".format(triples))
         vc = util.get_var_concept_dict(triples) 
         out = []
-        for i, triple in enumerate(triples):
+        for triple in triples:
             s, r, t = triple
             slabel = vc.get(s)
             rule = self.rules.get(slabel)
@@ -213,8 +213,7 @@ class SyntacticEdgeRelabelingTransformer(interfaces.GraphTransformer, interfaces
                 out.append((s, rule[r], t))
                 continue
             out.append(triple)
-        logger.debug("Edge relabel Graph transformer, OUTPUT: {}".format(triples))
-    
+        logger.debug("Edge relabel Graph transformer, OUTPUT: {}".format(triples)) 
         return out
 
     def _standardize(self, triples):
@@ -251,7 +250,6 @@ class SyntacticReificationGraphTransformer(interfaces.GraphTransformer, interfac
             return triples
         triples = list(triples)
         if self.mode == "dereify":
-            copy = list(triples)
             self._dereify_graph(triples)
         elif self.mode == "reify":
             self._reify_graph(triples)
