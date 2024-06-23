@@ -250,7 +250,7 @@ from smatchpp import data_helpers, graph_transforms
 from smatchpp.formalism.amr import tools as amrtools
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-reify_rules, reify_rules_inverse = amrtools.read_amr_reify_table()
+reify_rules = amrtools.read_amr_reify_table()
 reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, mode="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
