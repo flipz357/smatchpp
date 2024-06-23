@@ -111,7 +111,7 @@ Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To
 
 ## Python package<a id="python-package"></a>
 
-### Pip installation< id="pip-install"></a>
+### Pip installation<a id="pip-install"></a>
 
 To install SMATCH++ as a python package, simply run 
 
