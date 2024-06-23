@@ -317,7 +317,7 @@ Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'mai
 
 ### Example XI: Sub-graph isomorphism test
 
-We want to know if g1 is a subgraph of g2. We note: this is a i) binary value ii) using lossless `graph_compression` does not change the result, we iii) should ignore the `:root` relation that is implicit in Penman. So:
+We want to know: is g1 a *subgraph* of g2? We note: this is a i) binary value ii) using lossless `graph_compression` does not change the result, we iii) should ignore the `:root` relation that is implicit in Penman. So:
 
 ```python
 from smatchpp import Smatchpp, preprocess, data_helpers
