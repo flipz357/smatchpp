@@ -18,7 +18,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
     - [More command line examples](#more-command-line-examples)
 - [**Python package**](#python-package)
     - [Pip install](#pip-install)
-    - [*11* Graph processing examples](#python-usage)
+    - [*11 examples* for graph processing](#python-usage)
 - [FAQ](#faq)
 - [Citation](#citation)
 
