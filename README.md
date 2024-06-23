@@ -14,7 +14,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
 - [Requirements](#requirements)
 - [**Command line examples**](#command-line)
     - [Best practice for AMR parser evaluation](#basic-eval)
-    - [Best practice for generic semantic graph evaluation](#generic-eval)
+    - [Best practice for other types of graph parsing evaluation](#generic-eval)
     - [More command line examples](#more-command-line-examples)
 - [**Python package**](#python-package)
     - [Pip install](#pip-install)
@@ -83,6 +83,10 @@ x w rel
 ...
 ```
 
+### Evaluating other kinds of graphs<a id="generic-eval"></a>
+
+For evaluating other kinds of graphs, use `-graph_type generic` to perform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
+
 ### Other options<a id="more-command-line-examples"></a>
 
 All options can be viewed with:
@@ -92,10 +96,6 @@ python -m smatchpp --help
 ``` 
 
 Here are some interesting examples:
-
-### Evaluating other kinds of graphs<a id="generic-eval"></a>
-
-For evaluating other kinds of graphs, use `-graph_type generic` to perform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
 
 ### Using hill-climber (⚠️)
 
