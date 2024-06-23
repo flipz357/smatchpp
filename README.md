@@ -36,7 +36,9 @@ The packages can be installed with `pip ...`
 
 ## Command line examples<a id="command-line"></a>
 
-### Best practice for AMR evaluation<a id="basic-eval"></a>
+Evaluation of any type of graph parsing may include ILP optimal alignment, bootstrap confidence and micro and macro averaging. Specific formalisms can be simply set by the user with the `-graph_type` flag. Scroll down for command line examples.
+
+### Best practice for AMR parsing evaluation<a id="basic-eval"></a>
 
 This evaluation setup has optimal ILP alignmnent, calculates micro and macro corpus metrics and confidence intervals. It also applies AMR graph standardization.
 
