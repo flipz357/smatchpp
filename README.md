@@ -338,9 +338,9 @@ print(classifier("(t / dog :rel-of (d / test))", "(d / test :rel (t / dog))")) #
 
 ## FAQ<a id="faq"></a>
 
-- *I want to process other custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
+- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use heuristic by setting solver as HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a (possibly) sub-optimal solution (might be still better than hill-climbing and it has an upper-bound). Perhaps, 2. is most suitable as it can offer best solution quality.
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use heuristic via HillClimber (unfortunately heuristic will get worse if graphs are large since there are lots of local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and still gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a heuristic solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. is most suitable as it can offer best solution quality.
 
 - *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. Smatch++ allows easy customization of the triple matching function, and you can extend to implement your own class.
 
