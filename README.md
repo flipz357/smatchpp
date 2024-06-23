@@ -3,15 +3,26 @@
 Handy processing of graphs including graph alignment and graph matching. There is a special focus on standardized evaluation of graph parsing, but SMATCH++ allows easy extension for custom purposes. A short overview of some features:
 
 - Simple graph reading, graph processing, graph matching
-- Alignment solvers including optimal ILP
+- Alignment solvers including *optimal matching* with ILP
 - Evaluation scoring with bootstrap confidence intervals, micro and macro averages
 - Standardization for different graph types such as AMR
 - Fine-grained evaluation, graph compression for fast ILP
 - Easy to extend
 
-Jump directly to [command line examples](#command-line) or [pip install](#pip-install) to use Smatch++ and its options simply from within your python program.
+#### Table of contents
 
-## Requirements
+- [Requirements](#requirements)
+- [**Command line examples**](#command-line)
+    - [Best practice for AMR parser evaluation](#basic-eval)
+    - [Best practice for generic semantic graph evaluation](#generic-eval)
+    - [More command line examples](#more-command-line-examples)
+- [**Python package**](#python-package)
+    - [Pip install](#pip-install)
+    - [*11* Graph processing examples](#python-usage)
+- [FAQ](#faq)
+- [Citation](#citation)
+
+## Requirements<a id="requirements"></a>
 
 For the most basic version, there shouldn't be a need to install additional modules. However, when using ILP optimal solving and bootstrapping for evaluation (highly recommended!), we require
 
@@ -70,7 +81,7 @@ x w rel
 ...
 ```
 
-### Other options
+### Other options<a id="more-command-line-examples"></a>
 
 All options can be viewed with:
 
@@ -80,7 +91,7 @@ python -m smatchpp --help
 
 Here are some interesting examples:
 
-### Evaluating other kinds of graphs
+### Evaluating other kinds of graphs<a id="generic-eval"></a>
 
 For evaluating other kinds of graphs, use `-graph_type generic` to perform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
 
@@ -96,15 +107,17 @@ For using a graph compression to make evaluation much faster, use `--lossless_gr
 
 Measures similarity on different types of subgraphs (e.g., NER, cause, etc.). To apply, use `-score_dimension all-multialign` or `score_dimension all-onealign`. Multi align re-calculates alignments for each pair of sub-graph, one-align calculates one alignment for a pair of graphs which is then re-used for the sub-graph pairs. Currently only available when `-graph_type amr`.
 
-## Python package<a id="pip-install"></a>
+## Python package<a id="python-package"></a>
 
-### Pip installation
+### Pip installation< id="pip-install"></a>
 
 To install SMATCH++ as a python package, simply run 
 
 `pip install smatchpp`
 
-A main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. For other and more custom operations, specific modules can be loaded. Some examples are in the following,
+A main interface is a smatchpp.Smatchpp object. With this, most kinds of operations can be performed on graphs and pairs of graphs. For other and more custom operations, specific modules can be loaded. Some examples are in the following
+
+## Python usage examples<a id="python-usage"></a>
 
 ### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
@@ -151,11 +164,12 @@ print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0,
 
 ### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex-basicdefault-amr"></a>
 
-Beyond basic defaults, we need an ILP solver for best alignment and perform AMR-focused pre-processing.
+AMR is simply a special type of graph, where best-practice is implemented in `formalism/amr/tools.py`. Beyond basic defaults, we perform AMR-focused graph standardization. 
 
 ```python
-from smatchpp import Smatchpp, solvers, preprocess
-graph_standardizer = preprocess.AMRStandardizer()
+from smatchpp import Smatchpp, solvers
+from smatchpp.formalism.amr import tools as amrtools
+graph_standardizer = amrtools.AMRStandardizer()
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer)
 score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") # equivalent AMR graphs 
@@ -164,13 +178,14 @@ print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0,
 
 Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
 
-### Example IV: Best practice for AMR corpus scoring
+### Example IV: Best practice for AMR parser evaluation 
 
-According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals.
+According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals. 
 
 ```python
 from smatchpp import Smatchpp, solvers, preprocess, eval_statistics
-graph_standardizer = preprocess.AMRStandardizer()
+from smatchpp.formalism.amr import tools as amrtools
+graph_standardizer = amrtools.AMRStandardizer()
 printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=True, output_format="json")
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, printer=printer)
@@ -182,13 +197,17 @@ print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision'
 
 If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
+Not also that any other semantic formalism (not AMR) can be evaluated by simply using, e.g., `graph_standardizer = generictools.GenericStandardizer()` after importing `from smatchpp.formalism.generic import tools as generictools`.
+
+
 ### Example V: Standardize and extract subgraphs for AMR
 
 ```python
 from smatchpp import preprocess, subgraph_extraction, data_helpers
+from smatchpp.formalism.amr import tools as amrtools
+standardizer = amrtools.AMRStandardizer()
 reader = data_helpers.PenmanReader()
-standardizer = preprocess.AMRStandardizer()
-subgraph_extractor = subgraph_extraction.AMRSubGraphExtractor()
+subgraph_extractor = amrtools.AMRSubgraphExtractor()
 string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
 g = reader.string2graph(string_graph)
 g = standardizer.standardize(g)
@@ -196,19 +215,6 @@ name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
 
 # get subgraph for "instrument"
 print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
-```
-
-Note that the result is the same as when we mention the `instrument` edge explicitly, i.e., `string_graph = "(c / control-01 :arg1 (c2 / computer) :instrument (m / mouse))"`. 
-Such a semantic standarization can also be performed on a full graph by loading an explicit standardizer (here without subgraph extraction), which explicates core-roles, if possible:
-
-```python
-from smatchpp import data_helpers, graph_transforms
-graph_reader = data_helpers.PenmanReader()
-graph_transformer = graph_transforms.RuleBasedSemanticAMRTransformer()
-string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
-g = graph_reader.string2graph(string_graph)
-g = graph_transformer.transform(g)
-print(g) # [('c', ':instrument', 'm'), ('c', ':instance', 'control-01'), ('c1', ':instance', 'computer'), ('m', ':instance', 'mouse'), ('c', ':arg1', 'c1'), ('c', ':root', 'control-01')]
 ```
 
 ### Example VI: get an alignment
@@ -235,14 +241,15 @@ Note that the alignment is a by-product of the matching and can be also retrieve
 
 ### Example VII: Read, reify and write graph
 
-In this example, we read a basic graph from a string, apply reification standardization, and write the reified graph to a string.
+In this example, we read a basic graph from a string, apply reification, and write the reified graph to a string. Reification are equivalency-preserving graph transformations based on rules. Currently rules are only implemnted for AMR graphs, so we will import from `formalism/amr`
 
 ```python
-from smatchpp import data_helpers, graph_transforms, util
+from smatchpp import data_helpers, graph_transforms
+from smatchpp.formalism.amr import tools as amrtools
 graph_reader = data_helpers.PenmanReader()
 graph_writer = data_helpers.PenmanWriter()
-reify_rules, reify_rules_inverse = util.read_amr_reify_table()
-reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, reify_rules_inverse, mode="reify")
+reify_rules, reify_rules_inverse = amrtools.read_amr_reify_table()
+reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, mode="reify")
 s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
 g = graph_reader.string2graph(s)
 g = reifier.transform(g)
@@ -312,9 +319,10 @@ We want to know if g1 is a subgraph of g2. We note: this is a i) binary value ii
 
 ```python
 from smatchpp import Smatchpp, preprocess, data_helpers
+from smatchpp.formalism.generic import tools as generictools
 
 reader = data_helpers.PenmanReader(explicate_root=False) # ignore root
-standardizer = preprocess.GenericStandardizer() # use AMRStandardizer for AMR
+standardizer = generictools.GenericStandardizer() # generic standardizer
 pair_preparer_compressor = preprocess.BasicGraphPairPreparer(lossless_graph_compression=True)
 
 # now we can construct our measure and classifier, and run a few examples
@@ -326,7 +334,7 @@ print(classifier("(t / dog :rel (d / test))", "(d / test :rel (t / dog))")) # Fa
 print(classifier("(t / dog :rel-of (d / test))", "(d / test :rel (t / dog))")) # True
 ```
 
-## FAQ
+## FAQ<a id="faq"></a>
 
 - *I want to process other custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
 
@@ -334,7 +342,7 @@ print(classifier("(t / dog :rel-of (d / test))", "(d / test :rel (t / dog))")) #
 
 - *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. Smatch++ allows easy customization of the triple matching function, and you can extend to implement your own class.
 
-## Citation
+## Citation<a id="citation"></a>
 
 If you like the project, consider citing
 

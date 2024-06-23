@@ -59,19 +59,18 @@ def relabel_vars(triples):
         v2v[v] = vnew
 
     # now we can map to new variables
-    for i in range(len(triples)):
-        src = triples[i][0]
-        rel = triples[i][1]
-        tgt = triples[i][2]
+    newtriples = []
+    for (src, rel, tgt) in triples:
         if src in v2v:
             src = v2v[src]
         if tgt in v2v:
             if rel != ":instance":
                 tgt = v2v[tgt]
-        triples[i] = (src, triples[i][1], tgt)
+        newtriple = (src, rel, tgt)
+        newtriples.append(newtriple)
     
     logging.debug("I ensured that no variable name / node index equals concept / node label: {}".format(triples)) 
-    return None
+    return newtriples
      
 
 def deinvert_e(triples):
@@ -81,32 +80,35 @@ def deinvert_e(triples):
         triples: triples
 
     Returns:
-        None
+        graph with deinverted edges
         
     """
-    
-    for i in range(len(triples)):
-        s, relation, t = triples[i]
+    newtriples = []
+    for (src, rel, tgt) in triples:
         iters = 0
-        while relation.endswith("-of"):
-            relation = relation[:-3]
+        while rel.endswith("-of"):
+            rel = rel[:-3]
             iters += 1
         if iters % 2 != 0:
-            triples[i] = (t, relation, s)
+            newtriple = (tgt, rel, src)
         else:
-            triples[i] = (s, relation, t)
+            newtriple = (src, rel, tgt)
+        newtriples.append(newtriple)
     logging.debug("I deinverted edges: {}".format(triples))  
-    return None
+    return newtriples
  
 
 def domain2mod(triples):
-    for i, triple in enumerate(triples):
-        s, r, t = triple
+    newtriples = []
+    for (s, r, t) in triples:
         if r == ":domain":
-            triples[i] = (s, ":mod-of", t)
-        if r == ":domain-of":
-            triples[i] = (s, ":mod", t)
-    return None
+            newtriple = (s, ":mod-of", t)
+        elif r == ":domain-of":
+            newtriple = (s, ":mod", t)
+        else:
+            newtriple = (s, r, t)
+        newtriples.append(newtriple)
+    return newtriples
 
 
 def concept_as_root(triples):

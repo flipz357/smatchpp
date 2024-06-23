@@ -1,6 +1,4 @@
-from collections import defaultdict
 import logging
-from smatchpp import util
 from smatchpp import interfaces
 from smatchpp import graph_transforms
 
@@ -48,12 +46,12 @@ class GenericStandardizer(interfaces.GraphStandardizer):
     def _standardize(triples):
         """Triple standardization according to parameters specified in init"""
 
-        triples = list(triples)
+        #triples = list(triples)
         logging.debug("standardizing triples")
         logging.debug("This is the input graph: {}".format(triples))
         triples = graph_transforms.lower_all_labels(triples)
         triples = graph_transforms.remove_quotes_from_triples(triples)
-        graph_transforms.relabel_vars(triples)
-        graph_transforms.deinvert_e(triples)
+        triples = graph_transforms.relabel_vars(triples)
+        triples = graph_transforms.deinvert_e(triples)
 
         return triples

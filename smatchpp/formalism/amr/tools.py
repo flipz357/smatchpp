@@ -12,7 +12,6 @@ def read_amr_reify_table(p="/resource/reify_table.txt", lower=False):
     """load reification rules"""
     
     path = os.path.dirname(__file__)
-    print(p, path)
     with open(path + p, "r") as f:
         lines = [l for l in f.read().split("\n") if l if not l.startswith("#")]
 
@@ -121,7 +120,7 @@ def invert_frame_table(frame_table, aspects):
             for role in frame_table[pred]:
                 for string in strings:
                     if string in frame_table[pred][role]:
-                        pred_role_map[pred][role] =  string
+                        pred_role_map[pred][role] = aspects[aspect]["search_in_frame_descr"][string]
     return pred_role_map
 
 
@@ -183,12 +182,11 @@ class AMRStandardizer(interfaces.GraphStandardizer):
         triples = list(triples)
         logging.debug("standardizing triples")
         logging.debug("1. input: {}".format(triples))
-
         triples = graph_transforms.lower_all_labels(triples)
         triples = graph_transforms.remove_quotes_from_triples(triples)
-        graph_transforms.relabel_vars(triples)
-        graph_transforms.domain2mod(triples)
-        graph_transforms.deinvert_e(triples)
+        triples = graph_transforms.relabel_vars(triples)
+        triples = graph_transforms.domain2mod(triples)
+        triples = graph_transforms.deinvert_e(triples)
         graph_transforms.concept_as_root(triples)
         triples = self.dereifier.transform(triples)
         triples = graph_transforms.remove_duplicates(triples)
@@ -197,16 +195,32 @@ class AMRStandardizer(interfaces.GraphStandardizer):
 class AMRSubgraphExtractor(interfaces.SubgraphExtractor):
 
     def __init__(self):
+        
+        # we read the amr aspects, e.g., CAUSE, LOCATION, etc.
         graph_aspects = read_amr_aspects()
+        
+        # we read the concept groups that are associated with particular aspects
         concept_groups = read_amr_concept_groups()
+
+        # we read propbank frames and role specifications
         propbank_frames = read_frame_table()
+
+        # we intialize a semantic standardizer that uses PropBank frames to translate
+        # core roles to explicit non-core roles, e.g., for INSTRUMENT 
+        # (control-01 :arg2 -> control-01 :instrument), since arg2 is the instrument
         semantic_rules = invert_frame_table(propbank_frames, graph_aspects)
         self.semantic_standardizer = graph_transforms.SyntacticEdgeRelabelingTransformer(semantic_rules)
+
+        # we create a generic extractor based on our rules from aspects and concept groups
         self.extractor = subgraph_extraction.BasicSubgraphExtractor(add_instance=True,
                                                           graph_aspects=graph_aspects,
                                                           concept_groups=concept_groups)
-        
+ 
     def _all_subgraphs_by_name(self, triples):
+        
+        # we semantically standardize the graph with ropbank frames (see above) 
         triples = self.semantic_standardizer.standardize(triples)
-        return self.extractor._all_subgraphs_by_name(triples)
+
+        # we return the aspectual subgraphs
+        return self.extractor.all_subgraphs_by_name(triples)
 

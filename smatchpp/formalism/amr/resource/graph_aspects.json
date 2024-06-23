@@ -45,7 +45,8 @@
 	 "associated_concept_group": "",
 	 "search_in_frame_descr": 
 	 	{" instrument ": ":instrument", 
-		 " tool ": ":instrument"},
+		 " tool ": ":instrument",
+		 "instrumental": ":instrument"},
 	 "subgraph_extraction_range": 2,
 	 "add_parent": 0,
 	 "add_predicates": 1
