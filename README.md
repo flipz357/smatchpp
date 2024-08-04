@@ -121,7 +121,7 @@ A main interface is a smatchpp.Smatchpp object. With this, most kinds of operati
 
 ## Python usage examples<a id="python-usage"></a>
 
-### Basic processing and matching of graphs: 10 Examples
+### Basic processing and matching of graphs: 14 Examples
 
 An overview of the examples:
 
@@ -352,7 +352,7 @@ print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0,
 
 Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
 
-#### Example XII: Best practice for AMR parser evaluation<a id="best-practice-amr-corpus"></a>
+#### Example XII: Best practice for AMR parser evaluation<a id="ex-best-practice-amr-corpus"></a>
 
 According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals. 
 
@@ -369,7 +369,7 @@ score, optimization_status = measure.score_corpus(corpus1, corpus2)
 print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Recall': {'result': 50.0, 'ci': (43.0, 57.0)}}}
 ```
 
-#### Example XIII: Standardize and extract subgraphs<a id="extract-subgraphs-amr"></a>
+#### Example XIII: Standardize and extract subgraphs<a id="ex-extract-subgraphs-amr"></a>
 
 For specific formalisms, we can extract subgraphs, if we have defined some tools. Currently, this is allowed for AMR, where we can extract aspectual subgraphs as follows:
 
@@ -388,7 +388,7 @@ name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
 print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
 ```
 
-#### Example XIV: Read, reify and write graph<a id="reify-amr"></a>
+#### Example XIV: Read, reify and write graph<a id="ex-reify-amr"></a>
 
 In this example, we read a basic graph from a string, apply reification, and write the reified graph to a string. Reification are equivalency-preserving graph transformations based on rules. Currently rules are only implemnted for AMR graphs, so we will import from `formalism/amr`
 
