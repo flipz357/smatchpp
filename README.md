@@ -24,7 +24,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
 
 ## Install<a id="requirements"></a>
 
-Run
+Simply run
 
 ```
 pip install smatchpp
@@ -81,11 +81,11 @@ x w :rel
 ...
 ```
 
-Here, `:instance` is equivalent to `/` in Penman and holds the label of a node (e.g., the label of the node `x` is `y`). Note that a difference between the formats is that Penman assumes a root node (`x` in the example). To ensure the exact same graphs in tsv *and* Penman, a triple of `root x :root` would have to be added to the tsv graph. In fact, to have full control over the graph and process graphs `as-is` (also without any standardizing), you need to use `-input_format tsv` and remove the `graph_type` argument.
+Here, `:instance` is equivalent to `/` in Penman and holds the label of a node (e.g., the label of the node `x` is `y`). Note that a difference between the formats is that Penman assumes a root node (`x` in the example). To ensure the exact same graphs in tsv *and* Penman, a triple of `root x :root` would have to be added to the tsv graph. In fact, to have full control over the graph and process graphs "as-is" (also without any standardizing), please use `-input_format tsv` and remove the `graph_type` argument.
 
 ### Evaluating specific graph types (e.g., AMR)<a id="amr-eval"></a>
 
-Specific formalisms can be simply set by the user with the `-graph_type` flag. For evaluating AMR graphs, use `-graph_type amr` to perform some additional structural standardization according to AMR guidelines (i.a., dereification). Or remove the flag, to perform no graph pre-processing at all.
+Specific formalisms can be simply set by the user with the `-graph_type` flag. For evaluating AMR graphs (Abstract Meaning Representation), please use `-graph_type amr` to perform some additional structural standardization according to AMR guidelines (i.a., dereification). 
 
 ### Other options<a id="more-command-line-examples"></a>
 
@@ -401,11 +401,11 @@ print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / 
 
 ## FAQ<a id="faq"></a>
 
-- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then be used as shown [Example IX](#ex-custom-standardizer).
+- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then simply be used as shown in [Example VI](#ex-custom-standardizer). You can also extend SMATCH++ with a custom graph type that can then be called from command line. For ortientation, please consult the already implemented processing of `generic` and `amr` graph types.
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use heuristic via HillClimber (unfortunately heuristic will get worse for large graphs because of many local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get a heuristic solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. may be the best option due to optimality..
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use Hillclimber heuristic (unfortunately heuristic will get worse for large graphs because of many local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get an intermediate solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. may be the best option due to optimality.
 
-- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. Smatch++ allows easy customization of this, and you can extend to implement your own class.
+- *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. SMATCH++ allows easy customization of this, and you can extend to implement your own class.
 
 ## Citation<a id="citation"></a>
 
