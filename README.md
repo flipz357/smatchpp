@@ -73,15 +73,15 @@ Or can set to tsv with `-input_format tsv`, where the file looks like:
 
 ```
 # first graph
-x y nodelabel
-w z nodelabel
-x w rel
+x y :instance
+w z :instance
+x w :rel
 
 # second graph
 ...
 ```
 
-Here, `nodelabel` (sometimes also called `instance`) is equivalent to `/` in Penman. Note that a difference between the formats is that Penman assumes a root node (`x` in the example). In the example, to read the same graph, a triple of `root x :root` would have to be added to the tsv graph. If you want to ensure that the program reads the your graph exactly and without standardization, you must use `-input_format tsv` drop the `graph_type` flag entirely.
+Here, `:instance` is equivalent to `/` in Penman and holds the label of a node (e.g., the label of the node `x` is `y`). Note that a difference between the formats is that Penman assumes a root node (`x` in the example). To ensure the exact same graphs in tsv *and* Penman, a triple of `root x :root` would have to be added to the tsv graph. In fact, to have full control over the graph and process graphs `as-is` (also without any standardizing), you need to use `-input_format tsv` and remove the `graph_type` argument.
 
 ### Evaluating specific graph types (e.g., AMR)<a id="amr-eval"></a>
 
