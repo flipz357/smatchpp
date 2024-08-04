@@ -130,7 +130,7 @@ An overview of the examples:
 - [III](#ex-basicdefault-generic): Optimal and standardized graph match
 - [IV](#ex-parsereval): Optimal and standardized evaluation and corpus scoring
 - [V](#ex-standardizer): Build custom graph standardizer
-- [VI](#ex-feed-direct): Feed triples directly
+- [VI](#ex-feed-direct): Feed graph directly
 - [VII](#ex-gc): Graph-compression for fast matching
 - [VIII](#ex-align): Get alignment
 - [IX](#ex-subgraphtest): Subgraph isomorphism test (is a in b?)
@@ -153,9 +153,9 @@ measure = Smatchpp()
 match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
 print(match) # {'main': array([2., 2., 2., 2.])}, 2 left->right, 2 in right->left, 2 length of left, 2 length of right
 ```
-Note: Here it's two triples matching since there is an implicit root, that will be parsed into an additional triple. To ignore the root, consider writing a custom standardizer, or feeding the triples directly, as shown in [this example](#feed-without-string-reading)
+Note: Here it's two triples matching since there is an implicit root, that will be parsed into an additional triple. To ignore the root, consider writing a custom standardizer, or feeding the triples directly, as shown in [this example](#feed-without-string-reading). For information on how to use the graph/triples directly (without reading it as a string), see [Example VI](#ex-feed-direct).
 
-For greater convienience, we can also directly get an F1 / Precision / Recall score:
+For greater convience, we can also directly get an F1 / Precision / Recall score:
 
 ```python
 from smatchpp import Smatchpp
@@ -208,22 +208,22 @@ According to best practice, here we want to compute "micro Smatch" for a parser 
 
 ```python
 from smatchpp import Smatchpp, solvers, preprocess, eval_statistics
-from smatchpp.formalism.amr import tools as amrtools
-graph_standardizer = amrtools.AMRStandardizer()
+from smatchpp.formalism.generic import tools as generictools
+graph_standardizer = generictools.GenericStandardizer()
 printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=True, output_format="json")
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, printer=printer)
 corpus1 = ["(t / test)", "(d / duck)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
 corpus2 = ["(t / test)", "(a / ant)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
 score, optimization_status = measure.score_corpus(corpus1, corpus2)
-print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Recall': {'result': 50.0, 'ci': (43.0, 57.0)}}}
+print(score) # {'main': {'F1': {'result': 75.0, 'ci': (71.5, 78.5)}, 'Precision': {'result': 75.0, 'ci': (71.5, 78.5)}, 'Recall': {'result': 75.0, 'ci': (71.5, 78.5)}}}
 ```
 
 If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
 Note that for best evaluating a specific formalism, like AMR, more specialised pre-processing can be applied. Please visit [this example](#best-practice-amr-corpus)
 
-#### Example VI: Plug in custom standardizer in the matching<a id="ex-standardizer"></a>
+#### Example V: Plug in custom standardizer in the matching<a id="ex-standardizer"></a>
 
 To customize SMATCH++ in any ways should be easy. Here, in this example, we want to plug in a custom graph processing to make graphs unlabeled:
 
@@ -246,8 +246,7 @@ custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-
-#### Example VII: Feeding graph directly without string reading<a id="ex-feed-direct"></a>
+#### Example VI: Feeding graph directly without string reading<a id="ex-feed-direct"></a>
 
 Again, there's different ways to achieve this, like building you own pipeline. However, simplest would be to implement a dummy reader:
 
@@ -264,7 +263,7 @@ dummy_reader = DummyReader()
 Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-#### Example V: Lossless pairwise graph compression<a id="ex-gc"></a>
+#### Example VII: Lossless pairwise graph compression<a id="ex-gc"></a>
 
 Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
 
@@ -278,7 +277,7 @@ g1, g2, _, _ = pair_preparer_compressor.prepare_get_vars(g1, g2)
 print(len(g1), len(g2)) #4, 2
 ```
 
-If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
+If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object (an example can be seen in [IX](#ex-subgraphtest)).
 
 #### Example VIII: get an alignment<a id="ex-align"></a>
 
@@ -299,7 +298,6 @@ var_map = measure.graph_aligner._get_var_map(alignment, var_index)
 interpretable_mapping = measure.graph_aligner._interpretable_mapping(var_map, g1, g2)
 print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/bb indicates 1st/2nd graph
 ```
-
 
 #### Example IX: Sub-graph isomorphism test<a id="ex-subgraphtest"></a>
 
@@ -350,7 +348,7 @@ score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-o
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [SMATCH++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
+Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [SMATCH++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify). The score without dereification, can be seen in [Example III](#ex-basicdefault-generic).
 
 #### Example XII: Best practice for AMR parser evaluation<a id="ex-best-practice-amr-corpus"></a>
 
@@ -408,7 +406,7 @@ print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / 
 
 ## FAQ<a id="faq"></a>
 
-- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then simply be used as shown in [Example VI](#ex-custom-standardizer). You can also extend SMATCH++ with a custom graph type that can then be called from command line. For ortientation, please consult the already implemented processing of `generic` and `amr` graph types.
+- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then simply be used as shown in [Example V](#ex-custom-standardizer). You can also extend SMATCH++ with a custom graph type that can then be called from command line. For ortientation, please consult the already implemented processing of `generic` and `amr` graph types.
 
 - *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use Hillclimber heuristic (unfortunately heuristic will get worse for large graphs because of many local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get an intermediate solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. may be the best option due to optimality.
 
