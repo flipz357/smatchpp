@@ -85,7 +85,7 @@ Here, `:instance` is equivalent to `/` in Penman and holds the label of a node (
 
 ### Evaluating specific graph types (e.g., AMR)<a id="amr-eval"></a>
 
-Specific formalisms can be simply set by the user with the `-graph_type` flag. For evaluating AMR graphs (Abstract Meaning Representation), please use `-graph_type amr` to perform some additional structural standardization according to AMR guidelines (i.a., dereification). 
+Specific formalisms can be simply set with the `-graph_type` flag. E.g., for evaluating AMR graphs (Abstract Meaning Representation), please use `-graph_type amr` to perform some additional structural standardization according to AMR guidelines (i.a., dereification). 
 
 ### Other options<a id="more-command-line-examples"></a>
 
@@ -125,16 +125,23 @@ A main interface is a smatchpp.Smatchpp object. With this, most kinds of operati
 
 An overview of the examples:
 
-- [I](ex-basicdefault): Heuristic graph match
-- [II](ex-basicdefault-ilp): Optimal graph match
-- [III](ex-basicdefault-generic): Optimal and standardized graph match
-- [IV](ex-parsereval): Optimal and standardized evaluation and corpus scoring
-- [V](ex-standardizer): Build custom graph standardizer
-- [VI](ex-feed-direct): Feed triples directly
-- [VII](ex-gc): Graph-compression for fast matching
-- [VIII](ex-align): Get alignment
-- [IX](ex-subgraphtest): Subgraph isomorphism test (is a in b?)
-- [X](ex-read): Read Penman string
+- [I](#ex-basicdefault): Heuristic graph match
+- [II](#ex-basicdefault-ilp): Optimal graph match
+- [III](#ex-basicdefault-generic): Optimal and standardized graph match
+- [IV](#ex-parsereval): Optimal and standardized evaluation and corpus scoring
+- [V](#ex-standardizer): Build custom graph standardizer
+- [VI](#ex-feed-direct): Feed triples directly
+- [VII](#ex-gc): Graph-compression for fast matching
+- [VIII](#ex-align): Get alignment
+- [IX](#ex-subgraphtest): Subgraph isomorphism test (is a in b?)
+- [X](#ex-read): Read Penman string
+
+A handful of examples for processing a specific graph formalism (here: AMR graphs):
+
+- [XI](#ex-basicdefault-amr): Standardized AMR graph pair matching
+- [XII](#ex-best-practice-amr-corpus): Standardized AMR corpus matching / evaluation
+- [XIII](#ex-extract-subgraphs-amr): Extract aspectual subgraphs from an AMR graph.
+- [XIV](#ex-reify-amr): read, write an reifiy an AMR graph (reify is a operation defined on AMRs)
 
 #### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
@@ -362,7 +369,7 @@ score, optimization_status = measure.score_corpus(corpus1, corpus2)
 print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Recall': {'result': 50.0, 'ci': (43.0, 57.0)}}}
 ```
 
-#### Example XIII: Standardize and extract subgraphs
+#### Example XIII: Standardize and extract subgraphs<a id="extract-subgraphs-amr"></a>
 
 For specific formalisms, we can extract subgraphs, if we have defined some tools. Currently, this is allowed for AMR, where we can extract aspectual subgraphs as follows:
 
@@ -381,7 +388,7 @@ name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
 print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
 ```
 
-#### Example XIV: Read, reify and write graph
+#### Example XIV: Read, reify and write graph<a id="reify-amr"></a>
 
 In this example, we read a basic graph from a string, apply reification, and write the reified graph to a string. Reification are equivalency-preserving graph transformations based on rules. Currently rules are only implemnted for AMR graphs, so we will import from `formalism/amr`
 
