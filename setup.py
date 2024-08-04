@@ -19,6 +19,6 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     python_requires=">=3.5",
-    install_requires=['numpy>=1.20.1', 'scipy>=1.10.1, mip>=1.13.0'] # tested with  mip==1.13.0, scipy==1.10.1, numpy==1.20.1
+    install_requires=['numpy>=1.20.1', 'scipy>=1.10.1, mip>=1.13.0'], # tested with  mip==1.13.0, scipy==1.10.1, numpy==1.20.1
     classifiers=["License :: OSI Approved :: GNU General Public License v3 (GPLv3)"],
     package_data={'smatchpp': ['formalism/amr/resource/*']})
