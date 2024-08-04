@@ -13,34 +13,30 @@ Handy processing of graphs including graph alignment and graph matching. There i
 
 - [Requirements](#requirements)
 - [**Command line examples**](#command-line)
-    - [Best practice for AMR parser evaluation](#basic-eval)
-    - [Best practice for other types of graph parsing evaluation](#generic-eval)
+    - [Best practice for graph evaluation](#basic-eval)
+    - [Best practice for specific graph types](#amr-eval)
     - [More command line examples](#more-command-line-examples)
 - [**Python package**](#python-package)
     - [Pip install](#pip-install)
-    - [*11 examples* for graph processing](#python-usage)
+    - [*13 examples* for graph processing](#python-usage)
 - [FAQ](#faq)
 - [Citation](#citation)
 
-## Requirements<a id="requirements"></a>
+## Install<a id="requirements"></a>
 
-For the most basic version, there shouldn't be a need to install additional modules. However, when using ILP optimal solving and bootstrapping for evaluation (highly recommended!), we require
+Run
 
 ```
-mip (tested: 1.13.0)
-scipy (tested: 1.10.1)
-numpy (tested: 1.20.1)
+pip install smatchpp
 ```
-
-The packages can be installed with `pip ...`
 
 ## Command line examples<a id="command-line"></a>
 
-Evaluation of any type of graph parsing may include ILP optimal alignment, bootstrap confidence and micro and macro averaging. Specific formalisms can be simply set by the user with the `-graph_type` flag. Scroll down for command line examples.
+Evaluation of any type of graph parsing may include ILP optimal alignment, bootstrap confidence and micro and macro averaging. Scroll down for command line examples.
 
-### Best practice for AMR parsing evaluation<a id="basic-eval"></a>
+### Best practice for semantic parsing evaluation<a id="basic-eval"></a>
 
-This evaluation setup has optimal ILP alignmnent, calculates micro and macro corpus metrics and confidence intervals. It also applies AMR graph standardization.
+This evaluation setup has optimal ILP alignmnent, calculates micro and macro corpus metrics and confidence intervals.
 
 **Simply call**: 
 
@@ -54,13 +50,15 @@ or more explicitly call:
 python -m smatchpp      -a <graphs1> \
                         -b <graphs2> \
                         -solver ilp \
-                        -graph_type amr \
+                        -graph_type generic \
                         -score_dimension main \
                         -score_type micromacro \
                         --bootstrap
 ```
 
-Here, `<graphs1>` and `<graphs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
+Here, the `graph_type generic` flag means that we perform minimal graph standardization (e.g., lower-casing of node labels). 
+
+The variables `<graphs1>` and `<graphs2>` are the paths to the files with graphs. Format is assumed to be in "penman":
 
 ```
 # first graph
@@ -83,9 +81,11 @@ x w rel
 ...
 ```
 
-### Evaluating other kinds of graphs<a id="generic-eval"></a>
+Here, `nodelabel` (sometimes also called `instance`) is equivalent to `/` in Penman. Note that a difference between the formats is that Penman assumes a root node (`x` in the example). In the example, to read the same graph, a triple of `root x :root` would have to be added to the tsv graph. If you want to ensure that the program reads the your graph exactly and without standardization, you must use `-input_format tsv` drop the `graph_type` flag entirely.
 
-For evaluating other kinds of graphs, use `-graph_type generic` to perform some minimal generic standardization (e.g., lower-casing of node labels). Or remove the flag, to perform no graph pre-processing at all.
+### Evaluating specific graph types (e.g., AMR)<a id="amr-eval"></a>
+
+Specific formalisms can be simply set by the user with the `-graph_type` flag. For evaluating AMR graphs, use `-graph_type amr` to perform some additional structural standardization according to AMR guidelines (i.a., dereification). Or remove the flag, to perform no graph pre-processing at all.
 
 ### Other options<a id="more-command-line-examples"></a>
 
@@ -121,7 +121,22 @@ A main interface is a smatchpp.Smatchpp object. With this, most kinds of operati
 
 ## Python usage examples<a id="python-usage"></a>
 
-### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
+### Basic processing and matching of graphs: 10 Examples
+
+An overview of the examples:
+
+- [I](ex-basicdefault): Heuristic graph match
+- [II](ex-basicdefault-ilp): Optimal graph match
+- [III](ex-basicdefault-generic): Optimal and standardized graph match
+- [IV](ex-parsereval): Optimal and standardized evaluation and corpus scoring
+- [V](ex-standardizer): Build custom graph standardizer
+- [VI](ex-feed-direct): Feed triples directly
+- [VII](ex-gc): Graph-compression for fast matching
+- [VIII](ex-align): Get alignment
+- [IX](ex-subgraphtest): Subgraph isomorphism test (is a in b?)
+- [X](ex-read): Read Penman string
+
+#### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
 
 This uses a hill-climber and does not standardize the graphs in any way.
 
@@ -131,7 +146,7 @@ measure = Smatchpp()
 match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
 print(match) # {'main': array([2., 2., 2., 2.])}, 2 left->right, 2 in right->left, 2 length of left, 2 length of right
 ```
-Note: Here it's two triples matching since there is an implicit root.
+Note: Here it's two triples matching since there is an implicit root, that will be parsed into an additional triple. To ignore the root, consider writing a custom standardizer, or feeding the triples directly, as shown in [this example](#feed-without-string-reading)
 
 For greater convienience, we can also directly get an F1 / Precision / Recall score:
 
@@ -142,9 +157,9 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example II: Optimal Smatch++ with ILP<a id="ex-basicdefault-ilp"></a>
+#### Example II: Optimal Smatch++ with ILP<a id="ex-basicdefault-ilp"></a>
 
-In this example, we use ILP for optimal alignment.
+In this example, we use ILP for optimal alignment, which is highly recommended, since only ILP provides guaranteed true Smatch scores.
 
 ```python
 from smatchpp import Smatchpp, solvers
@@ -164,23 +179,23 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example III: Best-Practice matching for a pair of AMR graphs<a id="ex-basicdefault-amr"></a>
+#### Example III: Best-practice for matching a pair of basic graphs<a id="ex-basicdefault-generic"></a>
 
-AMR is simply a special type of graph, where best-practice is implemented in `formalism/amr/tools.py`. Beyond basic defaults, we perform AMR-focused graph standardization. 
+We read a `Penman'-string, perform generic standardization of the graph (e.g., lower-casing node labels), and run ILP optimal alignment, counting the matching triples.
 
 ```python
 from smatchpp import Smatchpp, solvers
-from smatchpp.formalism.amr import tools as amrtools
-graph_standardizer = amrtools.AMRStandardizer()
+from smatchpp.formalism.generic import tools as generictools
+graph_standardizer = generictools.GenericStandardizer()
 ilp = solvers.ILP()
 measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer)
-score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") # equivalent AMR graphs 
-print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") 
+print(score) # prints a json dict with convenient scores: {'main': {'F1': 60.0, 'Precision': 75.0, 'Recall': 50.0}}
 ```
 
-Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
+Note that the Penman-format entails a specific "root" node (here: `m`), that will be parsed into an additional triple. For full control over the matching, consider writing your own standardizer, or directly feeding the triples, as shown in [this example](#feed-without-string-reading).
 
-### Example IV: Best practice for AMR parser evaluation 
+#### Example IV: Best practice for evaluating a parser or corpus<a id="ex-parser-eval"</a> 
 
 According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals. 
 
@@ -199,83 +214,9 @@ print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision'
 
 If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
-Not also that any other semantic formalism (not AMR) can be evaluated by simply using, e.g., `graph_standardizer = generictools.GenericStandardizer()` after importing `from smatchpp.formalism.generic import tools as generictools`.
+Note that for best evaluating a specific formalism, like AMR, more specialised pre-processing can be applied. Please visit [this example](#best-practice-amr-corpus)
 
-
-### Example V: Standardize and extract subgraphs for AMR
-
-```python
-from smatchpp import preprocess, subgraph_extraction, data_helpers
-from smatchpp.formalism.amr import tools as amrtools
-standardizer = amrtools.AMRStandardizer()
-reader = data_helpers.PenmanReader()
-subgraph_extractor = amrtools.AMRSubgraphExtractor()
-string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
-g = reader.string2graph(string_graph)
-g = standardizer.standardize(g)
-name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
-
-# get subgraph for "instrument"
-print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
-```
-
-### Example VI: get an alignment
-
-In this example, we retrieve an alignment between graph nodes.
-
-```python
-from smatchpp import Smatchpp
-measure = Smatchpp()
-s1 = "(x / test)"
-s2 = "(y / test)"
-g1 = measure.graph_reader.string2graph(s1)
-g1 = measure.graph_standardizer.standardize(g1)
-g2 = measure.graph_reader.string2graph(s2)
-g2 = measure.graph_standardizer.standardize(g2)
-g1, g2, v1, v2 = measure.graph_pair_preparer.prepare_get_vars(g1, g2)
-alignment, var_index, _ = measure.graph_aligner.align(g1, g2, v1, v2)
-var_map = measure.graph_aligner._get_var_map(alignment, var_index)
-interpretable_mapping = measure.graph_aligner._interpretable_mapping(var_map, g1, g2)
-print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/bb indicates 1st/2nd graph
-```
-
-Note that the alignment is a by-product of the matching and can be also retrieved in simpler ways (here we showed the process from scratch).
-
-### Example VII: Read, reify and write graph
-
-In this example, we read a basic graph from a string, apply reification, and write the reified graph to a string. Reification are equivalency-preserving graph transformations based on rules. Currently rules are only implemnted for AMR graphs, so we will import from `formalism/amr`
-
-```python
-from smatchpp import data_helpers, graph_transforms
-from smatchpp.formalism.amr import tools as amrtools
-graph_reader = data_helpers.PenmanReader()
-graph_writer = data_helpers.PenmanWriter()
-reify_rules = amrtools.read_amr_reify_table()
-reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, mode="reify")
-s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
-g = graph_reader.string2graph(s)
-g = reifier.transform(g)
-string = graph_writer.graph2string(g)
-print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
-```
-
-### Example VIII: Lossless pairwise graph compression<a id="ex-lossless-gc"></a>
-
-Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
-
-```python
-from smatchpp import preprocess
-pair_preparer_compressor = preprocess.BasicGraphPairPreparer(lossless_graph_compression=True)
-g1 = [("c", ":instance", "cat"), ("c2", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d"), ("c2", ":otherrel", "d")]
-g2 = [("c", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d")]
-print(len(g1), len(g2)) #5, 3
-g1, g2, _, _ = pair_preparer_compressor.prepare_get_vars(g1, g2)
-print(len(g1), len(g2)) #4, 2
-```
-
-If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
-
-### Example IX: Plug in custom standardizer in the matching<a id="ex-custom-standardizer"></a>
+#### Example VI: Plug in custom standardizer in the matching<a id="ex-standardizer"></a>
 
 To customize SMATCH++ in any ways should be easy. Here, in this example, we want to plug in a custom graph processing to make graphs unlabeled:
 
@@ -298,7 +239,8 @@ custom_measure = Smatchpp(graph_standardizer=my_standardizer)
 print(custom_measure.score_pair(s1, s2)) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example X: Feeding graph directly without string reading
+
+#### Example VII: Feeding graph directly without string reading<a id="ex-feed-direct"></a>
 
 Again, there's different ways to achieve this, like building you own pipeline. However, simplest would be to implement a dummy reader:
 
@@ -315,7 +257,44 @@ dummy_reader = DummyReader()
 Smatchpp(graph_reader=dummy_reader).score_pair(test_graph1, test_graph2) # {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-### Example XI: Sub-graph isomorphism test
+#### Example V: Lossless pairwise graph compression<a id="ex-gc"></a>
+
+Lossless graph compression means that the graph size and alignment search space shrinks, but the input graphs can be fully reconstructed. This may be ideal for very fast matching, or quicker matching of very large graphs. Note that it holds that if Smatch on two compressed graphs equals 1, it is also the case for the uncompressed graphs, and vice versa.
+
+```python
+from smatchpp import preprocess
+pair_preparer_compressor = preprocess.BasicGraphPairPreparer(lossless_graph_compression=True)
+g1 = [("c", ":instance", "cat"), ("c2", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d"), ("c2", ":otherrel", "d")]
+g2 = [("c", ":instance", "cat"), ("d", ":instance", "dog"), ("c", ":rel", "d")]
+print(len(g1), len(g2)) #5, 3
+g1, g2, _, _ = pair_preparer_compressor.prepare_get_vars(g1, g2)
+print(len(g1), len(g2)) #4, 2
+```
+
+If we want to use the compression in the matching, simply set the argument `graph_pair_preparer=pair_preparer_compressor`, while initializing a `Smatchpp` object.
+
+#### Example VIII: get an alignment<a id="ex-align"></a>
+
+In this example, we retrieve an alignment between graph nodes.
+
+```python
+from smatchpp import Smatchpp
+measure = Smatchpp()
+s1 = "(x / test)"
+s2 = "(y / test)"
+g1 = measure.graph_reader.string2graph(s1)
+g1 = measure.graph_standardizer.standardize(g1)
+g2 = measure.graph_reader.string2graph(s2)
+g2 = measure.graph_standardizer.standardize(g2)
+g1, g2, v1, v2 = measure.graph_pair_preparer.prepare_get_vars(g1, g2)
+alignment, var_index, _ = measure.graph_aligner.align(g1, g2, v1, v2)
+var_map = measure.graph_aligner._get_var_map(alignment, var_index)
+interpretable_mapping = measure.graph_aligner._interpretable_mapping(var_map, g1, g2)
+print(interpretable_mapping) # prints [[('aa_x_test', 'bb_y_test')]], where aa/bb indicates 1st/2nd graph
+```
+
+
+#### Example IX: Sub-graph isomorphism test<a id="ex-subgraphtest"></a>
 
 We want to know: is g1 a *subgraph* of g2? We note: this is a i) binary value ii) using lossless `graph_compression` does not change the result, we iii) should ignore the `:root` relation that is implicit in Penman. So:
 
@@ -334,6 +313,90 @@ print(classifier("(t / test :rel (d / dog))", "(t / test :rel (d / dog))")) # Tr
 print(classifier("(d / dog)", "(t / test :rel (d / dog)")) # True
 print(classifier("(t / dog :rel (d / test))", "(d / test :rel (t / dog))")) # False
 print(classifier("(t / dog :rel-of (d / test))", "(d / test :rel (t / dog))")) # True
+```
+
+#### Example X: Read a Penman graph<a id="ex-read"></a>
+
+In this simple example, we read a Penman string into a graph.
+
+```python
+from smatchpp import data_helpers
+graph_reader = data_helpers.PenmanReader()
+s = "(t / train :mod (f / fast))"
+g = graph_reader.string2graph(s)
+print(g) # [('t', ':instance', 'train'), ('ROOT_OF_GRAPH', ':root', 't'), ('f', ':instance', 'fast'), ('t', ':mod', 'f')]
+```
+
+### Formalism-tailored processing (here: AMR graphs, Abstract Meaning Representation)
+
+#### Example XI: Best-Practice for matching a pair of AMR graphs<a id="ex-basicdefault-amr"></a>
+
+AMR is simply a special type of graph, where best-practice is implemented in `formalism/amr/tools.py`. Beyond basic defaults, we perform AMR-focused graph standardization. 
+
+```python
+from smatchpp import Smatchpp, solvers
+from smatchpp.formalism.amr import tools as amrtools
+graph_standardizer = amrtools.AMRStandardizer()
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer)
+score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-of (a / accompany-01 :arg0 (c / cat)))") # equivalent AMR graphs 
+print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
+```
+
+Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
+
+#### Example XII: Best practice for AMR parser evaluation<a id="best-practice-amr-corpus"></a>
+
+According to best practice, here we want to compute "micro Smatch" for a parser output and a reference with bootstrap 95% confidence intervals. 
+
+```python
+from smatchpp import Smatchpp, solvers, preprocess, eval_statistics
+from smatchpp.formalism.amr import tools as amrtools
+graph_standardizer = amrtools.AMRStandardizer()
+printer = eval_statistics.ResultPrinter(score_type="micro", do_bootstrap=True, output_format="json")
+ilp = solvers.ILP()
+measure = Smatchpp(alignmentsolver=ilp, graph_standardizer=graph_standardizer, printer=printer)
+corpus1 = ["(t / test)", "(d / duck)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
+corpus2 = ["(t / test)", "(a / ant)"] * 100 # we extend the lists because bootstrap doesn't work with tiny corpora
+score, optimization_status = measure.score_corpus(corpus1, corpus2)
+print(score) # {'main': {'F1': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Precision': {'result': 50.0, 'ci': (43.0, 57.0)}, 'Recall': {'result': 50.0, 'ci': (43.0, 57.0)}}}
+```
+
+#### Example XIII: Standardize and extract subgraphs
+
+For specific formalisms, we can extract subgraphs, if we have defined some tools. Currently, this is allowed for AMR, where we can extract aspectual subgraphs as follows:
+
+```python
+from smatchpp import preprocess, subgraph_extraction, data_helpers
+from smatchpp.formalism.amr import tools as amrtools
+standardizer = amrtools.AMRStandardizer()
+reader = data_helpers.PenmanReader()
+subgraph_extractor = amrtools.AMRSubgraphExtractor()
+string_graph = "(c / control-01 :arg1 (c2 / computer) :arg2 (m / mouse))"
+g = reader.string2graph(string_graph)
+g = standardizer.standardize(g)
+name_subgraph_dict = subgraph_extractor.all_subgraphs_by_name(g)
+
+# get subgraph for "instrument"
+print(name_subgraph_dict["INSTRUMENT"]) # [(c, instance, control-01), (m, instance, mouse), (c, instrument, m)]
+```
+
+#### Example XIV: Read, reify and write graph
+
+In this example, we read a basic graph from a string, apply reification, and write the reified graph to a string. Reification are equivalency-preserving graph transformations based on rules. Currently rules are only implemnted for AMR graphs, so we will import from `formalism/amr`
+
+```python
+from smatchpp import data_helpers, graph_transforms
+from smatchpp.formalism.amr import tools as amrtools
+graph_reader = data_helpers.PenmanReader()
+graph_writer = data_helpers.PenmanWriter()
+reify_rules = amrtools.read_amr_reify_table()
+reifier = graph_transforms.SyntacticReificationGraphTransformer(reify_rules, mode="reify")
+s = "(t / test :mod (s / small :mod (v / very)) :quant 2 :op v)"
+g = graph_reader.string2graph(s)
+g = reifier.transform(g)
+string = graph_writer.graph2string(g)
+print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / small :arg2-of (ric3 / have-mod-91 :arg1 t)))) :arg1-of (ric6 / have-quant-91 :arg2 2))
 ```
 
 ## FAQ<a id="faq"></a>

@@ -3,7 +3,7 @@
 python -m smatchpp      -a $1 \
 			-b $2 \
 			-solver ilp \
-			-graph_type amr \
+			-graph_type generic \
 			-score_dimension main \
 			-score_type micromacro \
 			--bootstrap 
