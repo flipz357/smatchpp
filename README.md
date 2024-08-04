@@ -143,7 +143,7 @@ A handful of examples for processing a specific graph formalism (here: AMR graph
 - [XIII](#ex-extract-subgraphs-amr): Extract aspectual subgraphs from an AMR graph.
 - [XIV](#ex-reify-amr): read, write an reifiy an AMR graph (reify is a operation defined on AMRs)
 
-#### Example I: Smatch++ matching with basic default<a id="ex-basicdefault"></a>
+#### Example I: SMATCH++ matching with basic default<a id="ex-basicdefault"></a>
 
 This uses a hill-climber and does not standardize the graphs in any way.
 
@@ -164,7 +164,7 @@ score = measure.score_pair("(t / test)", "(t / test)")
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-#### Example II: Optimal Smatch++ with ILP<a id="ex-basicdefault-ilp"></a>
+#### Example II: Optimal SMATCH++ with ILP<a id="ex-basicdefault-ilp"></a>
 
 In this example, we use ILP for optimal alignment, which is highly recommended, since only ILP provides guaranteed true Smatch scores.
 
@@ -350,7 +350,7 @@ score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-o
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 100.0, 'Precision': 100.0, 'Recall': 100.0}}
 ```
 
-Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [Smatch++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
+Note that the measure returns a score of 100 even though the input graphs are structurally different. This is due to advanced standardization tailored to AMR, called de/reification rules that translate between different graph structures, ensuring equivalency. Please find more information in the [SMATCH++ paper](https://arxiv.org/abs/2305.06993) or the [AMR guidelines](https://github.com/amrisi/amr-guidelines/blob/master/amr.md). Note that although de/reified structures apparently can be quite different, in practice a parser evaluation score is not much different (with/without dereification), since gold AMRs are dereified by default (sometimes, parsers forget to dereify, and therefore by ensuring dereification as preprocessing, a more fair comparison is ensured).
 
 #### Example XII: Best practice for AMR parser evaluation<a id="ex-best-practice-amr-corpus"></a>
 
