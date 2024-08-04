@@ -24,7 +24,7 @@ Handy processing of graphs including graph alignment and graph matching. There i
 
 ## Requirements<a id="requirements"></a>
 
-For comprehensive usage, SMATCH++ requires 'numpy>=1.20.1', 'scipy>=1.10.1', 'mip>=1.13.0'. 
+For comprehensive usage, SMATCH++ requires `numpy>=1.20.1`, `scipy>=1.10.1`, `mip>=1.13.0`. 
 
 These packages will be automatically installed when installing SMATCH++ via pip:
 
