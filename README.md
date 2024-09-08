@@ -130,7 +130,7 @@ An overview of the examples:
 - [I](#ex-basicdefault): Heuristic graph match
 - [II](#ex-basicdefault-ilp): Optimal graph match
 - [III](#ex-basicdefault-generic): Optimal and standardized graph match
-- [IV](#ex-parsereval): Optimal and standardized evaluation and corpus scoring
+- [IV](#ex-parser-eval): Optimal and standardized evaluation and corpus scoring
 - [V](#ex-standardizer): Build custom graph standardizer
 - [VI](#ex-feed-direct): Feed graph directly
 - [VII](#ex-gc): Graph-compression for fast matching
