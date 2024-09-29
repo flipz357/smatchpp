@@ -223,7 +223,7 @@ print(score) # {'main': {'F1': {'result': 75.0, 'ci': (71.5, 78.5)}, 'Precision'
 
 If you want to get access to the *full bootstrap distribution* you can add `also_return_bootstrap_distribution=True` when creating the `printer`. Beware that in this case the `score` result will be very large. Note also that for this we require scipy version of at least 1.10.0.
 
-Note that for best evaluating a specific formalism, like AMR, more specialised pre-processing can be applied. Please visit [this example](#best-practice-amr-corpus)
+Note that for best evaluating a specific formalism, like AMR, more specialised pre-processing can be applied. Please visit [this example](#best-practice-amr-corpus).
 
 #### Example V: Plug in custom standardizer in the matching<a id="ex-standardizer"></a>
 
@@ -408,9 +408,9 @@ print(string) # (t / test :op (v / very :arg2-of (ric5 / have-mod-91 :arg1 (s / 
 
 ## FAQ<a id="faq"></a>
 
-- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then simply be used as shown in [Example V](#ex-custom-standardizer). You can also extend SMATCH++ with a custom graph type that can then be called from command line. For ortientation, please consult the already implemented processing of `generic` and `amr` graph types.
+- *I want to process my custom graph type*: Consider implementing your custom graph standardizer that can then simply be used as shown in [Example V](#ex-standardizer). You can also extend SMATCH++ with a custom graph type that can then be called from command line. For ortientation, please consult the already implemented processing of `generic` and `amr` graph types.
 
-- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use Hillclimber heuristic (unfortunately heuristic will get worse for large graphs because of many local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VIII](#ex-lossless-gc)). This makes evaluation fast and gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get an intermediate solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. may be the best option due to optimality.
+- *I have very large graphs and optimal ILP doesn't terminate*: This is because optimal alignment is an NP hard problem. Mitigation options: 1. use Hillclimber heuristic (unfortunately heuristic will get worse for large graphs because of many local optima where it gets stuck). 2. Use `--lossless_graph_compression` (for python see [Example VII](#ex-gc)). This makes evaluation fast and gives an optimal score (the score tends to be slightly harsher/lower). 3. Play with the `max_seconds` argument in the ILP solver (see `ILPSolver` in `smatchpp/solvers.py`) and reduce it to get an intermediate solution (it can still be better than hill-climbing and it has an upper-bound). Perhaps, 2. may be the best option due to optimality.
 
 - *I want to use other triple matching functions*: Sometimes, e.g., in evaluation of cross-lingual graphs, we want to have that a triple `(x, instance, cat)` be similar to `(x, instance, kitten)` and allow more graded matching. SMATCH++ allows easy customization of this, and you can extend to implement your own class.
 
