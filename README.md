@@ -202,7 +202,7 @@ score = measure.score_pair("(m / man :accompanier (c / cat))", "(m / man :arg1-o
 print(score) # prints a json dict with convenient scores: {'main': {'F1': 60.0, 'Precision': 75.0, 'Recall': 50.0}}
 ```
 
-Note that the Penman-format entails a specific "root" node (here: `m`), that will be parsed into an additional triple. For full control over the matching, consider writing your own standardizer, or directly feeding the triples, as shown in [this example](#feed-without-string-reading).
+Note that the Penman-format entails a specific "root" node (here: `m`), that will be parsed into an additional triple. For full control over the matching, consider directly feeding the triples, as shown in [Example XI](#ex-feed-direct).
 
 #### Example IV: Best practice for evaluating a parser or corpus<a id="ex-parser-eval"></a> 
 
