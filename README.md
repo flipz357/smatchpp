@@ -155,7 +155,7 @@ measure = Smatchpp()
 match, optimization_status, alignment = measure.process_pair("(t / test)", "(t / test)")
 print(match) # {'main': array([2., 2., 2., 2.])}, 2 left->right, 2 in right->left, 2 length of left, 2 length of right
 ```
-Note: Here it's two triples matching since there is an implicit root, that will be parsed into an additional triple. To ignore the root, consider writing a custom standardizer, or feeding the triples directly, as shown in [this example](#feed-without-string-reading). For information on how to use the graph/triples directly (without reading it as a string), see [Example VI](#ex-feed-direct).
+Note: Here it's two triples matching since there is an implicit root, that will be parsed into an additional triple. To ignore the root, consider writing a custom standardizer ([Example V](#ex-standardizer)), or feeding the triples directly ([Example VI](#ex-feed-direct)).
 
 For greater convience, we can also directly get an F1 / Precision / Recall score:
 
