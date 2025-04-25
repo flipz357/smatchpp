@@ -56,7 +56,7 @@ def read_amr_concept_groups(p="/resource/concept_groups.json"):
 
 
 def maybe_download_amr_frame_file(targetpath="/resource/propbank-amr-frames-arg-descr.txt",
-        url="https://amr.isi.edu/doc/propbank-amr-frames-arg-descr.txt"):
+        url="https://raw.githubusercontent.com/flipz357/AMR-World/refs/heads/main/data/dictionaries/propbank-amr-frames-arg-descr.txt"):
     path = os.path.dirname(__file__)
     fullpath = path + targetpath
     error_state = 0
