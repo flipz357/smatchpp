@@ -36,6 +36,7 @@ class PenmanReader(interfaces.GraphReader):
             Returns:
                 a list with triples (src, rel, tgt)
         """
+        fullinput = string
         logging.debug("parsing {}".format(string))
         string = self.__protect_brackets_inside_quotes(string)
         logging.debug("Protect brackets inside quotes {}".format(string))
@@ -140,18 +141,20 @@ class PenmanReader(interfaces.GraphReader):
                     triple = (tmpsrc[tmp_nested_level], tmprel[tmp_nested_level], tgt) 
                     triples.append(triple)
                     i += 1
-            except KeyError:
+            except (KeyError, IndexError) as error:
                 error_state  = 1
                 break
 
+        triples = self.__unprotect_brackets_inside_quotes(triples)
+        
         # issue a warning if graph couldn't be read properly
         if error_state > 0:
             logger.warning("""This graph string seems broken, and I tried fixing it, 
                             extracting as much triples as possible, but larger graphs 
                             of the parts may be lost. No need to worry much now, but 
-                            this exception should occur veeeeery rarely. \n\n 
+                            this exception should occur very rarely. \n\n 
                             Here's the graph that caused this problem: {} \n\n 
-                            And here are the triples that I managed to extract: {}""".format(string, triples))
+                            And here are the triples that I managed to extract: {}""".format(fullinput, triples))
 
         # hypothetically it could be that a graph uses a relation ":root", 
         # but ":root" is preseverd as a special relation, so in the hypothetical
@@ -173,7 +176,6 @@ class PenmanReader(interfaces.GraphReader):
         if self.explicate_root == False:
             triples = [triple for triple in triples if triple[1] != ":root"]
 
-        triples = self.__unprotect_brackets_inside_quotes(triples)
         logging.debug("3. result after triple extraction: {}".format(triples))
         return triples
     
