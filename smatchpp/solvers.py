@@ -75,12 +75,10 @@ class HillClimber(interfaces.Solver):
         sc = 0.0 
          
         V = range(alignmat.shape[0])
-        
         for i in V:
             j = alignmat[i]
             sc += unarymatch_dict[(i, j)]
-        
-        
+                
         for i in V:
             j = alignmat[i]
             if not binarymatch_dict[(i, j)]:
@@ -426,7 +424,7 @@ class ILP(interfaces.Solver):
     def __init__(self, max_seconds=240):
         
         self.model_factory = MIPModelFactory()
-        
+        self.max_seconds = max_seconds
         return None
 
     def _solve(self, unarymatch_dict, binarymatch_dict, V):
@@ -435,7 +433,7 @@ class ILP(interfaces.Solver):
         model, x = self.model_factory.build_model(unarymatch_dict, binarymatch_dict, V)
         
         # optimizing
-        status = model.optimize(relax=False)
+        status = model.optimize(relax=False, max_seconds=self.max_seconds)
         
         # checking if a solution was found, and return result
         if model.num_solutions:
@@ -449,24 +447,10 @@ class ILP(interfaces.Solver):
                         consider increasing time limit, using Backup ILP (e.g., ILP + Hillclimber), \
                         or lossless graph_compression".format(self.max_seconds))
         
-        dummy_alignmat =  np.zeros(V, V)
+        dummy_alignmat =  np.zeros((V, V))
+        dummy_alignmat = util.alignmat_compressed(dummy_alignmat)
         return dummy_alignmat, 0.0, 10000000
         
-        """
-        # if no solution was found and no backup solver stated, use relaxed program
-        if self.backup_solver is None: 
-            logger.warning("no optimal alignment found, falling back on default relaxed LP")
-            status = model.optimize(max_seconds=5, relax=True)
-            if model.num_solutions:
-                logger.debug("alignment with value {} found".format(model.objective_value))
-                alignmat = np.array([x[i][j].x for i in Vr for j in Vr]).reshape((V, V))
-                alignmat = util.alignmat_compressed(alignmat)
-                return alignmat, model.objective_value, model.objective_bound
-     
-        logger.warning("no optimal alignment found, using backup solver")
-        # no solution was found return solution from backupsolver
-        return self.backup_solver.solve(unarymatch_dict, binarymatch_dict, V)
-        """
 
 class LP(interfaces.Solver):
     """Class that solves alignment problem with LP (relaxing ILP, possibly leading to 
@@ -479,15 +463,16 @@ class LP(interfaces.Solver):
     def __init__(self, max_seconds=240):
         
         self.model_factory = MIPModelFactory()
-        
+        self.max_seconds = max_seconds 
         return None
 
     def _solve(self, unarymatch_dict, binarymatch_dict, V):
          
         # get model
         model, x = self.model_factory.build_model(unarymatch_dict, binarymatch_dict, V)
+        
         # optimizing
-        status = model.optimize(relax=True)
+        status = model.optimize(relax=True, max_seconds=self.max_seconds)
         
         # checking if a solution was found, and return result
         if model.num_solutions:
@@ -495,30 +480,32 @@ class LP(interfaces.Solver):
             Vr = range(V)
             alignmat = np.array([x[i][j].x for i in Vr for j in Vr]).reshape((V, V))
             alignmat = util.alignmat_compressed(alignmat)
-            return alignmat, model.objective_value, model.objective_bound
+            
+            # the objective value model.objective_value is optimistic, probably
+            # so we obtain a more accurate one with (messy) tricks 
+
+            # first we destroy invalid alignments (e.g., two nodes of a aligning with the same (one) node of b)
+            for i, e in enumerate(alignmat):
+                if e in alignmat[:i]:
+                    alignmat[i] = alignmat[:i].max() + 1
+
+            # then we use HillClimber scoring to score this alignment
+            wd = Counter()
+            for a, b, c, d in binarymatch_dict:
+                if (a, b) not in wd:
+                    wd[(a, b)] = Counter()
+                wd[(a, b)][(c, d)] = binarymatch_dict[(a, b, c, d)]
+            ov = HillClimber._score(alignmat, unarymatch_dict, wd)
+            return alignmat, ov, model.objective_bound
         
         logger.warning("not one good alignment found in reasonbable time ({} secs),\
                         consider increasing time limit, using Backup ILP (e.g., ILP + Hillclimber),\
                         or lossless graph_compression".format(self.max_seconds))
         
-        dummy_alignmat =  np.zeros(V, V)
+        dummy_alignmat =  np.zeros((V, V))
+        dummy_alignmat = util.alignmat_compressed(dummy_alignmat)
         return dummy_alignmat, 0.0, 10000000
         
-        """
-        # if no solution was found and no backup solver stated, use relaxed program
-        if self.backup_solver is None: 
-            logger.warning("no optimal alignment found, falling back on default relaxed LP")
-            status = model.optimize(max_seconds=5, relax=True)
-            if model.num_solutions:
-                logger.debug("alignment with value {} found".format(model.objective_value))
-                alignmat = np.array([x[i][j].x for i in Vr for j in Vr]).reshape((V, V))
-                alignmat = util.alignmat_compressed(alignmat)
-                return alignmat, model.objective_value, model.objective_bound
-     
-        logger.warning("no optimal alignment found, using backup solver")
-        # no solution was found return solution from backupsolver
-        return self.backup_solver.solve(unarymatch_dict, binarymatch_dict, V)
-        """
 
 class BackedupILP(interfaces.Solver):
     
@@ -535,12 +522,15 @@ class BackedupILP(interfaces.Solver):
             return alignmat, score, bound
         logger.warning("no optimal alignment found, this may be due to time out, or solution < upper_bound,\
                         trying relaxed solvers and heuristics now")
-        candidates = [candidate_solution]
-        other_solvers = [LP(max_seconds=self.max_seconds), HillClimber()]
+        candidates = [(alignmat, score, bound)]
+        other_solvers = [LP(max_seconds=self.max_seconds)]#, HillClimber()]
         for solver in other_solvers:
             candidates.append(solver.solve(unarymatch_dict, binarymatch_dict, V))
-        candidates = sorted(candidates, key=lambda x:x[1], reverse=True)
-        return candidates[0]
+        best_candidate = sorted(candidates, key=lambda x:x[1], reverse=True)[0]
+        tightest_bound = sorted(candidates, key=lambda x:x[2], reverse=False)[0][2]
+        return (best_candidate[0], best_candidate[1], tightest_bound)
+
+
 
 ########################################################################
 ########################################################################
