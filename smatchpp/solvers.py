@@ -421,10 +421,11 @@ class ILP(interfaces.Solver):
             max_seconds (int): time limit
     """
 
-    def __init__(self, max_seconds=240):
+    def __init__(self, max_seconds=240, ignore_bad_solution_warning=False):
         
         self.model_factory = MIPModelFactory()
         self.max_seconds = max_seconds
+        self.ignore_bad_solution_warning = ignore_bad_solution_warning
         return None
 
     def _solve(self, unarymatch_dict, binarymatch_dict, V):
@@ -443,7 +444,8 @@ class ILP(interfaces.Solver):
             alignmat = util.alignmat_compressed(alignmat)
             return alignmat, model.objective_value, model.objective_bound
         
-        logger.warning("not one good alignment found in reasonbable time ({} secs), \
+        if not self.ignore_bad_solution_warning:
+            logger.warning("not one good alignment found in reasonbable time ({} secs), \
                         consider increasing time limit, using Backup ILP (e.g., ILP + Hillclimber), \
                         or lossless graph_compression".format(self.max_seconds))
         
@@ -460,10 +462,11 @@ class LP(interfaces.Solver):
             max_seconds (int): time limit
     """
 
-    def __init__(self, max_seconds=240):
+    def __init__(self, max_seconds=240, ignore_bad_solution_warning=False):
         
         self.model_factory = MIPModelFactory()
         self.max_seconds = max_seconds 
+        self.ignore_bad_solution_warning = ignore_bad_solution_warning
         return None
 
     def _solve(self, unarymatch_dict, binarymatch_dict, V):
@@ -498,9 +501,10 @@ class LP(interfaces.Solver):
             ov = HillClimber._score(alignmat, unarymatch_dict, wd)
             return alignmat, ov, model.objective_bound
         
-        logger.warning("not one good alignment found in reasonbable time ({} secs),\
-                        consider increasing time limit, using Backup ILP (e.g., ILP + Hillclimber),\
-                        or lossless graph_compression".format(self.max_seconds))
+        if not self.ignore_bad_solution_warning:
+            logger.warning("not one good alignment found in reasonbable time ({} secs),\
+                            consider increasing time limit, using Backup ILP (e.g., ILP + Hillclimber),\
+                            or lossless graph_compression".format(self.max_seconds))
         
         dummy_alignmat =  np.zeros((V, V))
         dummy_alignmat = util.alignmat_compressed(dummy_alignmat)
@@ -516,14 +520,14 @@ class BackedupILP(interfaces.Solver):
         return None
     
     def _solve(self, unarymatch_dict, binarymatch_dict, V):
-        ilp = ILP(max_seconds=self.max_seconds)
+        ilp = ILP(max_seconds=self.max_seconds, ignore_bad_solution_warning=True)
         alignmat, score, bound = ilp.solve(unarymatch_dict, binarymatch_dict, V)
         if score == bound:
             return alignmat, score, bound
         logger.warning("no optimal alignment found, this may be due to time out, or solution < upper_bound,\
                         trying relaxed solvers and heuristics now")
         candidates = [(alignmat, score, bound)]
-        other_solvers = [LP(max_seconds=self.max_seconds), HillClimber()]
+        other_solvers = [LP(max_seconds=self.max_seconds, ignore_bad_solution_warning=True), HillClimber()]
         for solver in other_solvers:
             candidates.append(solver.solve(unarymatch_dict, binarymatch_dict, V))
         best_candidate = sorted(candidates, key=lambda x:x[1], reverse=True)[0]
