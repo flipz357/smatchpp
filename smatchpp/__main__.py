@@ -60,9 +60,11 @@ def build_arg_parser():
             , type=str
             , default="ilp"
             , nargs='?'
-            , choices=["ilp", "hillclimber", "dummy", "rilp"]
+            , choices=["ilp_backed", "ilp", "lp", "hillclimber", "dummy", "rilp"]
             , help='alignment solver type: \
+                        ilp_backed: ilp with back up \
                         ilp: integer linear program \
+                        lp: relaxed integer linear program \
                         hillclimber: hillclimber \
                         dummy: dummy alignment \
                         rilp: relaxed integer linear program (experimental)')

@@ -1,4 +1,5 @@
 from collections import Counter
+import numpy as np
 
 class GraphStandardizer:
     
@@ -123,7 +124,12 @@ class Solver:
         s = alignmat.shape
         if s != (V,):
             raise ValueError("invalid alignment matrix, must be of shape ({}, ), received {}".format(V, alignmat))
-
+        
+        if len(set(alignmat)) < alignmat.shape[0] - (alignmat == -1).sum():
+            raise ValueError("invalid alignment matrix, contains duplicates alignments that are != -1.\
+                    Alignmat {}; \
+                    Duplicates, all values with count > 1 are wrong if not -1 {}.".format(alignmat, Counter(alignmat)))
+        
 class Scorer:
 
     def score(self, triples1, triples2, alignmat, varindex):
