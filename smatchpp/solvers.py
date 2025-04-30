@@ -523,7 +523,7 @@ class BackedupILP(interfaces.Solver):
         logger.warning("no optimal alignment found, this may be due to time out, or solution < upper_bound,\
                         trying relaxed solvers and heuristics now")
         candidates = [(alignmat, score, bound)]
-        other_solvers = [LP(max_seconds=self.max_seconds)]#, HillClimber()]
+        other_solvers = [LP(max_seconds=self.max_seconds), HillClimber()]
         for solver in other_solvers:
             candidates.append(solver.solve(unarymatch_dict, binarymatch_dict, V))
         best_candidate = sorted(candidates, key=lambda x:x[1], reverse=True)[0]
